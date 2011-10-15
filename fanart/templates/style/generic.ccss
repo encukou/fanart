@@ -1,0 +1,50 @@
+body:
+    background-color: $mid_background
+    color: $text_on_mid
+    margin: 0
+
+img:
+    border-style: none
+
+hr:
+    display: none
+
+ul, ol:
+    margin-left: 1.5em
+
+h1:
+    font-size: 110%
+    margin: 0
+    clear: both
+    margin-bottom: 0.5ex
+
+    &:first-child:
+        margin-top: 0
+
+*>h1:
+    margin-top: 1em
+
+h2:
+    background-color: $dark_background
+    padding-right: 1em
+
+    &.date:
+        text-align: right
+
+a:
+    color: $dark_secondary_color
+    margin: 0
+    padding: 0
+
+    transition-property: color
+    transition-duration: 0.25s
+
+    &:hover:
+        color: $link_hover_color
+        text-decoration: underline
+
+        transition-property: none
+
+::selection:
+    background-color: $dark_secondary_color
+    color: $light_background

@@ -5,7 +5,6 @@ from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.txt')).read()
-CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
     'pyramid',
@@ -13,6 +12,8 @@ requires = [
     'pyramid_debugtoolbar',
     'sqlalchemy',
     'zope.sqlalchemy',
+    'clevercss>=0.2.2.dev',
+    'mako',
     ]
 
 if sys.version_info[:3] < (2,5,0):
@@ -21,15 +22,16 @@ if sys.version_info[:3] < (2,5,0):
 setup(name='fanart',
       version='0.0',
       description='fanart',
-      long_description=README + '\n\n' +  CHANGES,
+      long_description=README,
       classifiers=[
         "Programming Language :: Python",
+        "Programming Language :: Python :: 2.7",
         "Framework :: Pylons",
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
         ],
-      author='',
-      author_email='',
+      author='Petr Viktorin',
+      author_email='encukou@gmail.com',
       url='',
       keywords='web pylons pyramid',
       packages=find_packages(),

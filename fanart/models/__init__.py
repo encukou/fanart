@@ -26,7 +26,7 @@ class MyModel(Base):
         self.name = name
         self.value = value
 
-class MyRoot(object):
+class FanartRoot(object):
     __name__ = None
     __parent__ = None
 
@@ -57,11 +57,6 @@ class MyRoot(object):
         query = session.query(MyModel)
         return iter(query)
 
-root = MyRoot()
-
-def root_factory(request):
-    return root
-
 def populate():
     session = DBSession()
     model = MyModel(name=u'test name', value=55)
@@ -78,7 +73,3 @@ def initialize_sql(engine):
     except IntegrityError:
         transaction.abort()
     return DBSession
-
-def appmaker(engine):
-    initialize_sql(engine)
-    return root_factory

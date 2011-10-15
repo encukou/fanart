@@ -1,0 +1,114 @@
+body.fanart:
+    .content, .links, .usernav, .sitenav:
+        border: 1px solid $dark_secondary_color
+        padding-bottom: 1ex
+
+        border-bottom-left-radius: 1ex
+        border-bottom-right-radius: 1ex
+
+    .links, .usernav, .sitenav:
+        background-color: $slightly_light_background
+        z-index: 0
+        *:
+            padding-left: 1ex
+            padding-right: 1ex
+            margin-bottom: 1ex
+
+            *:
+                padding-left: 1ex
+                padding-right: 1ex
+                margin-bottom: 0
+
+        h2:
+            background-color: $light_background
+            color: $dark_background
+            text-align: center
+            margin-top: 0
+            margin-left: 0
+            margin-right: 0
+            padding: 0.25ex
+            font-size: 110%
+
+    .title:
+        width: 100%
+        height: 138px
+        background-color: $mid_background
+        background-image: url(static/orig/head.png)
+        background-repeat: no-repeat
+        background-position: 50% 50%
+
+        a:
+            display: block
+            height: 100%
+            width: 100%
+            font-size: 0
+
+    .counter:
+        text-align: left
+
+    .content, .links:
+        margin-top: 0
+
+        margin-left: 11em
+        margin-right: 11em
+
+        transition-property: margin
+        transition-duration: 1s
+
+    .content:
+        padding: 1ex
+        padding-top: 0
+
+    &.fullview:
+        .links, .content:
+            margin-left: 1em
+            margin-right: 1em
+
+    .hierarchy:
+        background-color: $dark_background
+        border-style: none
+        padding: 1ex
+        padding-top: 0.5ex
+        margin-left: -1ex
+        margin-right: -1ex
+        margin-bottom: 1em
+        position: static
+
+    .usernav, .sitenav:
+        position: absolute
+        width: 10em
+        top: 138px
+        margin-top: 0
+        margin-bottom: 2em
+
+        transition-property: left, right
+        transition-duration: 1s
+
+    .sitenav:
+        left: 1ex
+    .usernav:
+        right: 1ex
+    &.fullview:
+        .sitenav:
+            left: -12em
+        .usernav:
+            right: -12em
+
+    .links:
+        margin-top: 1em
+        margin-bottom: 2em
+
+    .content:
+        *:
+            border-bottom-right-radius: 1ex
+
+        .hierarchy:
+            border-radius: 0
+
+        h1:
+            border-radius: 0
+            border-top-right-radius: 1ex
+            font-size: 150%
+            background-color: $light_background
+            color: $dark_secondary_color
+            text-align: center

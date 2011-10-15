@@ -1,0 +1,24 @@
+
+input.submit, input.button, textarea, select, input.file, input.password,
+input.text:
+    background-color: $mid_background
+    margin-bottom: 1ex
+    border-radius: 1ex
+
+textarea:
+    width: 75%
+    height: 11em
+
+input.password, input.text:
+    text-align: center
+    border-width: 1px
+
+input.submit, input.button, textarea:
+    border-width: 1px
+
+input.radio:
+    position: static !important
+
+select, input:
+    &.lineinput:
+        margin-right: 1ex

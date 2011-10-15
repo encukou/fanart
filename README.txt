@@ -1,1 +1,1 @@
-fanart README
+A small community fanart site

@@ -1,0 +1,13 @@
+mid_background = #b5a072
+dark_background = #a08c61
+slightly_light_background = #c6b083
+light_background = #dac397
+text_on_mid = #000000
+
+dark_secondary_color = #3e4929
+link_hover_color = white
+
+@import url(reset.ccss)
+@import url(generic.ccss)
+@import url(layout.ccss)
+@import url(forms.ccss)
