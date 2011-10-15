@@ -2,6 +2,7 @@ body:
     background-color: $mid_background
     color: $text_on_mid
     margin: 0
+    font-family: $serif
 
 img:
     border-style: none
@@ -21,7 +22,6 @@ h1:
     &:first-child:
         margin-top: 0
 
-*>h1:
     margin-top: 1em
 
 h2:
@@ -45,6 +45,13 @@ a:
 
         transition-property: none
 
+    &:focus:
+        text-decoration: underline
+        outline: none
+
 ::selection:
     background-color: $dark_secondary_color
     color: $light_background
+
+nav:
+    display: block

@@ -1,52 +1,17 @@
 import os
 
 from pyramid.response import Response
-from pyramid.renderers import render
-from pyramid.traversal import find_interface, resource_path
-from pyramid.location import lineage
 
 import pkg_resources
 import clevercss
 
+from fanart.views.base import ViewBase, instanceclass
+from fanart.views import users
+
 def view_root(context, request):
     return context.render(request)
 
-class Controller(object):
-    def __init__(self, parent, name):
-        self.__parent__ = self.parent = parent
-        self.__name__ = self.name = name
-
-    def __getitem__(self, item):
-        try:
-            return getattr(self, 'child_' + item)(self, item)
-        except AttributeError:
-            return self.get(item)
-
-    def get(self, item):
-        raise KeyError(item)
-
-    @property
-    def root(self):
-        return find_interface(self,  Site)
-
-    @property
-    def lineage(self):
-        return lineage(self)
-
-    @property
-    def url(self):
-        return resource_path(self)
-
-    def get_url(self, *args, **kwargs):
-        return resource_path(self, *args, **kwargs)
-
-    def render_response(self, template, request, args=None):
-        if args is None:
-            args = {}
-        args.setdefault('this', self)
-        return Response(render(template, args, request))
-
-class Site(Controller):
+class Site(ViewBase):
     __name__ = __parent__ = None
     friendly_name = 'Fanart'
 
@@ -57,7 +22,8 @@ class Site(Controller):
     def render(self, request):
         return self.render_response('root.mako', request)
 
-    class child_css(Controller):
+    @instanceclass
+    class child_css(ViewBase):
         def render(self, request):
             # XXX: Cache me
             filename = pkg_resources.resource_filename('fanart',
@@ -68,3 +34,6 @@ class Site(Controller):
             response.content_type = 'text/css'
             #response.cache_expires(3600 * 24)
             return response
+
+    child_me = instanceclass(users.Me)
+    child_users = instanceclass(users.Users)

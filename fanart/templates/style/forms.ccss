@@ -1,24 +1,188 @@
+form:
+    input[type=submit], input[type=button], textarea, select, input[type=file],
+    input[type=password], input[type=text], input[type=search], button:
+        background-color: $light_background
+        margin: 0
+        margin-bottom: 1ex
+        border-radius: 0.5ex
+        font-family: $sans
 
-input.submit, input.button, textarea, select, input.file, input.password,
-input.text:
-    background-color: $mid_background
-    margin-bottom: 1ex
-    border-radius: 1ex
+        &:focus:
+            box-shadow: 0px 0px 40px $light_background, 0px 1px 1px $light_background, 0px -1px 1px $dark_background
 
-textarea:
-    width: 75%
-    height: 11em
+    &::-webkit-input-placeholder, &:-moz-placeholder:
+        color: $dark_background
 
-input.password, input.text:
-    text-align: center
-    border-width: 1px
+    textarea:
+        width: 75%
+        height: 11em
 
-input.submit, input.button, textarea:
-    border-width: 1px
+    input[type=password], input[type=text], input[type=search]:
+        text-align: center
+        border-width: 1px
+        border-color: transparent
+        box-shadow: 0px 1px 1px $light_background, 0px -1px 1px $dark_background
+        min-width: 10em
 
-input.radio:
-    position: static !important
+        &:focus:
+            outline: none
 
-select, input:
-    &.lineinput:
-        margin-right: 1ex
+    input[type=submit], button[type=submit]:
+        border-color: $dark_background
+
+    input[type=submit], input[type=button], button:
+        border-width: 1px
+        border-radius: 3px
+        color: $dark_secondary_color
+        border: 1.5px solid $dark_secondary_color
+        border-color: transparent
+        position: relative
+        text-shadow: 0px 1px 1px $light_background.brighten(20%)
+        background-color: "-webkit-linear-gradient "(" top, $mid_background, $dark_background ")";
+        font-size: 80%
+
+        &:hover, &:focus:
+            box-shadow: 0px 1px 2px $dark_background, 0px -1px 1px $light_background
+            top: 0
+            left: 0
+
+        &:active:
+            box-shadow: 0px 1px 1px $light_background, -0.5px -1px 2px $dark_background
+            top: 1px
+            left: 1px
+
+        &:focus:
+            border-color: $dark_secondary_color
+            outline: none
+            box-shadow: 0px 0px 40px $light_background
+
+    button:
+        padding: 0 1ex
+
+    input[type=radio]:
+        position: static !important
+
+    select, input:
+        &.lineinput:
+            margin-right: 1ex
+
+    .req:
+        display: none
+
+    ul:
+        padding: 0
+        margin: 0
+
+    li:
+        margin-bottom: 1ex
+
+#content:
+    form:
+        h1+&:
+            margin-top: 1em
+
+        fieldset:
+            width: 100%
+
+            ul:
+                li:
+                    padding: 0.5ex
+                    clear: left
+
+                input[type=password], input[type=text], input[type=search]:
+                    text-align: left
+                    padding-left: 0.5em
+                    padding-right: 0.5em
+                    background-color: $slightly_light_background
+
+                button:
+                    font-size: 100%
+                    font-family: $sans
+                    color: $dark_foreground
+                    background-color: $mid_background
+                    padding: 0.25ex 1em
+                    margin: 0
+
+                button[type=submit]:
+                    background-color: $slightly_light_background
+
+                .errorLi:
+                    h3:before:
+                        content: url(../static/icons/exclamation.png)
+
+                p.error:before:
+                    content: url(../static/icons/exclamation.png)
+
+            &+*:
+                clear: both
+
+body.narrow #content form:
+    fieldset:
+        text-align: center
+        width: 100%
+
+        ul:
+            li:
+                padding: 0
+
+                &>label:
+                    margin-bottom: 0.5ex
+                    display: block
+
+                &>*:
+                    margin-left: auto
+
+                    &:first-child:
+                        margin-top: 1em
+
+                &.errorLi:
+                    &>h3:before:
+                        display: block
+
+body.wide #content form:
+    fieldset:
+        ul:
+            li:
+                &>label:
+                    clear: both
+                    float: left
+                    width: 38%
+                    text-align: right
+                    margin-top: 0.5ex
+                    margin-bottom: 1ex
+                    margin-left: 0
+                    margin-right: 0
+                    padding: 0 0.5ex 0 0
+
+                &>*:
+                    display: block
+                    margin-left: 39%
+                    width: 22%
+                    box-sizing: border-box
+                    position: relative
+                    z-index: 2
+
+                input[type=password], input[type=text], input[type=search], button[type=submit]:
+                    min-width: 10rem
+
+                &.errorLi:
+                    &>*:
+                        width: auto
+                        padding-left: 39%
+                        margin-left: 0
+
+                    &>h3:before:
+                        width: 16px
+                        margin-left: -24px
+                        margin-right: 8px
+                        vertical-align: bottom
+
+                p.error:
+                    border-left: 1px solid $slightly_light_background
+                    margin-top: -1em
+                    padding: 1ex
+                    padding-top: 1em
+                    padding-bottom: 0.5ex
+                    z-index: 1
+                    border-radius: 1ex
+                    width: auto

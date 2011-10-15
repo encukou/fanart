@@ -2,12 +2,41 @@ mid_background = #b5a072
 dark_background = #a08c61
 slightly_light_background = #c6b083
 light_background = #dac397
-text_on_mid = #000000
+text_on_mid = #130e04
 
+dark_foreground = #44381f
 dark_secondary_color = #3e4929
 link_hover_color = white
+
+relayout_duration = 0.5s
+
+sans = 'Ubuntu', sans-serif
+serif = 'Gentium Book Basic', serif
 
 @import url(reset.ccss)
 @import url(generic.ccss)
 @import url(layout.ccss)
 @import url(forms.ccss)
+
+body.fanart:
+    footer:
+        details:
+            text-align: center
+
+            label:
+                display: block
+                margin-top: 1ex
+                padding: 0
+                margin-bottom: 0.5ex
+
+            .login-prompt:
+                font-size: 90%
+
+            input[type=text], input[type=password], input[type=search]:
+                width: 85%
+
+                &:first-child:
+                    margin-top: 1ex
+
+            button:
+                padding: 0.25ex 1.5ex

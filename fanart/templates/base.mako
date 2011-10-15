@@ -1,3 +1,7 @@
+<%def name="title()">${this.friendly_name}</%def>
+<%def name="title_in_head()">${self.title() + ' - '}</%def>
+<%def name="title_in_page()">${self.title()}</%def>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
@@ -5,40 +9,62 @@
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
   <link rel="shortcut icon" href="${request.static_url('fanart:static/favicon.ico')}" />
   <link rel="stylesheet" href="${this.root['css'].url}" type="text/css" media="screen" charset="utf-8" />
+  <link href='http://fonts.googleapis.com/css?family=Ubuntu:400,700,400italic,700italic|Gentium+Book+Basic:400,400italic,700,700italic&amp;subset=latin-ext,latin' rel='stylesheet' type='text/css'>  <script src="${request.static_url('fanart:static/jquery-1.6.4.min.js')}" type="text/javascript"></script>
+  <script src="${request.static_url('deform:static/scripts/deform.js')}" type="text/javascript"></script>
+  <script src="${request.static_url('fanart:static/script.js')}" type="text/javascript"></script>
+  <script src="https://browserid.org/include.js" type="text/javascript"></script>
   <!--[if lte IE 6]>
   <link rel="stylesheet" href="${request.application_url + '/css/ie6'}" type="text/css" media="screen" charset="utf-8" />
   <![endif]-->
 </head>
-<body class="no-js fanart">
-    <div class="title" title="Česká PokéGalerie pana Smeargla ^_^"><a href="${this.root.url}">&nbsp;</a></div>
-    <div class="content" id="content">
-        <div class="hierarchy">
+<body class="fanart no-js wide">
+    <header>
+        <div class="title" title="Česká PokéGalerie pana Smeargla ^_^"><a href="${this.root.url}">&nbsp;</a></div>
+    </header>
+    <div id="content">
+        <nav class="hierarchy">
             <a href="http://pikachu.cz">Pikachu.cz</a>
             % for x in reversed(list(this.lineage)):
                 » <a href="${x.url}">${x.friendly_name}</a>
             % endfor
-        </div>
-            ${next.body()}
+        </nav>
+        <h1>${self.title_in_page()}</h1>
+        ${next.body()}
     </div>
     <hr>
-    <div class="usernav">
-        <h2>Login</h2>
-        <h2>Odkazy</h2>
-        <h2>K přidání</h2>
-        <h2>Shoutbox</h2>
-        <h2>Odmítnuté</h2>
-        <h2>Tvá práva</h2>
-    </div>
-    <div class="sitenav">
-        <h2>Hledání</h2>
-        <h2>Galerie</h2>
-        <h2>Počitadlo</h2>
-    </div>
-    <div class="links">
-        <h2>Odkazy</h2>
-    </div>
+    <footer>
+        <div id="usernav">
+            <%include file="widgets/user_login.mako" />
+            <details open>
+                <summary>K přidání</summary>
+            </details>
+            <details open>
+                <summary>Shoutbox</summary>
+            </details>
+            <details>
+                <summary>Odmítnuté</summary>
+            </details>
+        </div>
+        <div id="sitenav">
+            <details open>
+                <summary>Hledání</summary>
+                <form>
+                    <input type="text" results="5" autosave="fanart" name="q" id="side_search">
+                </form>
+            </details>
+            <details open>
+                <summary>Galerie</summary>
+            </details>
+            <details>
+                <summary>Počitadlo</summary>
+            </details>
+        </div>
+        <div id="links">
+            <section>
+                <h2>Odkazy</h2>
+            </section>
+        </div>
+        <div id="helper"><input type ie sucks></div>
+    </footer>
 </body>
 </html>
-
-<%def name="title()"></%def>
-<%def name="title_in_head()">${self.title() + ' - '}</%def>

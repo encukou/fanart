@@ -8,12 +8,16 @@ README = open(os.path.join(here, 'README.txt')).read()
 
 requires = [
     'pyramid',
-    'pyramid_tm',
-    'pyramid_debugtoolbar',
+    'pyramid-tm',
+    'pyramid-debugtoolbar',
+    'pyramid-beaker',
     'sqlalchemy',
     'zope.sqlalchemy',
     'clevercss>=0.2.2.dev',
     'mako',
+    'deform',
+    'py-bcrypt',
+    'unidecode',
     ]
 
 if sys.version_info[:3] < (2,5,0):

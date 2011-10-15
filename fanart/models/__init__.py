@@ -1,9 +1,14 @@
-import transaction
+import unicodedata
+import re
 
-from sqlalchemy.orm import scoped_session
-from sqlalchemy.orm import sessionmaker
+import transaction
+import bcrypt
+from unidecode import unidecode
+
+from sqlalchemy.orm import scoped_session, reconstructor, sessionmaker
 
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.sql import functions
 
 from sqlalchemy.exc import IntegrityError
 
@@ -16,51 +21,52 @@ from zope.sqlalchemy import ZopeTransactionExtension
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 Base = declarative_base()
 
-class MyModel(Base):
-    __tablename__ = 'models'
-    id = Column(Integer, primary_key=True)
-    name = Column(Unicode(255), unique=True)
-    value = Column(Integer)
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=False)
+    name = Column(Unicode, nullable=True)
+    normalized_name = Column(Unicode, nullable=True)
+    password = Column(Unicode, nullable=True)
 
-    def __init__(self, name, value):
-        self.name = name
-        self.value = value
+    def __init__(self, *args, **kwargs):
+        self.logged_in = kwargs.pop('logged_in', True)
+        super(User, self).__init__(*args, **kwargs)
 
-class FanartRoot(object):
-    __name__ = None
-    __parent__ = None
+    @reconstructor
+    def _initialize(self):
+        self.logged_in = True
 
-    def __getitem__(self, key):
-        session= DBSession()
-        try:
-            id = int(key)
-        except (ValueError, TypeError):
-            raise KeyError(key)
+    def __unicode__(self):
+        return '<User %s:"%s">' % (self.id, self.name)
 
-        item = session.query(MyModel).get(id)
-        if item is None:
-            raise KeyError(key)
+    @classmethod
+    def name_exists(cls, session, name):
+        normalized_name = cls.normalize_name(name)
+        if session.query(User).filter_by(normalized_name=normalized_name).count():
+            return True
+        else:
+            return False
 
-        item.__parent__ = self
-        item.__name__ = key
-        return item
+    @classmethod
+    def normalize_name(cls, name):
+        name = unidecode(name).lower()
+        name = re.sub('[^a-z0-9]+', '-', name)
+        return name.strip('-')
 
-    def get(self, key, default=None):
-        try:
-            item = self.__getitem__(key)
-        except KeyError:
-            item = default
-        return item
-
-    def __iter__(self):
-        session= DBSession()
-        query = session.query(MyModel)
-        return iter(query)
+    @classmethod
+    def create_local(cls, session, user_name, password):
+        normalized_name = cls.normalize_name(user_name)
+        if cls.name_exists(session, user_name):
+            raise ValueError('Name already exists')
+        return User(
+                id=(session.query(functions.max(cls.id)).one()[0] or 0) + 1,
+                name=user_name,
+                normalized_name=normalized_name,
+                password=bcrypt.hashpw(password, bcrypt.gensalt()),
+            )
 
 def populate():
     session = DBSession()
-    model = MyModel(name=u'test name', value=55)
-    session.add(model)
     session.flush()
     transaction.commit()
 
