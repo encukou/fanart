@@ -5,9 +5,9 @@ $(function() {
 
 $(function() {
     function resize() {
-        if($(window).width() < $('#helper').width()) {
+        if($(window).width() < $('#helper').width() - 5) {
             $('body').removeClass('wide').addClass('narrow');
-        } else {
+        } else if($(window).width() > $('#helper').width() + 5) {
             $('body').removeClass('narrow').addClass('wide');
         }
         /*
@@ -21,11 +21,12 @@ $(function() {
     $(window).bind("resize", resize);
     $('body').addClass('no-css-anim');
     resize();
-    setTimeout("$('body').removeClass('no-css-anim')", 100);
+    setTimeout(function() {$('body').removeClass('no-css-anim')}, 100);
 });
 
 /* Login */
-$(function() {
+/*
+(function() {
     var pwd = $('#side_login li:has(input[type=password])');
     pwd.addClass('hidden').hide();
     function hide(element) {
@@ -49,3 +50,10 @@ $(function() {
         keydown(username_change).keyup(username_change).click(username_change).
         click();
 });
+*/
+
+function fade_flashes() {
+    console.log($('.flash:not(.faded)'))
+    $('.flash:not(.faded)').addClass('faded')
+}
+$(function() {setTimeout(fade_flashes, 100)});

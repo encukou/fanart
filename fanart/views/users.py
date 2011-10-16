@@ -96,12 +96,38 @@ class Me(ViewBase):
     @instanceclass
     class child_login(ViewBase):
         def render(self, request):
-            pass
+            if 'submit' in request.POST:
+                try:
+                    request.session['user_id'] = models.User.login_user_by_password(
+                            session=request.sqlalchemy_session,
+                            user_name=request.POST['user_name'],
+                            password=request.POST['password'],
+                        ).id
+                except ValueError:
+                    request.session.flash('Špatné jméno nebo heslo',
+                        queue='login')
+                try:
+                    url = request.GET['redirect']
+                except KeyError:
+                    url = self.root.url
+                request.session.flash('Přihlášeno!', queue='login')  # XXX: Gender
+                return httpexceptions.HTTPSeeOther(url)
+            else:
+                return httpexceptions.HTTPNotFound()
 
     @instanceclass
     class child_logout(ViewBase):
         def render(self, request):
-            pass
+            if 'submit' in request.POST:
+                del request.session['user_id']
+                try:
+                    url = request.GET['redirect']
+                except KeyError:
+                    url = self.root.url
+                request.session.flash('Odhlášeno!', queue='login')  # XXX: Gender
+                return httpexceptions.HTTPSeeOther(url)
+            else:
+                return httpexceptions.HTTPNotFound()
 
 class Users(ViewBase):
     friendly_name = 'Autoři'

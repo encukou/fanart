@@ -5,11 +5,10 @@ import transaction
 import bcrypt
 from unidecode import unidecode
 
+import sqlalchemy.orm
 from sqlalchemy.orm import scoped_session, reconstructor, sessionmaker
-
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import functions
-
 from sqlalchemy.exc import IntegrityError
 
 from sqlalchemy import Integer
@@ -64,6 +63,20 @@ class User(Base):
                 normalized_name=normalized_name,
                 password=bcrypt.hashpw(password, bcrypt.gensalt()),
             )
+
+    @classmethod
+    def login_user_by_password(cls, session, user_name, password):
+        normalized_name = cls.normalize_name(user_name)
+        try:
+            user = session.query(User).filter_by(normalized_name=normalized_name).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise ValueError('User not found')
+        except sqlalchemy.orm.exc.MultipleResultsFound:
+            raise ValueError('Multiple users found')
+        if bcrypt.hashpw(password, user.password):
+            return user
+        else:
+            raise ValueError('Passwords did not match')
 
 def populate():
     session = DBSession()

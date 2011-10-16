@@ -8,6 +8,9 @@ dark_foreground = #44381f
 dark_secondary_color = #3e4929
 link_hover_color = white
 
+flash_color = #ffffff
+flash_border = #d37a13
+
 relayout_duration = 0.5s
 
 sans = 'Ubuntu', sans-serif

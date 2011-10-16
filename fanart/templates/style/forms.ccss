@@ -38,7 +38,7 @@ form:
         border-color: transparent
         position: relative
         text-shadow: 0px 1px 1px $light_background.brighten(20%)
-        background-color: "-webkit-linear-gradient "(" top, $mid_background, $dark_background ")";
+        background-color: -webkit-linear-gradient(top, $mid_background, $dark_background);
         font-size: 80%
 
         &:hover, &:focus:

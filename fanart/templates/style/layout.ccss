@@ -10,9 +10,6 @@ body.fanart.wide:
         border-bottom-left-radius: 1ex
         border-bottom-right-radius: 1ex
 
-    #links, #usernav, #sitenav:
-        z-index: 0
-
     #content, #links:
         margin-top: 0
 
@@ -99,40 +96,66 @@ body.fanart:
         color: $dark_foreground
         background-color: $slightly_light_background
 
-        summary, h2:
-            display: block;
-            background-color: $light_background
-            color: $dark_background
-            text-align: center
-            margin: 0 -1ex 1ex
-            padding: 0.5ex
-            font-size: 100%
-            text-shadow: 0px 1px 0px $light_background.brighten(10%)
-            border-top: 1px solid $light_background.brighten(7%)
-            box-shadow: 0px 2px 3px $mid_background
-            cursor: default
-            overflow: hidden
-
-            &::-webkit-details-marker:
-                font-size: 60%
-                padding-left: 1ex
-                vertical-align: 40%
-
-            &:first-child:
-                border-top-style: none
-
         details, section:
             &+details:
                 margin-top: 1ex
 
-            padding-left: 1ex
-            padding-right: 1ex
             margin-bottom: 1ex
 
-        .links:
-            font-size: 80%
-            font-family: $sans
-            text-align: center
+            &>*:
+                margin-left: 1ex
+                margin-right: 1ex
+
+            summary, h2:
+                display: block;
+                background-color: $light_background
+                color: $dark_background
+                text-align: center
+                margin: 0 0 0.5em
+                margin: 0 0 0.5rem
+                padding: 0.5ex
+                font-size: 100%
+                text-shadow: 0px 1px 0px $light_background.brighten(10%)
+                border-top: 1px solid $light_background.brighten(7%)
+                box-shadow: 0px 2px 3px $mid_background
+                cursor: default
+                overflow: hidden
+
+                &::-webkit-details-marker:
+                    font-size: 60%
+                    padding-left: 1ex
+                    vertical-align: 40%
+
+                &:first-child:
+                    border-top-style: none
+
+            .links:
+                font-size: 80%
+                font-family: $sans
+                text-align: center
+
+            .flash:
+                background-color: $flash_color
+                margin: 0
+                padding: 1ex
+                margin-bottom: 2ex
+                margin-top: -2ex
+                border-bottom: 1px solid $flash_border
+                box-shadow: 0px 0px 3px $flash_border
+
+                transition-property: background-color, box-shadow, border-color
+                transition-duration: 3s
+                transition-delay: 1s
+
+                summary+&:
+                    margin-top: -1ex
+
+                &.faded:
+                    background-color: $slightly_light_background
+                    box-shadow: none
+                    border-bottom: 1px solid $dark_background
+
+                    animation-name: none
 
     #content:
         transition-property: margin, border-radius
