@@ -21,25 +21,19 @@ serif = 'Gentium Book Basic', serif
 @import url(layout.ccss)
 @import url(forms.ccss)
 
-body.fanart:
-    footer:
-        details:
-            text-align: center
+#content:
+    dl.contact_info:
+        dt:
+            font-weight: bold
+            break: both
+            float: left
+            display: block
+            margin-right: 1ex
+            &:after:
+                content: `":"`
+        dd:
+            display: block
+            margin-bottom: 0.25ex
 
-            label:
-                display: block
-                margin-top: 1ex
-                padding: 0
-                margin-bottom: 0.5ex
-
-            .login-prompt:
-                font-size: 90%
-
-            input[type=text], input[type=password], input[type=search]:
-                width: 85%
-
-                &:first-child:
-                    margin-top: 1ex
-
-            button:
-                padding: 0.25ex 1.5ex
+        &+*:
+            break: both

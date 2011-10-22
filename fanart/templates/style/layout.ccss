@@ -1,93 +1,3 @@
-body.fanart.wide:
-    overflow-x: hidden
-
-    #content, #links, #usernav, #sitenav:
-        -border: 1px solid $dark_background
-        border-top: none
-        box-shadow: 0px 1px 1px $light_background, 0px -1px 1px $dark_background, 1px 0px 1px $dark_background, -1px 0px 1px $dark_background
-        padding-bottom: 1ex
-
-        border-bottom-left-radius: 1ex
-        border-bottom-right-radius: 1ex
-
-    #content, #links:
-        margin-top: 0
-
-        margin-left: 11em
-        margin-right: 11em
-
-    &.fullview:
-        #content:
-            margin-left: 0
-            margin-right: 0
-            border-radius: 0
-
-    #usernav, #sitenav:
-        position: absolute
-        width: 10em
-        top: 138px
-
-        margin-top: 0
-        margin-bottom: 2em
-
-        transition-property: left, right
-        transition-duration: $relayout_duration
-
-    #sitenav:
-        left: 1ex
-    #usernav:
-        right: 1ex
-    &.fullview:
-        #sitenav:
-            left: -12em
-        #usernav:
-            right: -12em
-
-    #links:
-        margin-top: 1em
-        margin-bottom: 2em
-
-    .title:
-        height: 138px
-
-        a:
-            display: block
-            height: 100%
-            width: 100%
-            font-size: 0
-
-body.fanart.narrow:
-    .title:
-        height: 0
-        overflow: hidden
-
-    &>footer:
-        z-index: 0
-        display: block
-        max-width: 10em
-        margin-left: auto
-        margin-right: auto
-        box-shadow: 1px -1px 1px $dark_background, -1px -1px 1px $dark_background, 0px 2px 2px $dark_background
-
-    #content:
-        margin-bottom: 3em
-        box-shadow: 0px 1px 2px $light_background
-
-        .hierarchy:
-            min-height: 16px
-            padding: 0.5ex
-
-            &>a+a:before:
-                content: url(../static/favicon.ico)
-                padding-left: 1em
-                float: right
-
-            &>a+a+a:before:
-                content: none
-
-    #usernav, #sitenav, #links:
-        padding-bottom: 0.25ex
-        margin-bottom: 0
 
 body.fanart:
     overflow-y: scroll
@@ -161,10 +71,13 @@ body.fanart:
         transition-property: margin, border-radius
         transition-duration: $relayout_duration
 
+        display: block
         padding: 1ex
         padding-top: 0
+        line-height: 120%
 
         .hierarchy:
+            line-height: 100%
             border-radius: 0
             background-color: $dark_background
             border-style: none
@@ -194,8 +107,19 @@ body.fanart:
             color: $dark_secondary_color
             text-align: center
             padding: 0.5ex;
+            margin-bottom: 1.5ex
             text-shadow: 0px 1px 0px $light_background.brighten(15%)
             box-shadow: 0px 0px 2px $light_background
+
+        h2:
+            margin-top: 1.5ex
+            margin-bottom: 1ex
+            padding: 0.5ex 0.75ex
+            border-radius: 2px
+            box-shadow: 0px 0px 2px $dark_background
+
+        p:
+            margin-bottom: 0.5em
 
     .title:
         width: 100%
@@ -208,13 +132,130 @@ body.fanart:
         transition-duration: $relayout_duration
 
     #helper:
-        width: 50em
+        width: 53em
         height: 1em
         background-color: #f0f
         visibility: hidden
         position: absolute
         top: 0
         left: -50em
+
+    footer:
+        details:
+            text-align: center
+
+            label:
+                display: block
+                margin-top: 1ex
+                padding: 0
+                margin-bottom: 0.5ex
+
+            .login-prompt:
+                font-size: 90%
+
+            input[type=text], input[type=password], input[type=search]:
+                width: 85%
+
+                &:first-child:
+                    margin-top: 1ex
+
+            button:
+                padding: 0.25ex 1.5ex
+
+body.fanart.wide:
+    overflow-x: hidden
+
+    #content, #links, #usernav, #sitenav:
+        -border: 1px solid $dark_background
+        border-top: none
+        box-shadow: 0px 1px 1px $light_background, 0px -1px 1px $dark_background, 1px 0px 1px $dark_background, -1px 0px 1px $dark_background
+        padding-bottom: 1ex
+
+        border-bottom-left-radius: 1ex
+        border-bottom-right-radius: 1ex
+
+    #content:
+        padding-bottom: 1em
+
+    #content, #links:
+        margin-top: 0
+
+        margin-left: 11em
+        margin-right: 11em
+
+    &.fullview:
+        #content:
+            margin-left: 0
+            margin-right: 0
+            border-radius: 0
+
+    #usernav, #sitenav:
+        position: absolute
+        width: 10em
+        top: 138px
+
+        margin-top: 0
+        margin-bottom: 2em
+
+        transition-property: left, right
+        transition-duration: $relayout_duration
+
+    #sitenav:
+        left: 1ex
+    #usernav:
+        right: 1ex
+    &.fullview:
+        #sitenav:
+            left: -12em
+        #usernav:
+            right: -12em
+
+    #links:
+        margin-top: 1em
+        margin-bottom: 2em
+
+    .title:
+        height: 138px
+
+        a:
+            display: block
+            height: 100%
+            width: 100%
+            font-size: 0
+
+body.fanart.narrow:
+    .title:
+        height: 0
+        overflow: hidden
+
+    &>footer:
+        z-index: 0
+        display: block
+        max-width: 10em
+        margin-left: auto
+        margin-right: auto
+        box-shadow: 1px -1px 1px $dark_background, -1px -1px 1px $dark_background, 0px 2px 2px $dark_background
+
+    #content:
+        margin-bottom: 3em
+        box-shadow: 0px 1px 2px $light_background
+        padding-bottom: 1em
+
+        .hierarchy:
+            min-height: 16px
+            padding: 0.5ex
+
+            &>a+a:before:
+                content: url(../static/favicon.ico)
+                padding-left: 1em
+                float: right
+
+            &>a+a+a:before:
+                content: none
+
+    #usernav, #sitenav, #links:
+        padding-bottom: 0.25ex
+        margin-bottom: 0
 
 body.no-css-anim *:
     transition-property: none !important

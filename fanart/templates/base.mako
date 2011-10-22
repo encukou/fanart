@@ -2,14 +2,15 @@
 <%def name="title_in_head()">${self.title() + ' - '}</%def>
 <%def name="title_in_page()">${self.title()}</%def>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-  <title>${self.title_in_head()}Česká PokéGalerie ~ Pokémon</title>
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+  <title>${self.title_in_head()}Česká PokéGalerie ~ Pokémon</title>
   <link rel="shortcut icon" href="${request.static_url('fanart:static/favicon.ico')}" />
   <link rel="stylesheet" href="${this.root['css'].url}" type="text/css" media="screen" charset="utf-8" />
-  <link href='http://fonts.googleapis.com/css?family=Ubuntu:400,700,400italic,700italic|Gentium+Book+Basic:400,400italic,700,700italic&amp;subset=latin-ext,latin' rel='stylesheet' type='text/css'>  <script src="${request.static_url('fanart:static/jquery-1.6.4.min.js')}" type="text/javascript"></script>
+  <link href='http://fonts.googleapis.com/css?family=Ubuntu:400,700,400italic,700italic|Gentium+Book+Basic:400,400italic,700,700italic&amp;subset=latin-ext,latin' rel='stylesheet' type='text/css'/>
+  <script src="${request.static_url('fanart:static/jquery-1.6.4.min.js')}" type="text/javascript"></script>
   <script src="${request.static_url('deform:static/scripts/deform.js')}" type="text/javascript"></script>
   <script src="${request.static_url('fanart:static/script.js')}" type="text/javascript"></script>
   <script src="https://browserid.org/include.js" type="text/javascript"></script>
@@ -21,7 +22,7 @@
     <header>
         <div class="title" title="Česká PokéGalerie pana Smeargla ^_^"><a href="${this.root.url}">&nbsp;</a></div>
     </header>
-    <div id="content">
+    <section id="content">
         <nav class="hierarchy">
             <a href="http://pikachu.cz">Pikachu.cz</a>
             % for x in reversed(list(this.lineage)):
@@ -30,7 +31,7 @@
         </nav>
         <h1>${self.title_in_page()}</h1>
         ${next.body()}
-    </div>
+    </section>
     <hr>
     <footer>
         <div id="usernav">

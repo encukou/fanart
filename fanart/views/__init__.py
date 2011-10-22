@@ -1,6 +1,9 @@
 import os
 
+from pyramid.renderers import render
 from pyramid.response import Response
+from pyramid.threadlocal import get_current_request
+from pyramid import httpexceptions
 
 import pkg_resources
 import clevercss
@@ -9,7 +12,16 @@ from fanart.views.base import ViewBase, instanceclass
 from fanart.views import users
 
 def view_root(context, request):
+    if request.path_info != context.url:
+        return httpexceptions.HTTPSeeOther(context.url)
     return context.render(request)
+
+def view_403(context, request):
+    response = Response(render('errors/403-forbidden.mako',
+            dict(request=request, this=Site(request), detail=context.detail),
+            request))
+    response.status_int = 403
+    return response
 
 class Site(ViewBase):
     __name__ = __parent__ = None

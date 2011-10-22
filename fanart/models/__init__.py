@@ -1,23 +1,20 @@
 import unicodedata
 import re
 
-import transaction
 import bcrypt
 from unidecode import unidecode
 
 import sqlalchemy.orm
-from sqlalchemy.orm import scoped_session, reconstructor, sessionmaker
+from sqlalchemy.orm import (scoped_session, reconstructor, sessionmaker,
+        relationship, backref)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import functions
 from sqlalchemy.exc import IntegrityError
 
-from sqlalchemy import Integer
-from sqlalchemy import Unicode
-from sqlalchemy import Column
+from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Integer, Unicode, DateTime, Boolean
 
-from zope.sqlalchemy import ZopeTransactionExtension
-
-DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
+DBSession = scoped_session(sessionmaker())
 Base = declarative_base()
 
 class User(Base):
@@ -26,6 +23,13 @@ class User(Base):
     name = Column(Unicode, nullable=True)
     normalized_name = Column(Unicode, nullable=True)
     password = Column(Unicode, nullable=True)
+    gender = Column(Unicode(6), nullable=True)
+    bio = Column(Unicode, nullable=True)
+    email = Column(Unicode, nullable=True)
+    date_of_birth = Column(DateTime, nullable=True)
+    show_email = Column(Boolean, default=False)
+    show_age = Column(Boolean, default=False)
+    show_birthday = Column(Boolean, default=False)
 
     def __init__(self, *args, **kwargs):
         self.logged_in = kwargs.pop('logged_in', True)
@@ -78,10 +82,22 @@ class User(Base):
         else:
             raise ValueError('Passwords did not match')
 
+class UserContact(Base):
+    __tablename__ = 'user_contacts'
+    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True, nullable=False)
+    type = Column(Unicode, primary_key=True, nullable=False)
+    value = Column(Unicode, nullable=False)
+
+UserContact.user = relationship(User,
+    backref=backref('contacts', cascade="all, delete-orphan"))
+
 def populate():
     session = DBSession()
+    session.add(User(id=3, name='Test', normalized_name='test',
+        # password is: 'pass'
+        password='$2a$04$B6eLb5G5cQjpmtqtkh.JfOWjMKbAHIsKmh1ULOR7AK7/6xcpqvCxy'))
     session.flush()
-    transaction.commit()
+    session.commit()
 
 def initialize_sql(engine):
     DBSession.configure(bind=engine)
@@ -89,6 +105,7 @@ def initialize_sql(engine):
     Base.metadata.create_all(engine)
     try:
         populate()
-    except IntegrityError:
-        transaction.abort()
+    except IntegrityError as e:
+        print e
+        DBSession.rollback()
     return DBSession

@@ -1,6 +1,6 @@
 form:
     input[type=submit], input[type=button], textarea, select, input[type=file],
-    input[type=password], input[type=text], input[type=search], button:
+    input[type=password], input[type=text], input[type=search], input[type=date], button:
         background-color: $light_background
         margin: 0
         margin-bottom: 1ex
@@ -17,7 +17,7 @@ form:
         width: 75%
         height: 11em
 
-    input[type=password], input[type=text], input[type=search]:
+    input[type=password], input[type=text], input[type=search], input[type=date], textarea:
         text-align: center
         border-width: 1px
         border-color: transparent
@@ -76,23 +76,32 @@ form:
     li:
         margin-bottom: 1ex
 
+    .deformClosebutton:
+        background: url(../static/icons/cross.png)
+        width: 16px
+        height: 16px
+        display: inline-block
+
 #content:
     form:
-        h1+&:
-            margin-top: 1em
+        margin-top: 1em
+        margin-bottom: 1em
 
         fieldset:
             width: 100%
 
-            ul:
-                li:
+            &>ul:
+                &>li:
                     padding: 0.5ex
                     clear: left
 
-                input[type=password], input[type=text], input[type=search]:
+                input[type=password], input[type=text], input[type=search], input[type=date], textarea:
                     text-align: left
                     padding-left: 0.5em
                     padding-right: 0.5em
+                    background-color: $slightly_light_background
+
+                input[type=radio]:
                     background-color: $slightly_light_background
 
                 button:
@@ -113,16 +122,24 @@ form:
                 p.error:before:
                     content: url(../static/icons/exclamation.png)
 
+                ul:
+                    li:
+                        *:
+                            display: inline
+
             &+*:
                 clear: both
+
+        .deformClosebutton:
+            display: inline-block
 
 body.narrow #content form:
     fieldset:
         text-align: center
         width: 100%
 
-        ul:
-            li:
+        &>ul:
+            &>li:
                 padding: 0
 
                 &>label:
@@ -139,10 +156,19 @@ body.narrow #content form:
                     &>h3:before:
                         display: block
 
+                &>ul:
+                    display: table
+                    width: auto
+                    margin-left: auto
+                    margin-right: auto
+                    &>li:
+                        display: table-row
+                        text-align: left
+
 body.wide #content form:
     fieldset:
-        ul:
-            li:
+        &>ul:
+            &>li:
                 &>label:
                     clear: both
                     float: left
@@ -165,6 +191,10 @@ body.wide #content form:
                 input[type=password], input[type=text], input[type=search], button[type=submit]:
                     min-width: 10rem
 
+                textarea, ul:
+                    width: 61%
+                    max-width: 30em
+
                 &.errorLi:
                     &>*:
                         width: auto
@@ -186,3 +216,12 @@ body.wide #content form:
                     z-index: 1
                     border-radius: 1ex
                     width: auto
+
+                .deformSeq:
+                    width: auto
+
+                    .deformClosebutton:
+                        display: inline-block
+
+#ui-datepicker-div:
+    background-color: $slightly_light_background

@@ -10,9 +10,12 @@ def get_user(request, session):
     try:
         user_id = session['user_id']
     except KeyError:
-        return models.User(name='Host', logged_in=False)
+        pass
     else:
-        return request.sqlalchemy_session.query(models.User).get(user_id)
+        user = request.sqlalchemy_session.query(models.User).get(user_id)
+        if user is not None:
+            return user
+    return models.User(name='Host', logged_in=False)
 
 def session_factory_wrapper(func):
     def session_factory(request):

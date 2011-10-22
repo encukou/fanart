@@ -15,7 +15,7 @@
             <a href="${request.root['users', 'new'].url}">Založit nový účet</a>
         </div>
     % else:
-        <div>${user.name}</div>
+        <div><a href="${request.root['me'].url}">${user.name}</a></div>
         <div class="login">
             ${render_mini_logout_form(this) |n}
         </div>

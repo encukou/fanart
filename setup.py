@@ -12,7 +12,6 @@ requires = [
     'pyramid-debugtoolbar',
     'pyramid-beaker',
     'sqlalchemy',
-    'zope.sqlalchemy',
     'clevercss>=0.2.2.dev',
     'mako',
     'deform',
