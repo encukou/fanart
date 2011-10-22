@@ -13,9 +13,9 @@
             <% "XXX: Generalize contacts" %>
             <dd><a href="http://${contact.value}.deviantart.com/">${contact.value}</a></dd>
         % elif contact.type == 'Web':
-            % if re.match(r'https?://.*[.].{2-3}(/[^ ]*)?$', contact.value):
+            % if re.match(r'https?://[^/]*[.][^/]{2,3}/?[^ ]*$', contact.value):
                 <dd><a href="${contact.value}">${contact.value}</a></dd>
-            % elif re.match(r'.*[.].{2-3}(/[^ ]*)?$', contact.value):
+            % elif re.match(r'[^/]*[.][^/]{2,3}/?[^ ]*$', contact.value):
                 <dd><a href="http://${contact.value}">${contact.value}</a></dd>
             % else:
                 <dd>${contact.value}</dd>

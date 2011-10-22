@@ -22,7 +22,10 @@ class instanceclass(object):
 class ViewBase(object):
     def __init__(self, parent, name):
         self.__parent__ = self.parent = parent
-        self.__name__ = self.name = name
+        try:
+            self.__name__ = self.name = name
+        except AttributeError:
+            pass
         self.request = parent.request
 
     def __getitem__(self, item):
@@ -37,7 +40,10 @@ class ViewBase(object):
         try:
             child = getattr(self, 'child_' + item)
         except AttributeError:
-            return self.get(item)
+            try:
+                return self.get(item)
+            except LookupError:
+                raise KeyError(item)
         else:
             return child(item)
 

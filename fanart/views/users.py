@@ -134,117 +134,6 @@ def render_mini_logout_form(context):
             csrft=context.request.session.get_csrf_token(),
         ))
 
-class Login(ViewBase):
-    def render(self, request):
-        return self.render_response('users/login.mako', request)
-
-class Me(ViewBase):
-    friendly_name = 'Tvůj účet'
-    def __init__(self, parent, name):
-        super(Me, self).__init__(parent, name)
-        if not self.request.session.user.logged_in:
-            raise httpexceptions.HTTPForbidden('Nejsi přihlášen/a.')
-
-    def render(self, request):
-        if request.session.user.logged_in:
-            return self.render_response('users/user.mako', request,
-                    user=request.session.user,
-                )
-        else:
-            raise httpexceptions.HTTPForbidden('Nejsi přihlášen/a.')
-
-    @instanceclass
-    class child_edit(ViewBase):
-        friendly_name = 'Nastavení účtu'
-        def render(self, request):
-            user = request.session.user
-            schema = UserSchema(request)
-            form = deform.Form(schema, buttons=(
-                    deform.Button(title='Změnit účet'),
-                ))
-            appdata = dict(csrft=request.session.get_csrf_token())
-            if user.gender: appdata['gender'] = user.gender
-            if user.bio: appdata['bio'] = user.bio
-            if user.date_of_birth: appdata['date_of_birth'] = user.date_of_birth
-            appdata['field_visibility'] = set()
-            if user.show_email: appdata['field_visibility'].add('email')
-            if user.show_age: appdata['field_visibility'].add('age')
-            if user.show_birthday: appdata['field_visibility'].add('birthday')
-            appdata['contacts'] = []
-            for contact in user.contacts:
-                if contact.type.lower() == 'web':
-                    appdata['web'] = contact.value
-                elif contact.type.lower() == 'xmpp':
-                    appdata['xmpp_nick'] = contact.value
-                elif contact.type.lower() == 'irc':
-                    appdata['irc_nick'] = contact.value
-                elif contact.type.lower() == 'deviantart':
-                    appdata['deviantart_nick'] = contact.value
-                elif contact.type.lower() == 'email':
-                    pass
-                else:
-                    appdata['contacts'].append(contact.type + ': ' + contact.value)
-            appdata['contacts'].append('')
-            if 'submit' in request.POST:
-                controls = request.POST.items()
-                try:
-                    appdata = form.validate(controls)
-                except deform.ValidationFailure, e:
-                    print e, type(e), e.error
-                    pass
-                else:
-                    session = request.sqlalchemy_session
-                    session.rollback()
-                    print appdata
-                    user.gender = appdata['gender']
-                    user.bio = appdata['bio']
-                    user.email = appdata['email']
-                    user.date_of_birth = appdata['date_of_birth']
-                    user.show_email = 'email' in appdata['field_visibility']
-                    user.show_age = 'age' in appdata['field_visibility']
-                    user.show_birthday = 'birthday' in appdata['field_visibility']
-                    print user.show_email, user.show_age, user.show_birthday
-
-                    user.contacts[:] = []
-                    added_contacts = set()
-                    def add_contact(type_, value):
-                        if type_.lower() in added_contacts:
-                            return
-                        print 'Adding', type_, value
-                        added_contacts.add(type_.lower())
-                        contact = models.UserContact(
-                                user_id = user.id,
-                                type = type_.strip(),
-                                value = value.strip(),
-                            )
-                        session.add(contact)
-                    if 'email' in appdata['field_visibility'] and appdata['email']:
-                        add_contact('Email', appdata['email'])
-                    if appdata['web']:
-                        add_contact('Web', appdata['web'])
-                    if appdata['xmpp_nick']:
-                        add_contact('XMPP', appdata['xmpp_nick'])
-                    if appdata['irc_nick']:
-                        add_contact('IRC', appdata['irc_nick'])
-                    if appdata['deviantart_nick']:
-                        add_contact('deviantArt', appdata['deviantart_nick'])
-                    for contacts in appdata['contacts']:
-                        for contact in contacts.split(','):
-                            type_, sep, value = contact.partition(':')
-                            if type_.strip():
-                                if sep and value.strip():
-                                    if value.strip():
-                                        add_contact(type_, value)
-                                else:
-                                    add_contact(type_, '?')
-
-                    session.commit()
-                    return httpexceptions.HTTPSeeOther(self.url)
-            return self.render_response('users/edit.mako', request,
-                    user=request.session.user,
-                    form=form.render(appdata),
-                )
-
 class Users(ViewBase):
     friendly_name = 'Autoři'
     def render(self, request):
@@ -355,3 +244,150 @@ class Users(ViewBase):
                     return httpexceptions.HTTPSeeOther(self.root.url)
             else:
                 return httpexceptions.HTTPNotFound()
+
+    def get(self, id):
+        return UserByID(self, id)
+
+class UserByID(ViewBase):
+    def __init__(self, parent, id):
+        super(UserByID, self).__init__(parent, id)
+        try:
+            id = int(id)
+        except ValueError:
+            raise IndexError(id)
+        self.user = self.request.sqlalchemy_session.query(models.User).get(id)
+        if self.user is None:
+            raise IndexError(id)
+
+    @property
+    def friendly_name(self):
+        return None
+
+    @property
+    def __name__(self):
+        return str(self.user.id)
+
+    @property
+    def by_name(self):
+        return UserByName(self)
+
+    def get(self, name=None):
+        return self.by_name
+
+    def render(self, request):
+        return httpexceptions.HTTPSeeOther(self.by_name.url)
+
+class UserByName(ViewBase):
+    def __init__(self, parent, name=None):
+        self.user = parent.user
+        super(UserByName, self).__init__(parent, self.user.normalized_name)
+
+    @property
+    def friendly_name(self):
+        return self.user.name
+
+    @property
+    def __name__(self):
+        return str(self.user.normalized_name)
+
+    def render(self, request):
+        return self.render_response('users/user.mako', request,
+                user=self.user,
+            )
+
+    @instanceclass
+    class child_edit(ViewBase):
+        friendly_name = 'Nastavení účtu'
+
+        def render(self, request):
+            if not request.session.user.logged_in:
+                raise httpexceptions.HTTPForbidden('Nejsi přihlášen/a.')
+            user = self.parent.user
+            if request.session.user is not user:
+                raise httpexceptions.HTTPForbidden('Nemůžeš měnit cizí účty.')
+            schema = UserSchema(request)
+            form = deform.Form(schema, buttons=(
+                    deform.Button(title='Změnit účet'),
+                ))
+            appdata = dict(csrft=request.session.get_csrf_token())
+            if user.gender: appdata['gender'] = user.gender
+            if user.bio: appdata['bio'] = user.bio
+            if user.date_of_birth: appdata['date_of_birth'] = user.date_of_birth
+            appdata['field_visibility'] = set()
+            if user.show_email: appdata['field_visibility'].add('email')
+            if user.show_age: appdata['field_visibility'].add('age')
+            if user.show_birthday: appdata['field_visibility'].add('birthday')
+            appdata['contacts'] = []
+            for contact in user.contacts:
+                if contact.type.lower() == 'web':
+                    appdata['web'] = contact.value
+                elif contact.type.lower() == 'xmpp':
+                    appdata['xmpp_nick'] = contact.value
+                elif contact.type.lower() == 'irc':
+                    appdata['irc_nick'] = contact.value
+                elif contact.type.lower() == 'deviantart':
+                    appdata['deviantart_nick'] = contact.value
+                elif contact.type.lower() == 'email':
+                    pass
+                else:
+                    appdata['contacts'].append(contact.type + ': ' + contact.value)
+            appdata['contacts'].append('')
+            if 'submit' in request.POST:
+                controls = request.POST.items()
+                try:
+                    appdata = form.validate(controls)
+                except deform.ValidationFailure, e:
+                    print e, type(e), e.error
+                    pass
+                else:
+                    session = request.sqlalchemy_session
+                    session.rollback()
+                    print appdata
+                    user.gender = appdata['gender']
+                    user.bio = appdata['bio']
+                    user.email = appdata['email']
+                    user.date_of_birth = appdata['date_of_birth']
+                    user.show_email = 'email' in appdata['field_visibility']
+                    user.show_age = 'age' in appdata['field_visibility']
+                    user.show_birthday = 'birthday' in appdata['field_visibility']
+                    print user.show_email, user.show_age, user.show_birthday
+
+                    user.contacts[:] = []
+                    added_contacts = set()
+                    def add_contact(type_, value):
+                        if type_.lower() in added_contacts:
+                            return
+                        print 'Adding', type_, value
+                        added_contacts.add(type_.lower())
+                        contact = models.UserContact(
+                                user_id = user.id,
+                                type = type_.strip(),
+                                value = value.strip(),
+                            )
+                        session.add(contact)
+                    if 'email' in appdata['field_visibility'] and appdata['email']:
+                        add_contact('Email', appdata['email'])
+                    if appdata['web']:
+                        add_contact('Web', appdata['web'])
+                    if appdata['xmpp_nick']:
+                        add_contact('XMPP', appdata['xmpp_nick'])
+                    if appdata['irc_nick']:
+                        add_contact('IRC', appdata['irc_nick'])
+                    if appdata['deviantart_nick']:
+                        add_contact('deviantArt', appdata['deviantart_nick'])
+                    for contacts in appdata['contacts']:
+                        for contact in contacts.split(','):
+                            type_, sep, value = contact.partition(':')
+                            if type_.strip():
+                                if sep and value.strip():
+                                    if value.strip():
+                                        add_contact(type_, value)
+                                else:
+                                    add_contact(type_, '?')
+
+                    session.commit()
+                    return httpexceptions.HTTPSeeOther(self.url)
+            return self.render_response('users/edit.mako', request,
+                    user=request.session.user,
+                    form=form.render(appdata),
+                )

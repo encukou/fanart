@@ -54,7 +54,7 @@ class User(Base):
     def normalize_name(cls, name):
         name = unidecode(name).lower()
         name = re.sub('[^a-z0-9]+', '-', name)
-        return name.strip('-')
+        return name.strip('-') or '-'
 
     @classmethod
     def create_local(cls, session, user_name, password):

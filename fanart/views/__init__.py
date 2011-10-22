@@ -1,3 +1,6 @@
+# Encoding: UTF-8
+from __future__ import unicode_literals, division
+
 import os
 
 from pyramid.renderers import render
@@ -47,5 +50,11 @@ class Site(ViewBase):
             #response.cache_expires(3600 * 24)
             return response
 
-    child_me = instanceclass(users.Me)
+    def child_me(self, name):
+        uid = self.request.session.user.id
+        if uid is None:
+            raise httpexceptions.HTTPNotFound('Nejsi přihlášen/a')
+        else:
+            return self['users'].get(self.request.session.user.id).by_name
+
     child_users = instanceclass(users.Users)

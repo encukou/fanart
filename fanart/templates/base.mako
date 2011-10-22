@@ -26,7 +26,9 @@
         <nav class="hierarchy">
             <a href="http://pikachu.cz">Pikachu.cz</a>
             % for x in reversed(list(this.lineage)):
-                » <a href="${x.url}">${x.friendly_name}</a>
+                % if x.friendly_name:
+                    » <a href="${x.url}">${x.friendly_name}</a>
+                % endif
             % endfor
         </nav>
         <h1>${self.title_in_page()}</h1>
