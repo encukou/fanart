@@ -1,15 +1,11 @@
 # Encoding: UTF-8
 from __future__ import unicode_literals, division
 
-import colander
-import deform
-from sqlalchemy.orm import joinedload
-
 from fanart import models
 
-def get_user(request, session):
+def get_user(request):
     try:
-        user_id = session['user_id']
+        user_id = request.session['user_id']
     except KeyError:
         pass
     else:
@@ -17,10 +13,3 @@ def get_user(request, session):
         if user is not None:
             return user
     return models.User(name='Host', logged_in=False)
-
-def session_factory_wrapper(func):
-    def session_factory(request):
-        session = func(request)
-        session.user = get_user(request, session)
-        return session
-    return session_factory

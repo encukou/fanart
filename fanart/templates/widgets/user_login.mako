@@ -1,6 +1,6 @@
 <% from fanart.views.users import render_mini_login_form, render_mini_logout_form %>
 
-<% user = this.request.session.user %>
+<% user = this.request.user %>
 
 <details open>
     <summary>Login</summary>

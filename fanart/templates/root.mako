@@ -3,7 +3,7 @@
 <%def name="title_in_head()">${self.title()}</%def>
 <%def name="title_in_page()">Česká Pokégalerie</%def>
 
-% if request.session.user.logged_in:
+% if request.user.logged_in:
     <div>Vítej zpět!</div>
 % else:
     <div>Vítej v České PokéGalerii!</div>
@@ -15,6 +15,6 @@
 % endif
 
 <h1>Novinky</h1>
-% if request.session.user.logged_in:
+% if request.user.logged_in:
     <div class="action_link"><a href="${request.root['news']['new'].url}">Napsat novinku</a></div>
 % endif

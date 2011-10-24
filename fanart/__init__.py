@@ -7,6 +7,7 @@ from pyramid.config import Configurator
 from pyramid.request import Request
 from pyramid.events import ContextFound, NewRequest
 from pyramid.httpexceptions import HTTPForbidden
+from pyramid.decorator import reify
 import pyramid_beaker
 from sqlalchemy import engine_from_config
 from pyramid.i18n import get_localizer
@@ -51,8 +52,11 @@ def main(global_config, **settings):
     class SQLARequest(Request):
         sqlalchemy_session = sqla_session
 
+        @reify
+        def user(self):
+            return users.get_user(self)
+
     session_factory = pyramid_beaker.session_factory_from_settings(settings)
-    session_factory = users.session_factory_wrapper(session_factory)
     config = Configurator(settings=settings,
             root_factory=Site,
             request_factory=SQLARequest,

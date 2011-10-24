@@ -15,7 +15,11 @@ from fanart.views.base import ViewBase, instanceclass
 from fanart.views import users, news, api
 
 def view_root(context, request):
-    if request.path_info != context.url:
+    print request.application_url, request.path_info, context.url
+    path_info = request.path_info
+    if path_info == '/':
+        path_info = ''
+    if request.application_url + path_info != context.url:
         return httpexceptions.HTTPSeeOther(context.url)
     return context.render(request)
 
@@ -53,11 +57,11 @@ class Site(ViewBase):
             return response
 
     def child_me(self, name):
-        uid = self.request.session.user.id
+        uid = self.request.user.id
         if uid is None:
             raise httpexceptions.HTTPNotFound('Nejsi přihlášen/a')
         else:
-            return self['users'].get(self.request.session.user.id).by_name
+            return self['users'].get(self.request.user.id).by_name
 
     child_users = instanceclass(users.Users)
     child_news = instanceclass(news.News)

@@ -144,7 +144,7 @@ class Users(ViewBase):
         friendly_name = 'Založení účtu'
         def __init__(self, *args, **kwargs):
             ViewBase.__init__(self, *args, **kwargs)
-            user = self.request.session.user
+            user = self.request.user
             if user.logged_in:
                 raise httpexceptions.HTTPForbidden('Už jsi přihlášen%s.' %
                         dict(female='a', male='').get(user.gender, '/a'))
@@ -192,7 +192,7 @@ class Users(ViewBase):
                         except httpexceptions.HTTPException:
                             return httpexceptions.HTTPSeeOther(self.root.url)
             return self.render_response('users/new.mako', request,
-                    user=request.session.user,
+                    user=request.user,
                     form=form.render(appdata),
                 )
 
@@ -300,10 +300,10 @@ class UserByName(ViewBase):
         friendly_name = 'Nastavení účtu'
 
         def render(self, request):
-            if not request.session.user.logged_in:
+            if not request.user.logged_in:
                 raise httpexceptions.HTTPForbidden('Nejsi přihlášen/a.')
             user = self.parent.user
-            if request.session.user is not user:
+            if request.user is not user:
                 raise httpexceptions.HTTPForbidden('Nemůžeš měnit cizí účty.')
             schema = UserSchema(request)
             form = deform.Form(schema, buttons=(
@@ -388,6 +388,6 @@ class UserByName(ViewBase):
                     session.commit()
                     return httpexceptions.HTTPSeeOther(self.url)
             return self.render_response('users/edit.mako', request,
-                    user=request.session.user,
+                    user=request.user,
                     form=form.render(appdata),
                 )

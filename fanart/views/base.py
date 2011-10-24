@@ -5,6 +5,7 @@ from pyramid.traversal import find_interface, resource_path
 from pyramid.location import lineage
 from pyramid.response import Response
 from pyramid.encode import urlencode
+from pyramid.decorator import reify
 
 class instanceclass(object):
     def __init__(self, cls):
@@ -47,6 +48,9 @@ class ViewBase(object):
         else:
             return child(item)
 
+    def __resource_url__(self, request, info):
+        return request.application_url + info['virtual_path'].rstrip('/')
+
     def get(self, item):
         raise KeyError(item)
 
@@ -59,13 +63,12 @@ class ViewBase(object):
     def lineage(self):
         return lineage(self)
 
-    @property
+    @reify
     def url(self):
-        return resource_path(self)
+        return self.request.resource_url(self)
 
     def get_url(self, **kwargs):
-        resource = resource_path(self,)
-        return '%s?%s' % (resource, urlencode(kwargs))
+        return self.request.resource_url(self, query=kwargs)
 
     def render_response(self, template, request, **kwargs):
         kwargs.setdefault('this', self)
