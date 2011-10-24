@@ -3,6 +3,7 @@ from __future__ import unicode_literals, division
 
 import colander
 import deform
+from sqlalchemy.orm import joinedload
 
 from fanart import models
 

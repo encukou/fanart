@@ -1,3 +1,6 @@
+# Encoding: UTF-8
+from __future__ import unicode_literals, division
+
 import logging
 
 from pyramid.config import Configurator
@@ -28,7 +31,7 @@ def check_csrf(request):
 
 def check_request_for_csrf(event):
     if event.request.POST and not check_csrf(event.request):
-        raise HTTPForbidden("CSRF token mismatch")
+        raise HTTPForbidden("Vypadá to, že se snažíš o nějakou nekalost (nebo se o ni snaží někdo jiný tvým jménem).")
 
 def set_locale(event):
     event.request._LOCALE_ = 'cs'

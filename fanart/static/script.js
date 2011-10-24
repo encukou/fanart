@@ -1,6 +1,10 @@
 $(function() {
     $('body').removeClass('no-js').addClass('have-js');
     deform.load();
+    $.fanart = {
+        csrft: $("#csrft").val(),
+        api_base: $("#api_base").val(),
+    }
 });
 
 $(function() {
@@ -53,7 +57,64 @@ $(function() {
 */
 
 function fade_flashes() {
-    console.log($('.flash:not(.faded)'))
     $('.flash:not(.faded)').addClass('faded')
 }
 $(function() {setTimeout(fade_flashes, 100)});
+
+/* Preview */
+$(function() {
+    $("textarea.markdown-textarea").each(function (index, md_textarea) {
+        var preview_div = $("<div class='markdown preview'>Hahaha</div>");
+        preview_div.insertAfter(md_textarea);
+        var timer_id = 0;
+        var state = 'ready'; // -> 'request', -> 'timer'
+        var last_data = '';
+        function do_ajax() {
+            state = 'request';
+            var request_data = $(md_textarea).val();
+            function done(cooldown_timeout) {
+                state = 'timer';
+                changed();
+                timer_id = setTimeout(function() {
+                    state = 'ready';
+                    changed();
+                }, cooldown_timeout);
+            };
+            function success(data, textStatus, jqXHR) {
+                preview_div.empty();
+                preview_div.append(data);
+                last_data = request_data;
+                done(2000);
+            };
+            if (request_data) {
+                $.ajax({
+                    type: 'POST',
+                    dataType: 'html',
+                    data: {
+                        data: request_data,
+                        csrft: $.fanart.csrft
+                    },
+                    url: $.fanart.api_base + '/markdown',
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        done(10000);
+                    },
+                    success: success
+                });
+            }else{
+                success('', '', '');
+            }
+        }
+        function changed() {
+            if (last_data == $(md_textarea).val()) {
+                preview_div.removeClass('out-of-date');
+            }else{
+                preview_div.addClass('out-of-date');
+                if (state == 'ready') {
+                    do_ajax();
+                }
+            }
+        }
+        $(md_textarea).change(changed).keypress(changed).keydown(changed).
+            keyup(changed).click(changed);
+    });
+});

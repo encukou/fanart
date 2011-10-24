@@ -13,10 +13,6 @@ form:
     &::-webkit-input-placeholder, &:-moz-placeholder:
         color: $dark_background
 
-    textarea:
-        width: 75%
-        height: 11em
-
     input[type=password], input[type=text], input[type=search], input[type=date], textarea:
         text-align: center
         border-width: 1px
@@ -26,6 +22,22 @@ form:
 
         &:focus:
             outline: none
+
+    .markdown-textarea:
+        width: 75%
+        text-align: left
+        height: 11em
+        &+div.preview:
+            width: 75%
+            text-align: left
+            max-height: 20em
+            overflow-y: auto
+            margin-left: auto
+            margin-right: auto
+            &.out-of-date:
+                color: $disabled_color
+                a:
+                    color: $disabled_color
 
     input[type=submit], button[type=submit]:
         border-color: $dark_background
@@ -90,6 +102,17 @@ form:
         fieldset:
             width: 100%
 
+            button:
+                font-size: 100%
+                font-family: $sans
+                color: $dark_foreground
+                background-color: $mid_background
+                padding: 0.25ex 1em
+                margin: 0
+
+            button[type=submit]:
+                background-color: $slightly_light_background
+
             &>ul:
                 &>li:
                     padding: 0.5ex
@@ -102,17 +125,6 @@ form:
                     background-color: $slightly_light_background
 
                 input[type=radio]:
-                    background-color: $slightly_light_background
-
-                button:
-                    font-size: 100%
-                    font-family: $sans
-                    color: $dark_foreground
-                    background-color: $mid_background
-                    padding: 0.25ex 1em
-                    margin: 0
-
-                button[type=submit]:
                     background-color: $slightly_light_background
 
                 .errorLi:
@@ -132,6 +144,11 @@ form:
 
         .deformClosebutton:
             display: inline-block
+
+        &.simple:
+            fieldset:
+                display: block
+                text-align: center
 
 body.narrow #content form:
     fieldset:

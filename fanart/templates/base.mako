@@ -67,7 +67,11 @@
                 <h2>Odkazy</h2>
             </section>
         </div>
-        <div id="helper"><input type ie sucks></div>
+        <div id="helper">
+            <input type="hidden" id="csrft" value="${request.session.get_csrf_token()}">
+            <input type="hidden" id="api_base" value="${request.root['api'].url}">
+            <input type ie sucks>
+        </div>
     </footer>
 </body>
 </html>

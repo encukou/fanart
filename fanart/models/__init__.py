@@ -88,6 +88,14 @@ class UserContact(Base):
     type = Column(Unicode, primary_key=True, nullable=False)
     value = Column(Unicode, nullable=False)
 
+class NewsItem(Base):
+    __tablename__ = 'news_items'
+    id = Column(Integer, primary_key=True, nullable=False)
+    published = Column(DateTime, index=True, nullable=False)
+    text = Column(Unicode, nullable=False)
+    html = Column(Unicode, nullable=False)
+    reporter = Column(Integer, ForeignKey('users.id'), nullable=False)
+
 UserContact.user = relationship(User,
     backref=backref('contacts', cascade="all, delete-orphan"))
 

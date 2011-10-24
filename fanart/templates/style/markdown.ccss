@@ -1,0 +1,110 @@
+.markdown:
+    em, i:
+        font-style: italic
+
+    strong, b:
+        font-weight: bold
+
+    u:
+        font-decoration: underline
+
+    .signature:
+        padding-left: 5em
+        font-size: 80%
+        font-family: sans
+
+    blockquote:
+        border-left: 0.5ex solid $dark_background
+        padding-left: 1ex
+
+    table:
+        border: 0.5ex solid $dark_background
+        box-shadow: 0px 0px 1px $dark_background
+        border-radius: 1px
+        td, th:
+            border: 1px solid $dark_background
+            padding: 0.5ex
+        th:
+            background-color: $slightly_light_background
+            text-align: center
+
+    abbr:
+        display: inline-block
+        background-color: $slightly_light_background
+        border-bottom: 1px dashed $dark_background
+        padding: 0 0.5ex
+        border-top-left-radius: 3px
+        border-top-right-radius: 3px
+
+    dl:
+        margin: 1ex 0
+        dt:
+            font-weight: bold
+        dd:
+            margin-left: 1.5ex
+
+    code:
+        display: inline-block
+
+    pre:
+        display: block
+        margin: 1ex 0 1.5ex
+
+    code, pre:
+        text-wrap: pre
+        background-color: $slightly_light_background
+        border: 1px solid $dark_background
+        box-shadow: 0 1px 2px $mid_background inset;
+        border-radius: 2px
+        font-family: monospace
+        padding: 0 0.5ex
+
+    pre code:
+        background-color: transparent
+        border-style: none
+        box-shadow: none
+
+    hr:
+        display: block
+        width: 63%
+        height: 0.5ex
+        margin-left: 0
+        margin-right: auto
+        border-style: none
+        background-color: $dark_background
+        color: $dark_background
+        margin: 1em 0
+
+    sup:
+        vertical-align: super;
+        font-size: smaller;
+
+    ol:
+        display: block;
+        list-style-type: decimal;
+
+    .footnote:
+        ol:
+            a[rev=footnote]:
+                display: none
+
+    h4, h5, h6:
+        margin: 1.5em 0 1ex
+        padding: 0.25ex 0 0
+        font-size: 110%
+
+    h4:
+        margin-top: 2em
+        padding: 0.25ex
+        border-bottom: 0.5ex solid $light_background;
+        background-color: $slightly_light_background;
+
+    h5:
+        max-width: 63%
+        margin-right: auto
+        border-bottom: 0.5ex solid $light_background;
+
+    h6:
+        max-width: 63%
+        margin-right: auto
+        border-bottom: 0.5ex solid $slightly_light_background;

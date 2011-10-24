@@ -12,7 +12,7 @@ import pkg_resources
 import clevercss
 
 from fanart.views.base import ViewBase, instanceclass
-from fanart.views import users
+from fanart.views import users, news, api
 
 def view_root(context, request):
     if request.path_info != context.url:
@@ -20,8 +20,10 @@ def view_root(context, request):
     return context.render(request)
 
 def view_403(context, request):
+    if not hasattr(request, 'root'):
+        request.root = Site(request)
     response = Response(render('errors/403-forbidden.mako',
-            dict(request=request, this=Site(request), detail=context.detail),
+            dict(request=request, this=request.root, detail=context.detail),
             request))
     response.status_int = 403
     return response
@@ -58,3 +60,5 @@ class Site(ViewBase):
             return self['users'].get(self.request.session.user.id).by_name
 
     child_users = instanceclass(users.Users)
+    child_news = instanceclass(news.News)
+    child_api = instanceclass(api.Api)

@@ -121,6 +121,12 @@ body.fanart:
         p:
             margin-bottom: 0.5em
 
+        .action_link:
+            font-family: $sans
+            font-size: 80%
+            h1+&:
+                margin-top: -1em
+
     .title:
         width: 100%
         background-color: $mid_background

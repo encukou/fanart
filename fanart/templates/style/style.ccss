@@ -7,6 +7,7 @@ text_on_mid = #130e04
 dark_foreground = #44381f
 dark_secondary_color = #3e4929
 link_hover_color = white
+disabled_color = $dark_background
 
 flash_color = #ffffff
 flash_border = #d37a13
@@ -20,6 +21,7 @@ serif = 'Gentium Book Basic', serif
 @import url(generic.ccss)
 @import url(layout.ccss)
 @import url(forms.ccss)
+@import url(markdown.ccss)
 
 #content:
     dl.contact_info:
