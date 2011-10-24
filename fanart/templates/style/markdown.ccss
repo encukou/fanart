@@ -111,20 +111,20 @@
                 display: none
 
     h4, h5, h6:
-        margin: 1.5em 0 1ex
+        margin: 1em 0 1ex
         padding: 0.25ex 0 0
         font-size: 110%
+        &:first-child:
+            margin-top: 0
 
     h4:
-        margin-top: 2em
+        margin-top: 1.5em
         padding: 0.25ex
         border-bottom: 0.5ex solid $light_background;
-        background-color: $slightly_light_background;
+        /* background-color: $slightly_light_background; */
 
     h5:
-        max-width: 63%
-        margin-right: auto
-        border-bottom: 0.5ex solid $light_background;
+        border-bottom: 0.5ex solid $slightly_light_background;
 
     h6:
         max-width: 63%
