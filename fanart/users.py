@@ -9,7 +9,7 @@ def get_user(request):
     except KeyError:
         pass
     else:
-        user = request.sqlalchemy_session.query(models.User).get(user_id)
+        user = request.db.query(models.User).get(user_id)
         if user is not None:
             return user
     return models.User(name='Host', logged_in=False)

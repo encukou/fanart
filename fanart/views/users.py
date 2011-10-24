@@ -79,7 +79,7 @@ def NewUserSchema(request):
             raise colander.Invalid(node, 'Hesla se neshodují.')
 
     def validate_username(node, value):
-        if models.User.name_exists(request.sqlalchemy_session, value):
+        if models.User.name_exists(request.db, value):
             raise colander.Invalid(node, 'Uživatel s tímto jménem už existuje. Vyber si prosím jiné jméno.')
 
     locale_name = get_locale_name(request)
@@ -173,20 +173,21 @@ class Users(ViewBase):
                         form.err = err
                         raise err
 
-                    session = request.sqlalchemy_session
-                    session.rollback()
+                    db = request.db
+                    db.rollback()
                     try:
-                        new_user = models.User.create_local(session,
+                        new_user = models.User.create_local(db,
                             **appstruct)
-                        session.add(new_user)
-                        session.flush()
+                        db.add(new_user)
+                        db.flush()
                     except RuntimeError:
                         err = deform.ValidationFailure('Uživatel už existuje.')
                         err.field = form.dzdd
                         raise err
                     else:
                         request.session['user_id'] = new_user.id
-                        session.commit()
+                        del request.user
+                        db.commit()
                         try:
                             return httpexceptions.HTTPSeeOther(self.root.url + '/me')
                         except httpexceptions.HTTPException:
@@ -202,7 +203,7 @@ class Users(ViewBase):
             if 'submit' in request.POST:
                 try:
                     request.session['user_id'] = models.User.login_user_by_password(
-                            session=request.sqlalchemy_session,
+                            session=request.db,
                             user_name=request.POST['user_name'],
                             password=request.POST['password'],
                         ).id
@@ -255,7 +256,7 @@ class UserByID(ViewBase):
             id = int(id)
         except ValueError:
             raise IndexError(id)
-        self.user = self.request.sqlalchemy_session.query(models.User).get(id)
+        self.user = self.request.db.query(models.User).get(id)
         if self.user is None:
             raise IndexError(id)
 
@@ -340,8 +341,8 @@ class UserByName(ViewBase):
                     print e, type(e), e.error
                     pass
                 else:
-                    session = request.sqlalchemy_session
-                    session.rollback()
+                    db = request.db
+                    db.rollback()
                     print appdata
                     user.gender = appdata['gender']
                     user.bio = appdata['bio']
@@ -364,7 +365,7 @@ class UserByName(ViewBase):
                                 type = type_.strip(),
                                 value = value.strip(),
                             )
-                        session.add(contact)
+                        db.add(contact)
                     if 'email' in appdata['field_visibility'] and appdata['email']:
                         add_contact('Email', appdata['email'])
                     if appdata['web']:
@@ -385,7 +386,7 @@ class UserByName(ViewBase):
                                 else:
                                     add_contact(type_, '?')
 
-                    session.commit()
+                    db.commit()
                     return httpexceptions.HTTPSeeOther(self.url)
             return self.render_response('users/edit.mako', request,
                     user=request.user,

@@ -50,7 +50,7 @@ def main(global_config, **settings):
     sqla_session = initialize_sql(engine)
 
     class SQLARequest(Request):
-        sqlalchemy_session = sqla_session
+        db = sqla_session
 
         @reify
         def user(self):
