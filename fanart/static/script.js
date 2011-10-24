@@ -64,16 +64,19 @@ $(function() {setTimeout(fade_flashes, 100)});
 /* Preview */
 $(function() {
     $("textarea.markdown-textarea").each(function (index, md_textarea) {
-        var preview_div = $("<div class='markdown preview'>Hahaha</div>");
+        var preview_div = $("<div class='markdown preview'></div>");
         preview_div.insertAfter(md_textarea);
         var timer_id = 0;
-        var state = 'ready'; // -> 'request', -> 'timer'
+        var state = 'ready'; // idle state
+        // -> 'warmup' - document changed; wait for small period of inactivity before AJAX request
+        // -> 'request' - the AJAX request is executing
+        // -> 'cooldown' - a rather large timeout after the AJAX request is acive; for rate limiting
         var last_data = '';
         function do_ajax() {
             state = 'request';
             var request_data = $(md_textarea).val();
             function done(cooldown_timeout) {
-                state = 'timer';
+                state = 'cooldown';
                 changed();
                 timer_id = setTimeout(function() {
                     state = 'ready';
@@ -110,7 +113,11 @@ $(function() {
             }else{
                 preview_div.addClass('out-of-date');
                 if (state == 'ready') {
-                    do_ajax();
+                    timer_id = setTimeout(do_ajax, 400);
+                    state = 'warmup';
+                }else if (state == 'warmup') {
+                    clearTimeout(timer_id);
+                    timer_id = setTimeout(do_ajax, 400);
                 }
             }
         }
