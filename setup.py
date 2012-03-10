@@ -18,6 +18,7 @@ requires = [
     'py-bcrypt',
     'unidecode',
     'markdown',
+    'pytz',
     ]
 
 if sys.version_info[:3] < (2,5,0):

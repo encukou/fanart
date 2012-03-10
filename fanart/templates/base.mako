@@ -36,7 +36,7 @@
     </section>
     <hr>
     <footer>
-        <div id="usernav">
+        <section id="usernav">
             <%include file="widgets/user_login.mako" />
             <details open>
                 <summary>K přidání</summary>
@@ -47,8 +47,8 @@
             <details>
                 <summary>Odmítnuté</summary>
             </details>
-        </div>
-        <div id="sitenav">
+        </section>
+        <section id="sitenav">
             <details open>
                 <summary>Hledání</summary>
                 <form>
@@ -61,12 +61,12 @@
             <details>
                 <summary>Počitadlo</summary>
             </details>
-        </div>
-        <div id="links">
+        </section>
+        <section id="links">
             <section>
                 <h2>Odkazy</h2>
             </section>
-        </div>
+        </section>
         <div id="helper">
             <input type="hidden" id="csrft" value="${request.session.get_csrf_token()}">
             <input type="hidden" id="api_base" value="${request.root['api'].url}">

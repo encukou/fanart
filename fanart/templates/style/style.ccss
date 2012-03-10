@@ -39,3 +39,12 @@ serif = 'Gentium Book Basic', serif
 
         &+*:
             break: both
+
+
+    article + article:
+        margin-top: 2em
+
+    .date-header time:
+        float: right
+        margin-left: 3em
+        margin-bottom: 0.5ex

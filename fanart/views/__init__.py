@@ -13,6 +13,7 @@ import clevercss
 
 from fanart.views.base import ViewBase, instanceclass
 from fanart.views import users, news, api
+from fanart.models import NewsItem
 
 def view_root(context, request):
     print request.application_url, request.path_info, context.url
@@ -41,7 +42,9 @@ class Site(ViewBase):
         self.request = request
 
     def render(self, request):
-        return self.render_response('root.mako', request)
+        # XXX: Better number of stories
+        news_items = request.db.query(NewsItem).order_by(NewsItem.published.desc())[:3]
+        return self.render_response('root.mako', request, news=news_items)
 
     @instanceclass
     class child_css(ViewBase):

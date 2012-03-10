@@ -15,6 +15,17 @@
 % endif
 
 <h1>Novinky</h1>
+% for news_item in news:
+    <details>
+        <summary class="h2 date-header">${h.format_date(news_item.published)} <span class="head-text">${news_item.heading}</span></summary>
+        <div class="markdown">
+        ${h.markdown2html(news_item.source)}
+        </div>
+    </details>
+% endfor
+    <ul class="link-line">
+        <li class="action-link"><a href="${request.root['news'].url}">Archiv novinek</a></li>
 % if request.user.logged_in:
-    <div class="action_link"><a href="${request.root['news']['new'].url}">Napsat novinku</a></div>
+        <li class="action-link"><a href="${request.root['news']['new'].url}">Napsat novinku</a></li>
 % endif
+    </ul>

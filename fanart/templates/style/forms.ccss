@@ -23,10 +23,11 @@ form:
         &:focus:
             outline: none
 
-    .markdown-textarea:
+    .markdown-textarea, .long-text:
         width: 75%
-        text-align: left
-        height: 11em
+        &.markdown-textarea:
+            height: 11em
+        text-align: left !important
         &+div.preview:
             width: 75%
             text-align: left

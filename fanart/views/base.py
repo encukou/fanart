@@ -7,6 +7,8 @@ from pyramid.response import Response
 from pyramid.encode import urlencode
 from pyramid.decorator import reify
 
+from fanart.views import helpers
+
 class instanceclass(object):
     def __init__(self, cls):
         self.cls = cls
@@ -72,4 +74,5 @@ class ViewBase(object):
 
     def render_response(self, template, request, **kwargs):
         kwargs.setdefault('this', self)
+        kwargs.setdefault('h', helpers)
         return Response(render(template, kwargs, request))

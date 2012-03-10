@@ -13,8 +13,6 @@ from fanart.thirdparty import nl2br, urlize, mdx_downheader, wikilinks
 from pyramid.response import Response
 from pyramid import httpexceptions
 
-from fanart.views.base import ViewBase, instanceclass
-
 def build_url(label, base, end):
     # XXX: URLs for Wikilinks
     return None
@@ -80,6 +78,10 @@ class CodeBlockProcessor(BlockProcessor):
 
 engine.parser.blockprocessors.add('signature', CodeBlockProcessor(engine.parser), '>code')
 
+class MarkdownResultString(unicode):
+    def __html__(self):
+        return self
+
 # And the actual function to call it all
 def convert(source):
-    return engine.convert(source)
+    return MarkdownResultString(engine.convert(source))

@@ -111,7 +111,7 @@ body.fanart:
             text-shadow: 0px 1px 0px $light_background.brighten(15%)
             box-shadow: 0px 0px 2px $light_background
 
-        h2:
+        h2, summary.h2:
             margin-top: 1.5ex
             margin-bottom: 1ex
             padding: 0.5ex 0.75ex
@@ -121,7 +121,17 @@ body.fanart:
         p:
             margin-bottom: 0.5em
 
-        .action_link:
+        .link-line:
+            margin-left: 0
+            margin-right: 0
+            li:
+                display: inline
+                & + li:
+                    &:before:
+                        content: `"•"`
+                        padding-right: 1ex
+
+        .action-link:
             font-family: $sans
             font-size: 80%
             h1+&:

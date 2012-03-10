@@ -90,14 +90,17 @@ class UserContact(Base):
 
 class NewsItem(Base):
     __tablename__ = 'news_items'
-    id = Column(Integer, primary_key=True, nullable=False)
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     published = Column(DateTime, index=True, nullable=False)
-    text = Column(Unicode, nullable=False)
-    html = Column(Unicode, nullable=False)
-    reporter = Column(Integer, ForeignKey('users.id'), nullable=False)
+    heading = Column(Unicode, nullable=False)
+    source = Column(Unicode, nullable=False)
+    reporter_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
 UserContact.user = relationship(User,
     backref=backref('contacts', cascade="all, delete-orphan"))
+
+NewsItem.reporter = relationship(User,
+        primaryjoin=NewsItem.reporter_id == User.id)
 
 def populate():
     session = DBSession()

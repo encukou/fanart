@@ -24,7 +24,7 @@ h1:
 
     margin-top: 1em
 
-h2:
+h2, summary.h2:
     background-color: $dark_background
     padding-right: 1em
 
@@ -55,3 +55,6 @@ a:
 
 nav:
     display: block
+
+summary:
+    cursor: default
