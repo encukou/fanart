@@ -48,3 +48,4 @@ serif = 'Gentium Book Basic', serif
         float: right
         margin-left: 3em
         margin-bottom: 0.5ex
+        color: $dark_foreground

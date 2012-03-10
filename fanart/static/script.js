@@ -125,3 +125,9 @@ $(function() {
             keyup(changed).click(changed);
     });
 });
+
+/* Details */
+$(function() {
+    $('body').addClass($.fn.details.support ? 'details' : 'no-details');
+    $('details').details();
+});

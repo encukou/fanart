@@ -10,7 +10,8 @@
   <link rel="shortcut icon" href="${request.static_url('fanart:static/favicon.ico')}" />
   <link rel="stylesheet" href="${this.root['css'].url}" type="text/css" media="screen" charset="utf-8" />
   <link href='http://fonts.googleapis.com/css?family=Ubuntu:400,700,400italic,700italic|Gentium+Book+Basic:400,400italic,700,700italic&amp;subset=latin-ext,latin' rel='stylesheet' type='text/css'/>
-  <script src="${request.static_url('fanart:static/jquery-1.6.4.min.js')}" type="text/javascript"></script>
+  <script src="${request.static_url('fanart:static/jquery-1.7.1.min.js')}" type="text/javascript"></script>
+  <script src="${request.static_url('fanart:static/jquery.details.min.js')}" type="text/javascript"></script>
   <script src="${request.static_url('deform:static/scripts/deform.js')}" type="text/javascript"></script>
   <script src="${request.static_url('fanart:static/script.js')}" type="text/javascript"></script>
   <script src="https://browserid.org/include.js" type="text/javascript"></script>

@@ -56,5 +56,22 @@ a:
 nav:
     display: block
 
-summary:
-    cursor: default
+body.no-details details:
+    &:not([open]):
+        & > summary:
+            display: block
+        & > *:
+            display: none
+    & > *:
+        display:block
+    summary:
+        &::-webkit-details-marker:
+            display: none
+        &::before:
+            content: `"▸"`
+            padding-right: 0.5ex
+        cursor: default
+        display: block
+    &[open], &.open:
+        summary::before:
+            content: `"▾"` !important
