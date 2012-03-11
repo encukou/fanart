@@ -12,6 +12,7 @@
   <link href='http://fonts.googleapis.com/css?family=Ubuntu:400,700,400italic,700italic|Gentium+Book+Basic:400,400italic,700,700italic&amp;subset=latin-ext,latin' rel='stylesheet' type='text/css'/>
   <script src="${request.static_url('fanart:static/jquery-1.7.1.min.js')}" type="text/javascript"></script>
   <script src="${request.static_url('fanart:static/jquery.details.min.js')}" type="text/javascript"></script>
+  <script src="${request.static_url('fanart:static/jquery.timeago.js')}" type="text/javascript"></script>
   <script src="${request.static_url('deform:static/scripts/deform.js')}" type="text/javascript"></script>
   <script src="${request.static_url('fanart:static/script.js')}" type="text/javascript"></script>
   <script src="https://browserid.org/include.js" type="text/javascript"></script>
