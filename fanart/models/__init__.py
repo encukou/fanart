@@ -94,7 +94,7 @@ class NewsItem(Base):
     published = Column(DateTime, index=True, nullable=False)
     heading = Column(Unicode, nullable=False)
     source = Column(Unicode, nullable=False)
-    reporter_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    reporter_id = Column(Integer, ForeignKey('users.id'), nullable=True)
 
 UserContact.user = relationship(User,
     backref=backref('contacts', cascade="all, delete-orphan"))
@@ -108,6 +108,11 @@ def populate():
         # password is: 'pass'
         password='$2a$04$B6eLb5G5cQjpmtqtkh.JfOWjMKbAHIsKmh1ULOR7AK7/6xcpqvCxy'))
     session.flush()
+
+    if session.query(NewsItem).count() == 0:
+        from fanart.models.import_old import import_news
+        import_news(session)
+
     session.commit()
 
 def initialize_sql(engine):

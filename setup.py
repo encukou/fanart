@@ -19,6 +19,7 @@ requires = [
     'unidecode',
     'markdown',
     'pytz',
+    'pyyaml',
     ]
 
 if sys.version_info[:3] < (2,5,0):

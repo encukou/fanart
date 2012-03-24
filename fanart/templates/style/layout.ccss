@@ -74,7 +74,7 @@ body.fanart:
         display: block
         padding: 1ex
         padding-top: 0
-        line-height: 120%
+        line-height: 150%
 
         .hierarchy:
             line-height: 100%

@@ -41,9 +41,9 @@ def UserSchema(request):
         bio = colander.SchemaNode(colander.String(), missing=None,
                 title='Něco o tobě',
                 widget=deform.widget.TextAreaWidget())
-        # XXX: E-mail seems buggy in deform?
+        # XXX: E-mail seems buggy in colander?
         email = colander.SchemaNode(colander.String(), missing=None,
-                validator = colander.Email,
+                #validator = colander.Email,
                 title='E-mail')
         # XXX: Make a nice calendar widget for this
         date_of_birth = colander.SchemaNode(colander.Date(), missing=None,
@@ -329,7 +329,7 @@ class UserByName(ViewBase):
                 elif contact.type.lower() == 'deviantart':
                     appdata['deviantart_nick'] = contact.value
                 elif contact.type.lower() == 'email':
-                    pass
+                    appdata['email'] = contact.value
                 else:
                     appdata['contacts'].append(contact.type + ': ' + contact.value)
             appdata['contacts'].append('')
@@ -366,6 +366,7 @@ class UserByName(ViewBase):
                                 value = value.strip(),
                             )
                         db.add(contact)
+                    user.email = appdata['email']
                     if 'email' in appdata['field_visibility'] and appdata['email']:
                         add_contact('Email', appdata['email'])
                     if appdata['web']:
