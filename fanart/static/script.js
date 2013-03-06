@@ -148,7 +148,9 @@ $(function() {
 
         if (seconds < 45) return simple("před chvilkou", "za chvilku");
         if (seconds < 90) return simple("před minutou", "za minutu");
-        if (minutes < 45) return complex(minutes, "před %d minutami", "za %d minuty", "za %d minut");
+        if (minutes < 10) return complex(minutes, "před %d minutami", "za %d minuty", "za %d minut");
+        if (minutes < 20) return simple("před čtvrt hodinou", "za čtvrt hodiny");
+        if (minutes < 45) return simple("před půl hodinou", "za půl hodiny");
         if (minutes < 90) return simple("před hodinou", "za hodinu");
         if (hours < 20) return complex(hours, "před %d hodinami", "za %d hodiny", "za %d hodin");
         if (days < 2) {
