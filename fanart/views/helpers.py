@@ -2,7 +2,10 @@
 
 
 import datetime
+
 import pytz
+import colander
+import deform
 
 from fanart.markdown import convert as markdown2html
 
@@ -35,3 +38,16 @@ class FormattedDate(object):
 def format_date(date, **kwargs):
     kwargs.setdefault('format', 'date')
     return FormattedDate(date, **kwargs)
+
+
+@colander.deferred
+def _deferred_csrf_default(node, kw):
+    return kw['request'].csrf_token
+
+
+class FormSchema(colander.MappingSchema):
+    csrft = colander.SchemaNode(
+        colander.String(),
+        default = _deferred_csrf_default,
+        widget = deform.widget.HiddenWidget(),
+    )

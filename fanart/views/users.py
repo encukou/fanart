@@ -8,6 +8,7 @@ import colander
 import deform
 
 from fanart.views.base import ViewBase, instanceclass
+from fanart.views import helpers as view_helpers
 from fanart import models, helpers
 
 class StringListSchema(colander.SequenceSchema):
@@ -20,7 +21,7 @@ class MemoryTmpStore(dict):
 
 def UserSchema(request):
     temp_store = helpers.FileUploadTempStore(request)
-    class UserSchema(colander.MappingSchema):
+    class UserSchema(view_helpers.FormSchema):
         gender = colander.SchemaNode(colander.String(), missing=None,
                 title='Pohlaví',
                 validator=colander.OneOf(('male', 'female', '')),
@@ -68,9 +69,7 @@ def UserSchema(request):
         # XXX: pokemon tags
         #pokemon = StringListSchema(accept_scalar=True, default=[''],
         #        title='Kterýpak jsi pokémon?')
-        csrft = colander.SchemaNode(colander.String(),
-                widget=deform.widget.HiddenWidget(), missing='')
-    return UserSchema()
+    return UserSchema().bind(request=request)
 
 def NewUserSchema(request):
     get = request.POST.get
@@ -83,7 +82,7 @@ def NewUserSchema(request):
             raise colander.Invalid(node, 'Uživatel s tímto jménem už existuje. Vyber si prosím jiné jméno.')
 
     locale_name = get_locale_name(request)
-    class NewUserSchema(colander.MappingSchema):
+    class NewUserSchema(view_helpers.FormSchema):
         user_name = colander.SchemaNode(colander.String(),
                 validator=validate_username,
                 title='Jméno')
@@ -94,45 +93,36 @@ def NewUserSchema(request):
                 validator=validate_password,
                 title='Heslo znovu',
                 widget=deform.widget.PasswordWidget())
-        csrft = colander.SchemaNode(colander.String(),
-                widget=deform.widget.HiddenWidget(), missing='')
 
-    return NewUserSchema()
+    return NewUserSchema().bind(request=request)
 
-class LogoutFormSchema(colander.MappingSchema):
-    csrft = colander.SchemaNode(colander.String(),
-        widget=deform.widget.HiddenWidget(), missing='')
+class LogoutFormSchema(view_helpers.FormSchema):
+    pass
 
-class LoginFormSchema(colander.MappingSchema):
+class LoginFormSchema(view_helpers.FormSchema):
     user_name = colander.SchemaNode(colander.String(),
         title='Jméno')
     password = colander.SchemaNode(colander.String(), missing='',
         title='Heslo',
         widget=deform.widget.PasswordWidget())
-    csrft = colander.SchemaNode(colander.String(),
-        widget=deform.widget.HiddenWidget())
 
 def render_mini_login_form(context):
     form = deform.Form(
-            schema=LoginFormSchema(),
+            schema=LoginFormSchema().bind(request=context.request),
             buttons=(deform.Button(title='Přihlásit'),),
             action=context.root['users', 'login'].get_url(redirect=context.url),
             formid='side_login',
         )
-    return form.render(dict(
-            csrft=context.request.csrf_token,
-        ))
+    return form.render()
 
 def render_mini_logout_form(context):
     form = deform.Form(
-            schema=LogoutFormSchema(),
+            schema=LogoutFormSchema().bind(request=context.request),
             buttons=(deform.Button(title='Odhlásit'),),
             action=context.root['users', 'logout'].get_url(redirect=context.url),
             formid='side_logout',
         )
-    return form.render(dict(
-            csrft=context.request.csrf_token,
-        ))
+    return form.render()
 
 class Users(ViewBase):
     friendly_name = 'Autoři'
@@ -154,12 +144,11 @@ class Users(ViewBase):
             form = deform.Form(schema, buttons=(
                     deform.Button(title='Založit účet'),
                 ))
-            appdata = dict(csrft=request.session.get_csrf_token())
+            appdata = dict()
             if 'submit' in request.POST:
                 controls = list(request.POST.items())
                 try:
                     appstruct = form.validate(controls)
-                    appstruct.pop('csrft')
                 except deform.ValidationFailure as e:
                     print(e, type(e), e.error)
                     pass
@@ -310,7 +299,7 @@ class UserByName(ViewBase):
             form = deform.Form(schema, buttons=(
                     deform.Button(title='Změnit účet'),
                 ))
-            appdata = dict(csrft=request.session.get_csrf_token())
+            appdata = dict()
             if user.gender: appdata['gender'] = user.gender
             if user.bio: appdata['bio'] = user.bio
             if user.date_of_birth: appdata['date_of_birth'] = user.date_of_birth
