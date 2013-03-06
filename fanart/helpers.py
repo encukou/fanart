@@ -1,4 +1,4 @@
-import StringIO
+import io
 
 class FileUploadTempStore(object):
 

@@ -1,5 +1,5 @@
 # Encoding: UTF-8
-from __future__ import unicode_literals, division, absolute_import
+
 
 import datetime
 import pytz
@@ -18,11 +18,12 @@ class FormattedDate(object):
         self.format = format
         self.utc_date = date
         self.local_date = pytz.utc.localize(date).astimezone(local_timezone)
-        print self.utc_date, self.local_date
+        print(self.utc_date, self.local_date)
         self.pubdate = pubdate
 
     def __unicode__(self):
         return self.local_date.strftime(formats[self.format])
+    __str__ = __unicode__
 
     def __html__(self):
         attribs = ['data-dateformat="%s"' % self.format]

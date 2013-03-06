@@ -6,7 +6,7 @@
 <fieldset>
 <input type="text" name="heading" id="heading" class="long-text">
 <textarea name="content" class="markdown-textarea"></textarea>
-<input type="hidden" name="csrft" value="${request.session.get_csrf_token()}"></button>
+<input type="hidden" name="csrft" value="${request.csrf_token}"></button>
 </fieldset>
 <fieldset>
 <button type="submit" name="submit" value="submit">Přidat</button>

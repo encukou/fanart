@@ -10,12 +10,13 @@ requires = [
     'pyramid',
     'pyramid-tm',
     'pyramid-debugtoolbar',
+    'waitress',
     'pyramid-beaker',
     'sqlalchemy',
     'clevercss>=0.2.2.dev',
     'mako',
     'deform',
-    'py-bcrypt',
+    'py3k-bcrypt',
     'unidecode',
     'markdown',
     'pytz',
@@ -50,6 +51,5 @@ setup(name='fanart',
       [paste.app_factory]
       main = fanart:main
       """,
-      paster_plugins=['pyramid'],
       )
 

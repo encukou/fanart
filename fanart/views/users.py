@@ -1,5 +1,5 @@
 # Encoding: UTF-8
-from __future__ import unicode_literals, division
+
 
 from pyramid import httpexceptions
 from pyramid import traversal
@@ -120,7 +120,7 @@ def render_mini_login_form(context):
             formid='side_login',
         )
     return form.render(dict(
-            csrft=context.request.session.get_csrf_token(),
+            csrft=context.request.csrf_token,
         ))
 
 def render_mini_logout_form(context):
@@ -131,7 +131,7 @@ def render_mini_logout_form(context):
             formid='side_logout',
         )
     return form.render(dict(
-            csrft=context.request.session.get_csrf_token(),
+            csrft=context.request.csrf_token,
         ))
 
 class Users(ViewBase):
@@ -156,12 +156,12 @@ class Users(ViewBase):
                 ))
             appdata = dict(csrft=request.session.get_csrf_token())
             if 'submit' in request.POST:
-                controls = request.POST.items()
+                controls = list(request.POST.items())
                 try:
                     appstruct = form.validate(controls)
                     appstruct.pop('csrft')
-                except deform.ValidationFailure, e:
-                    print e, type(e), e.error
+                except deform.ValidationFailure as e:
+                    print(e, type(e), e.error)
                     pass
                 else:
                     if appstruct.pop('password2', None) != appstruct.get('password'):
@@ -334,16 +334,16 @@ class UserByName(ViewBase):
                     appdata['contacts'].append(contact.type + ': ' + contact.value)
             appdata['contacts'].append('')
             if 'submit' in request.POST:
-                controls = request.POST.items()
+                controls = list(request.POST.items())
                 try:
                     appdata = form.validate(controls)
-                except deform.ValidationFailure, e:
-                    print e, type(e), e.error
+                except deform.ValidationFailure as e:
+                    print(e, type(e), e.error)
                     pass
                 else:
                     db = request.db
                     db.rollback()
-                    print appdata
+                    print(appdata)
                     user.gender = appdata['gender']
                     user.bio = appdata['bio']
                     user.email = appdata['email']
@@ -351,14 +351,14 @@ class UserByName(ViewBase):
                     user.show_email = 'email' in appdata['field_visibility']
                     user.show_age = 'age' in appdata['field_visibility']
                     user.show_birthday = 'birthday' in appdata['field_visibility']
-                    print user.show_email, user.show_age, user.show_birthday
+                    print(user.show_email, user.show_age, user.show_birthday)
 
                     user.contacts[:] = []
                     added_contacts = set()
                     def add_contact(type_, value):
                         if type_.lower() in added_contacts:
                             return
-                        print 'Adding', type_, value
+                        print('Adding', type_, value)
                         added_contacts.add(type_.lower())
                         contact = models.UserContact(
                                 user_id = user.id,

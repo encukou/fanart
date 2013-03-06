@@ -122,6 +122,6 @@ def initialize_sql(engine):
     try:
         populate()
     except IntegrityError as e:
-        print e
+        print(e)
         DBSession.rollback()
     return DBSession

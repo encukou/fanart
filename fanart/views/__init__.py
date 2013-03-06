@@ -1,5 +1,5 @@
 # Encoding: UTF-8
-from __future__ import unicode_literals, division
+
 
 import os
 
@@ -7,16 +7,15 @@ from pyramid.renderers import render
 from pyramid.response import Response
 from pyramid.threadlocal import get_current_request
 from pyramid import httpexceptions
-
-import pkg_resources
 import clevercss
+import pkg_resources
 
 from fanart.views.base import ViewBase, instanceclass
 from fanart.views import users, news, api
 from fanart.models import NewsItem
 
 def view_root(context, request):
-    print request.application_url, request.path_info, context.url
+    print(request.application_url, request.path_info, context.url)
     path_info = request.path_info
     if path_info == '/':
         path_info = ''
@@ -51,7 +50,7 @@ class Site(ViewBase):
         def render(self, request):
             # XXX: Cache me
             filename = pkg_resources.resource_filename('fanart',
-                    'templates/style/style.ccss')
+                   'templates/style/style.ccss')
             css = clevercss.convert(open(filename).read(), minified=True,
                 fname=filename)
             response = Response(css)

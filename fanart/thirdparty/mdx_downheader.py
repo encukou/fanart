@@ -31,7 +31,7 @@ def makeExtension(configs=None) :
     
 class DownHeaderExtension(markdown.Extension):
     def extendMarkdown(self, md, md_globals):
-        if 'downheader' in md.treeprocessors.keys():
+        if 'downheader' in list(md.treeprocessors.keys()):
             md.treeprocessors['downheader'].offset += 1
         else:
             md.treeprocessors.add('downheader', DownHeaderProcessor(), '_end')

@@ -4,7 +4,7 @@ class Controller(object):
         self._request = request
 
     def __getitem__(self, name):
-        if isinstance(name, basestring):
+        if isinstance(name, str):
             try:
                 child = getattr(self, name)
             except AttributeError:

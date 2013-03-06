@@ -1,4 +1,4 @@
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from pyramid.renderers import render
 from pyramid.traversal import find_interface, resource_path

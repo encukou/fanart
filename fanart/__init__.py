@@ -1,5 +1,5 @@
 # Encoding: UTF-8
-from __future__ import unicode_literals, division
+
 
 import logging
 
@@ -21,7 +21,7 @@ from fanart import users
 
 def check_csrf(request):
     """for any request that has a POST, make sure the CSRF is valid"""
-    token = request.session.get_csrf_token()
+    token = request.csrf_token
     if request.POST.pop('csrft', None) == token:
         logging.debug("CSRF in POST matches session token")
         return True
@@ -49,17 +49,21 @@ def main(global_config, **settings):
     engine = engine_from_config(settings, 'sqlalchemy.')
     sqla_session = initialize_sql(engine)
 
-    class SQLARequest(Request):
+    class FARequest(Request):
         db = sqla_session
 
         @reify
         def user(self):
             return users.get_user(self)
 
+        @reify
+        def csrf_token(self):
+            return self.session.get_csrf_token().decode('ascii')
+
     session_factory = pyramid_beaker.session_factory_from_settings(settings)
     config = Configurator(settings=settings,
             root_factory=Site,
-            request_factory=SQLARequest,
+            request_factory=FARequest,
             session_factory=session_factory,
         )
     deform.Form.set_default_renderer(deform_renderer)

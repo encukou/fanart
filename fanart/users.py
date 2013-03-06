@@ -1,5 +1,5 @@
 # Encoding: UTF-8
-from __future__ import unicode_literals, division
+
 
 from fanart import models
 

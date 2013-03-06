@@ -1,5 +1,5 @@
 # Encoding: UTF-8
-from __future__ import unicode_literals, division, absolute_import
+
 
 import re
 
@@ -7,8 +7,8 @@ import markdown
 from markdown.inlinepatterns import (Pattern, DoubleTagPattern,
         SimpleTagPattern, HtmlPattern)
 from markdown.blockprocessors import BlockProcessor
-from markdown.extensions import headerid, fenced_code, def_list, tables, abbr
-from fanart.thirdparty import nl2br, urlize, mdx_downheader, wikilinks
+from markdown.extensions import headerid, fenced_code, def_list, tables, abbr, nl2br
+from fanart.thirdparty import urlize, mdx_downheader, wikilinks
 
 from pyramid.response import Response
 from pyramid import httpexceptions
@@ -18,7 +18,7 @@ def build_url(label, base, end):
     return None
 
 def make_extension(module, **kwargs):
-    return module.makeExtension(kwargs.items())
+    return module.makeExtension(list(kwargs.items()))
 
 engine = markdown.Markdown(safe_mode='escape', extensions=[
         # Convert \n to a line break (as most web-form-based Markdown flavors do)
@@ -41,7 +41,7 @@ engine = markdown.Markdown(safe_mode='escape', extensions=[
         mdx_downheader.makeExtension(),
         mdx_downheader.makeExtension(),
         # And lastly, Fanart's own flavor of WikiLinks.
-        wikilinks.makeExtension(dict(build_url=build_url).items()),
+        wikilinks.makeExtension(list(dict(build_url=build_url).items())),
     ])
 
 # Now, since `*hug*` or `*sigh*` just look **bad** in italics and without the
@@ -56,8 +56,9 @@ engine.inlinePatterns["emphasis"] = SimpleTagPattern(
 engine.inlinePatterns["emphasis2"] = SimpleTagPattern(
         r'(_)(.+?)\2', 'em')
 
-# Allow the <b>, <u> and <i> tags – legay syntax users are used to
-html_index = engine.inlinePatterns.index('html')
+# Allow the <b>, <u> and <i> tags – legacy syntax users are used to
+print(engine.inlinePatterns)
+html_index = engine.inlinePatterns.index('link')
 for tag in 'bui':
     engine.inlinePatterns.insert(html_index, 'html_' + tag, SimpleTagPattern(
             r'(<{0}>)(.+?)</{0}>'.format(tag), tag))
@@ -71,14 +72,14 @@ class CodeBlockProcessor(BlockProcessor):
 
     def run(self, parent, blocks):
         block = blocks.pop(0)
-        print block
+        print(block)
         sig = markdown.etree.SubElement(parent, 'div')
         sig.set('class', 'signature')
         sig.text = '—' + block.lstrip('~')
 
 engine.parser.blockprocessors.add('signature', CodeBlockProcessor(engine.parser), '>code')
 
-class MarkdownResultString(unicode):
+class MarkdownResultString(str):
     def __html__(self):
         return self
 

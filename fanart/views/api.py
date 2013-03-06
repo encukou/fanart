@@ -1,9 +1,9 @@
 # Encoding: UTF-8
-from __future__ import unicode_literals, division
+
 
 import re
 
-from markdown import Markdown, inlinepatterns, load_extensions
+from markdown import Markdown, inlinepatterns
 from markdown.extensions import wikilinks
 
 from pyramid.response import Response
