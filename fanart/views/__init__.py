@@ -46,6 +46,21 @@ def view_403(context, request):
 class Class403(ViewBase):
     friendly_name = '403 Nepovolený přístup'
 
+class URLExpression(clevercss.expressions.Expr):
+    lineno = 0
+    def __init__(self, prefix, func):
+        self.prefix = prefix
+        self.func = func
+
+    def static(self, context, url):
+        return clevercss.expressions.String(
+            'url({})'.format(
+            self.func('{}/{}'.format(self.prefix, url.to_string(context)))))
+
+    methods = {
+        'static': static,
+    }
+
 class Site(ViewBase):
     __name__ = __parent__ = None
     friendly_name = 'Fanart'
@@ -65,8 +80,11 @@ class Site(ViewBase):
             # XXX: Cache me
             filename = pkg_resources.resource_filename('fanart',
                    'templates/style/style.ccss')
+            css_context = dict(
+                url=URLExpression('fanart:static', request.static_url),
+            )
             css = clevercss.convert(open(filename).read(), minified=False,
-                fname=filename)
+                fname=filename, context=css_context)
             response = Response(css)
             response.content_type = 'text/css'
             #response.cache_expires(3600 * 24)

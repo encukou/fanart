@@ -3,8 +3,10 @@ body.fanart:
     overflow-y: scroll
 
     #links, #usernav, #sitenav:
-        color: $dark_foreground
+        /* cream_dust: Made by Thomas Myrman (http://thomasmyrman.com/); colorized by ECK */
+        background-image: $url.static('background/cream_dust-slightly_light.png')
         background-color: $slightly_light_background
+        color: $dark_foreground
 
         details, section:
             &+details:

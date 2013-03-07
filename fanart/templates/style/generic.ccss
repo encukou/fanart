@@ -1,4 +1,7 @@
+
 body:
+    /* paper_fibers: Made by Heliodor Jalba (http://about.me/heliodor); colorized by ECK */
+    background-image: $url.static('background/paper_fibers-mid.png')
     background-color: $mid_background
     color: $text_on_mid
     margin: 0

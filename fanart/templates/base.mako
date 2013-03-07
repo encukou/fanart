@@ -26,10 +26,12 @@
     </header>
     <section id="content">
         <nav class="hierarchy">
-            <a href="http://pikachu.cz">Pikachu.cz</a>
             % for x in reversed(list(this.lineage)):
                 % if x.friendly_name:
-                    » <a href="${x.url}">${x.friendly_name}</a>
+                    % if not loop.first:
+                        »
+                    % endif
+                    <a href="${x.url}">${x.friendly_name}</a>
                 % endif
             % endfor
         </nav>
