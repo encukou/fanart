@@ -15,7 +15,7 @@ def import_news(session):
         session.add(NewsItem(**item))
     session.commit()
 
-    # XXX: WikiLinks - [[soutěž:1|tady]], [[Sheer Cold]]
+    # XXX: WikiLinks - [[soutěž:1|tady]], [[Sheer Cold]], [[ceny]]
     # XXX: Localipersonalization: {{a}}
     # XXX: Users: [[@Teysa]]
     # XXX: Site links: [blabla](pravidla)
