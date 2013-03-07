@@ -104,6 +104,42 @@ class ChatMessage(Base):
     sender_id = Column(Integer, ForeignKey('users.id'), nullable=True)
     recipient_id = Column(Integer, ForeignKey('users.id'), nullable=True)
 
+class Artwork(Base):
+    __tablename__ = 'artworks'
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    created_at = Column(DateTime, index=True, nullable=False)
+    name = Column(Unicode, nullable=False)
+    description = Column(Unicode, nullable=False)
+    identifier = Column(Unicode, nullable=False, unique=True)
+    uploader_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    approved = Column(Boolean, nullable=False, default=False)
+    deleted = Column(Boolean, nullable=False, default=False)
+    rejected = Column(Boolean, nullable=False, default=False)
+
+class ArtworkVersion(Base):
+    __tablename__ = 'artwork_versions'
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    uploaded_at = Column(DateTime, index=True, nullable=False)
+    artwork_id = Column(Integer, ForeignKey('artworks.id'), nullable=False)
+    active = Column(Boolean, nullable=False, default=False)
+
+class MediumSize(Base):
+    __tablename__ = 'media_sizes'
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    identifier = Column(Unicode, index=True, nullable=False)
+
+    def __init__(self, identifier):
+        super().__init__()
+        self.identifier = identifier
+
+class Medium(Base):
+    __tablename__ = 'media'
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    artwork_version_id = Column(Integer, ForeignKey('artwork_versions.id'), nullable=False)
+    size_id = Column(Integer, ForeignKey('media_sizes.id'), nullable=False)
+    storage_type = Column(Unicode, nullable=True)
+    storage_location = Column(Unicode, nullable=False)
+
 UserContact.user = relationship(User,
     backref=backref('contacts', cascade="all, delete-orphan"))
 
@@ -125,6 +161,10 @@ def populate():
     if session.query(NewsItem).count() == 0:
         from fanart.models.import_old import import_news
         import_news(session)
+
+    session.add(MediumSize('full'))
+    session.add(MediumSize('normal'))
+    session.add(MediumSize('thumb'))
 
     session.commit()
 
