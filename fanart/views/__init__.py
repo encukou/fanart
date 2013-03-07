@@ -11,7 +11,7 @@ import clevercss
 import pkg_resources
 
 from fanart.views.base import ViewBase, instanceclass
-from fanart.views import users, news, api, shoutbox, helpers
+from fanart.views import users, news, api, shoutbox, art, helpers
 from fanart.models import NewsItem
 
 def view_root(context, request):
@@ -83,3 +83,4 @@ class Site(ViewBase):
     child_news = instanceclass(news.News)
     child_api = instanceclass(api.Api)
     child_shoutbox = instanceclass(shoutbox.Shoutbox)
+    child_art = instanceclass(art.Art)
