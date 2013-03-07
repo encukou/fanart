@@ -11,7 +11,7 @@ import clevercss
 import pkg_resources
 
 from fanart.views.base import ViewBase, instanceclass
-from fanart.views import users, news, api
+from fanart.views import users, news, api, shoutbox, helpers
 from fanart.models import NewsItem
 
 def view_root(context, request):
@@ -26,11 +26,25 @@ def view_root(context, request):
 def view_403(context, request):
     if not hasattr(request, 'root'):
         request.root = Site(request)
+    view = request.root
+    for path_part in request.path_info.strip('/').split('/'):
+        try:
+            view = view[path_part]
+        except Exception:
+            break
+    view = Class403(view, '403')
     response = Response(render('errors/403-forbidden.mako',
-            dict(request=request, this=request.root, detail=context.detail),
+            dict(
+                request=request,
+                this=view,
+                detail=context.detail,
+                h=helpers),
             request))
     response.status_int = 403
     return response
+
+class Class403(ViewBase):
+    friendly_name = '403 Nepovolený přístup'
 
 class Site(ViewBase):
     __name__ = __parent__ = None
@@ -51,7 +65,7 @@ class Site(ViewBase):
             # XXX: Cache me
             filename = pkg_resources.resource_filename('fanart',
                    'templates/style/style.ccss')
-            css = clevercss.convert(open(filename).read(), minified=True,
+            css = clevercss.convert(open(filename).read(), minified=False,
                 fname=filename)
             response = Response(css)
             response.content_type = 'text/css'
@@ -68,3 +82,4 @@ class Site(ViewBase):
     child_users = instanceclass(users.Users)
     child_news = instanceclass(news.News)
     child_api = instanceclass(api.Api)
+    child_shoutbox = instanceclass(shoutbox.Shoutbox)

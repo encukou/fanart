@@ -4,7 +4,7 @@
 
 <form action="${this.url}" method="POST" class="simple" enctype="multipart/form-data" accept-charset="utf-8">
 <fieldset>
-<input type="text" name="heading" id="heading" class="long-text" value="${request.POST.get('heading', '')}">
+<input type="text" name="heading" class="long-text" value="${request.POST.get('heading', '')}">
 <textarea name="content" class="markdown-textarea">${request.POST.get('content', '')}</textarea>
 <input type="hidden" name="csrft" value="${request.csrf_token}"></button>
 </fieldset>

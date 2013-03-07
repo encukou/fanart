@@ -49,3 +49,41 @@ serif = 'Gentium Book Basic', serif
         margin-left: 3em
         margin-bottom: 0.5ex
         color: $dark_foreground
+
+#usernav #shoutbox:
+    section:
+        text-align: left
+        padding-left: 0.1em
+        padding-right: 0.1em
+        padding-top: 0.25em
+        margin: 0.5em 0.5em 0
+        border-top: 1px solid $dark_background
+
+        summary+&:
+            border-top-style: none
+
+        .date-header:
+            font-family: $sans
+            font-size: 80%
+
+        h3:
+            margin-bottom: 0.5em
+
+            &.date:
+                text-align: right
+
+            .head-text:after:
+                content: `":"`
+
+        .date-header time:
+            float: right
+            margin-left: 2em
+            margin-bottom: 0.5ex
+            color: $dark_foreground
+
+    footer:
+        border-top: 1px solid $dark_background
+        padding-top: 0.25em
+        margin-top: 2ex
+        font-size: 80%
+        font-family: $sans

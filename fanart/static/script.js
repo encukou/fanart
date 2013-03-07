@@ -106,7 +106,10 @@ $(function() {
 
 /* Fuzzy dates */
 $(function() {
-    $.timeago.inWords = function(distanceMillis) {
+    $.timeago.inWords = function(distanceMillis, element, orig_date) {
+        if (typeof orig_date === 'undefined') {
+            orig_date = new Date((new Date()).getTime() - distanceMillis);
+        }
         var $l = this.settings.strings;
         var prefix = $l.prefixAgo;
         var suffix = $l.suffixAgo;
@@ -124,6 +127,36 @@ $(function() {
         var weeks = weeks / 24;
         var months = days / 30.5;
         var years = days / 365;
+
+        if (element && element.attr('data-dateformat') == 'compact') {
+            function pad2(n) {
+                var z = '0';
+                var n = n + '';
+                var width = 2;
+                return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+            }
+            if (days < 2) {
+                var today = new Date();
+                if (orig_date.getDate() == today.getDate()) {
+                    return pad2(orig_date.getHours()) + ':' + pad2(orig_date.getMinutes());
+                }
+                var yesterday = today;
+                yesterday.setDate(yesterday.getDate() - 1);
+                if (orig_date.getDate() == yesterday.getDate()) {
+                    return "včera";
+                }
+                var tomorrow = today;
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                if (orig_date.getDate() == tomorrow.getDate()) {
+                    return "zítra";
+                }
+            }
+            var month_day = pad2(orig_date.getDate()) + '. ' + pad2(orig_date.getMonth())
+            if (orig_date.getYear() == today.getYear()) {
+                return month_day;
+            }
+            return month_day + '. ' + orig_date.getYear();
+        }
 
         function substitute(stringOrFunction, number) {
             var string = $.isFunction(stringOrFunction) ? stringOrFunction(number, distanceMillis) : stringOrFunction;
@@ -143,8 +176,6 @@ $(function() {
             if (value < 5) return future_2.replace(/%d/i, value);
             return future_5.replace(/%d/i, value);
         }
-
-        var orig_date = new Date((new Date()).getTime() - distanceMillis);
 
         if (seconds < 45) return simple("před chvilkou", "za chvilku");
         if (seconds < 90) return simple("před minutou", "za minutu");

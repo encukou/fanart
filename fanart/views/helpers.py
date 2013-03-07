@@ -13,6 +13,7 @@ local_timezone = pytz.timezone('Europe/Prague')
 
 formats = dict(
         date='%d. %m. %Y %H:%M',
+        compact='%H:%M',
     )
 
 class FormattedDate(object):

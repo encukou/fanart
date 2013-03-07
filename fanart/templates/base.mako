@@ -43,9 +43,7 @@
             <details open>
                 <summary>K přidání</summary>
             </details>
-            <details open>
-                <summary>Shoutbox</summary>
-            </details>
+            <%include file="widgets/shoutbox.mako" />
             <details>
                 <summary>Odmítnuté</summary>
             </details>

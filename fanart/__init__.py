@@ -6,7 +6,7 @@ import logging
 from pyramid.config import Configurator
 from pyramid.request import Request
 from pyramid.events import ContextFound, NewRequest
-from pyramid.httpexceptions import HTTPForbidden
+from pyramid.httpexceptions import HTTPForbidden, HTTPSeeOther
 from pyramid.decorator import reify
 import pyramid_beaker
 from sqlalchemy import engine_from_config

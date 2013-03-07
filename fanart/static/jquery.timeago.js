@@ -116,7 +116,7 @@
   function refresh() {
     var data = prepareData(this);
     if (!isNaN(data.datetime)) {
-      $(this).text(inWords(data.datetime));
+      $(this).text(inWords(data.datetime, this));
     }
     return this;
   }
@@ -133,8 +133,8 @@
     return element.data("timeago");
   }
 
-  function inWords(date) {
-    return $t.inWords(distance(date));
+  function inWords(date, element) {
+    return $t.inWords(distance(date), $(element), date);
   }
 
   function distance(date) {

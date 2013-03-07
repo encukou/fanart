@@ -96,11 +96,24 @@ class NewsItem(Base):
     source = Column(Unicode, nullable=False)
     reporter_id = Column(Integer, ForeignKey('users.id'), nullable=True)
 
+class ChatMessage(Base):
+    __tablename__ = 'chat_messages'
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    published = Column(DateTime, index=True, nullable=False)
+    source = Column(Unicode, nullable=False)
+    sender_id = Column(Integer, ForeignKey('users.id'), nullable=True)
+    recipient_id = Column(Integer, ForeignKey('users.id'), nullable=True)
+
 UserContact.user = relationship(User,
     backref=backref('contacts', cascade="all, delete-orphan"))
 
 NewsItem.reporter = relationship(User,
         primaryjoin=NewsItem.reporter_id == User.id)
+
+ChatMessage.sender = relationship(User,
+        primaryjoin=ChatMessage.sender_id == User.id)
+ChatMessage.recipient = relationship(User,
+        primaryjoin=ChatMessage.recipient_id == User.id)
 
 def populate():
     session = DBSession()
