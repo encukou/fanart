@@ -22,7 +22,7 @@ from fanart import users
 def check_csrf(request):
     """for any request that has a POST, make sure the CSRF is valid"""
     token = request.csrf_token
-    if request.POST.pop('csrft', None) == token:
+    if request.POST.get('csrft', None) == token:
         logging.debug("CSRF in POST matches session token")
         return True
     else:

@@ -24,9 +24,6 @@ class Shoutbox(ViewBase):
     class child_post(ViewBase):
         friendly_name = 'Napsat zprávu do Shoutboxu'
 
-        def render_form(self):
-            return self.render_response('shoutbox/new.mako', self.request)
-
         def render(self, request):
             if not request.user.logged_in:
                 raise httpexceptions.HTTPForbidden("Nejsi přihlášen/a.")

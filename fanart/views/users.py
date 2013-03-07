@@ -377,7 +377,7 @@ class UserByName(ViewBase):
                                     add_contact(type_, '?')
 
                     db.commit()
-                    return httpexceptions.HTTPSeeOther(self.url)
+                    return httpexceptions.HTTPSeeOther(self.parent.url)
             return self.render_response('users/edit.mako', request,
                     user=request.user,
                     form=form.render(appdata),
