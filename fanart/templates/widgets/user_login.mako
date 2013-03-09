@@ -23,7 +23,7 @@
             <a href="${request.root['me', 'edit'].url}">Tvůj účet</a>
         </div>
         <div class="links">
-            <a href="${request.root['art', 'upload'].url}">Přidat obrázek</a>
+            <a href="${request.root['art', 'manage', 'upload'].url}">Přidat obrázek</a>
         </div>
     % endif
 </details>

@@ -1,4 +1,4 @@
-<%def name="title()">${this.friendly_name}</%def>
+<%def name="title()">${getattr(this, 'page_title', this.friendly_name)}</%def>
 <%def name="title_in_head()">${self.title() + ' - '}</%def>
 <%def name="title_in_page()">${self.title()}</%def>
 

@@ -37,18 +37,20 @@ class ViewBase(object):
                 return self[item[0]][item[1:]]
             else:
                 return self
-        item, slash, rest = item.partition('/')
-        if slash:
-            return self[item][tuple(rest.split('/'))]
-        try:
-            child = getattr(self, 'child_' + item)
-        except AttributeError:
+        if isinstance(item, str):
+            item, slash, rest = item.partition('/')
+            if slash:
+                return self[item][tuple(rest.split('/'))]
             try:
-                return self.get(item)
-            except LookupError:
-                raise KeyError(item)
-        else:
-            return child(item)
+                child = getattr(self, 'child_' + item)
+            except AttributeError:
+                pass
+            else:
+                return child(item)
+        try:
+            return self.get(item)
+        except LookupError:
+            raise KeyError(item)
 
     def __resource_url__(self, request, info):
         return request.application_url + info['virtual_path'].rstrip('/')

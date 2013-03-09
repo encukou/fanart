@@ -51,6 +51,7 @@ def main(global_config, **settings):
 
     class FARequest(Request):
         db = sqla_session
+        fanart_settings = settings
 
         @reify
         def user(self):

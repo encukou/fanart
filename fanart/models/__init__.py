@@ -10,9 +10,10 @@ from sqlalchemy.orm import (scoped_session, reconstructor, sessionmaker,
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import functions
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from sqlalchemy import Column, ForeignKey
-from sqlalchemy import Integer, Unicode, DateTime, Boolean
+from sqlalchemy import Integer, Unicode, DateTime, Boolean, BINARY
 
 DBSession = scoped_session(sessionmaker())
 Base = declarative_base()
@@ -109,36 +110,37 @@ class Artwork(Base):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     created_at = Column(DateTime, index=True, nullable=False)
     name = Column(Unicode, nullable=False)
-    description = Column(Unicode, nullable=False)
-    identifier = Column(Unicode, nullable=False, unique=True)
-    uploader_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    identifier = Column(Unicode, nullable=True, unique=True)
     approved = Column(Boolean, nullable=False, default=False)
-    deleted = Column(Boolean, nullable=False, default=False)
+    hidden = Column(Boolean, nullable=False, default=False)
     rejected = Column(Boolean, nullable=False, default=False)
 
 class ArtworkVersion(Base):
     __tablename__ = 'artwork_versions'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    uploaded_at = Column(DateTime, index=True, nullable=False)
     artwork_id = Column(Integer, ForeignKey('artworks.id'), nullable=False)
-    active = Column(Boolean, nullable=False, default=False)
+    uploaded_at = Column(DateTime, index=True, nullable=False)
+    uploader_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
-class MediumSize(Base):
-    __tablename__ = 'media_sizes'
+class Artifact(Base):
+    __tablename__ = 'artifacts'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    identifier = Column(Unicode, index=True, nullable=False)
-
-    def __init__(self, identifier):
-        super().__init__()
-        self.identifier = identifier
-
-class Medium(Base):
-    __tablename__ = 'media'
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    artwork_version_id = Column(Integer, ForeignKey('artwork_versions.id'), nullable=False)
-    size_id = Column(Integer, ForeignKey('media_sizes.id'), nullable=False)
     storage_type = Column(Unicode, nullable=True)
     storage_location = Column(Unicode, nullable=False)
+    hash = Column(BINARY(16), nullable=True)
+
+class ArtworkArtifact(Base):
+    __tablename__ = 'artwork_artifacts'
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    type = Column(Unicode, nullable=False)
+    artwork_version_id = Column(Integer, ForeignKey('artwork_versions.id'), nullable=False)
+    artifact_id = Column(Integer, ForeignKey('artifacts.id'), nullable=False)
+
+class ArtworkAuthor(Base):
+    __tablename__ = 'artwork_authors'
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    artwork_id = Column(Integer, ForeignKey('artworks.id'), nullable=False)
+    author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
 UserContact.user = relationship(User,
     backref=backref('contacts', cascade="all, delete-orphan"))
@@ -151,6 +153,31 @@ ChatMessage.sender = relationship(User,
 ChatMessage.recipient = relationship(User,
         primaryjoin=ChatMessage.recipient_id == User.id)
 
+Artwork.authors = association_proxy('artwork_authors', 'author')
+Artwork.versions = association_proxy('artwork_versions', 'artwork_version')
+
+ArtworkVersion.uploader = relationship(User,
+        primaryjoin=ArtworkVersion.uploader_id == User.id,
+        backref='artwork_versions')
+ArtworkVersion.artwork = relationship(Artwork,
+        primaryjoin=ArtworkVersion.artwork_id == Artwork.id,
+        backref='artwork_versions')
+ArtworkVersion.artifacts = association_proxy('artwork_artifacts', 'artifact')
+
+ArtworkArtifact.artwork_version = relationship(ArtworkVersion,
+        primaryjoin=ArtworkArtifact.artwork_version_id == ArtworkVersion.id,
+        backref='artwork_artifacts')
+ArtworkArtifact.artifact = relationship(Artifact,
+        primaryjoin=ArtworkArtifact.artifact_id == Artifact.id,
+        backref='artwork_artifacts')
+
+ArtworkAuthor.author = relationship(User,
+        primaryjoin=ArtworkAuthor.author_id == User.id,
+        backref='artwork_authors')
+ArtworkAuthor.artwork = relationship(Artwork,
+        primaryjoin=ArtworkAuthor.artwork_id == Artwork.id,
+        backref='artwork_authors')
+
 def populate():
     session = DBSession()
     session.add(User(id=3, name='Test', normalized_name='test',
@@ -161,10 +188,6 @@ def populate():
     if session.query(NewsItem).count() == 0:
         from fanart.models.import_old import import_news
         import_news(session)
-
-    session.add(MediumSize('full'))
-    session.add(MediumSize('normal'))
-    session.add(MediumSize('thumb'))
 
     session.commit()
 
