@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 import hashlib
 import uuid
+import itertools
 
 from pyramid import httpexceptions
 from pyramid.response import Response
@@ -17,6 +18,7 @@ from fanart.models import (
 from fanart.views.base import ViewBase, instanceclass
 from fanart.views import helpers as view_helpers
 from fanart.models import NewsItem
+from fanart.helpers import make_identifier
 from fanart import markdown
 
 
@@ -90,6 +92,7 @@ class ArtManager(ViewBase):
                             artwork=artwork,
                             uploaded_at=datetime.utcnow(),
                             uploader=request.user,
+                            current=True,
                             )
                         request.db.add(artwork_version)
                         request.db.flush()
@@ -159,10 +162,10 @@ class PieceManager(ViewBase):
         print(self.url)
 
     def render(self, request):
-        if not self.request.user.logged_in:
+        if not request.user.logged_in:
             raise httpexceptions.HTTPForbidden("Nejsi přihlášen/a.")
         artwork = self.artwork
-        if self.request.user not in artwork.authors:
+        if request.user not in artwork.authors:
             raise httpexceptions.HTTPForbidden("Sem můžou jen autoři obrázku.")
         schema = PieceSchema(request)
 
@@ -173,6 +176,14 @@ class PieceManager(ViewBase):
                 Obrázek je nahraný, ale ještě není v Galerii.
                 Zkontroluj, zda je všechno správně, a klikni na Přidat.
                 ''')
+        elif artwork.rejected:
+            messages.append(
+                '''
+                Obrázek byl odmítnut. Do této Galerie se nehodí.
+                Pokud si myslíš, že došlo k omylu, kontaktuj administrátory
+                    stránky.
+                ''')
+                # XXX: Link to rules!
         else:
             query = request.db.query(ArtworkArtifact)
             query = query.join(ArtworkArtifact.artwork_version)
@@ -182,25 +193,19 @@ class PieceManager(ViewBase):
                 if not artwork.hidden:
                     messages.append(
                         '''
-                        K obrázku se připravují náhledy. Chvíli strpení...
+                        Před přidáním se k obrázku musí připravit zmenšená
+                            verze.
+                        Prosím o chvíli strpení...
                         ''')
-        if not messages and not artwork.approved and not artwork.hidden:
-            messages.append(
-                '''
-                Obrázek ještě nebyl přijat.
-                Jako prevenci proti spamu a neslušným vtípkům se na přidané
-                    obrázky nejdřív dívají moderátoři, jestli se do Galerie
-                    hodí.
-                Prosím, chvíli počkej, než se k obrázku někdo dostane.
-                ''')
-        if artwork.rejected:
-            messages.append(
-                '''
-                Obrázek byl odmítnut. Do této Galerie se nehodí.
-                Pokud si myslíš, že došlo k omylu, kontaktuj administrátory
-                    stránky.
-                ''')
-                # XXX: Link to rules!
+            if not artwork.approved and not artwork.hidden:
+                messages.append(
+                    '''
+                    Obrázek ještě nebyl přijat.
+                    Jako prevenci proti spamu a neslušným vtípkům se na přidané
+                        obrázky nejdřív dívají moderátoři, jestli se do Galerie
+                        hodí.
+                    Prosím, chvíli počkej, než se k obrázku někdo dostane.
+                    ''')
 
         if artwork.identifier:
             button_title = 'Upravit informace'
@@ -221,6 +226,42 @@ class PieceManager(ViewBase):
                 if appstruct['image_name']:
                     artwork.name = appstruct['image_name']
                 artwork.hidden = appstruct['publish'] == 'n'
+                if not artwork.hidden and artwork.name:
+                    # Auto-create a unique identifier for the art!
+                    # For all of these, use make_identifier to keep
+                    # these within [a-z0-9-]*
+                    art_identifier = make_identifier(artwork.name)
+                    def gen_identifiers():
+                        # We don't want "-" (empty)
+                        # We also don't want things that DON'T include a "-"
+                        # (i.e. single words): those might clash with future
+                        # additions to the URL namespace
+                        # And we also don't want numbers; reserve those for
+                        # numeric IDs.
+                        if art_identifier != '-' and '-' in art_identifier:
+                            try:
+                                int(art_identifier)
+                            except ValueError:
+                                pass
+                            else:
+                                yield art_identifier
+                        # If that's taken, prepend the author's name(s)
+                        bases = [
+                            make_identifier('{}-{}'.format(
+                                a.name, art_identifier))
+                            for a in artwork.authors]
+                        for base in bases:
+                            yield base
+                        # And if that's still not enough, append a number
+                        for i in itertools.count(start=1):
+                            for base in bases:
+                                yield '{}-{}'.format(base, i)
+                    for identifier in gen_identifiers():
+                        query = request.db.query(Artwork)
+                        query = query.filter(Artwork.identifier == identifier)
+                        if not query.count():
+                            artwork.identifier = identifier
+                            break
                 request.db.commit()
             return httpexceptions.HTTPSeeOther(self.url)
         appdata = dict()
@@ -235,6 +276,7 @@ class PieceManager(ViewBase):
             'art/piece_manager.mako', request,
             form=form.render(appdata),
             messages=messages,
+            artwork=artwork,
             )
 
 

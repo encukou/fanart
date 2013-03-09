@@ -1,8 +1,4 @@
-import unicodedata
-import re
-
 import bcrypt
-from unidecode import unidecode
 
 import sqlalchemy.orm
 from sqlalchemy.orm import (scoped_session, reconstructor, sessionmaker,
@@ -14,6 +10,8 @@ from sqlalchemy.ext.associationproxy import association_proxy
 
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy import Integer, Unicode, DateTime, Boolean, BINARY
+
+from fanart.helpers import make_identifier
 
 DBSession = scoped_session(sessionmaker())
 Base = declarative_base()
@@ -53,9 +51,7 @@ class User(Base):
 
     @classmethod
     def normalize_name(cls, name):
-        name = unidecode(name).lower()
-        name = re.sub('[^a-z0-9]+', '-', name)
-        return name.strip('-') or '-'
+        return make_identifier(name)
 
     @classmethod
     def create_local(cls, session, user_name, password):
@@ -121,6 +117,7 @@ class ArtworkVersion(Base):
     artwork_id = Column(Integer, ForeignKey('artworks.id'), nullable=False)
     uploaded_at = Column(DateTime, index=True, nullable=False)
     uploader_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    current = Column(Boolean, nullable=False, default=False)
 
 class Artifact(Base):
     __tablename__ = 'artifacts'
