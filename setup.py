@@ -49,7 +49,7 @@ setup(name='fanart',
       test_suite="fanart",
       entry_points = """\
       [paste.app_factory]
-      main = fanart:main
+      main = fanart.wsgi_app:main
       """,
       )
 

@@ -12,7 +12,7 @@ from sqlalchemy.orm.exc import NoResultFound
 import colander
 import deform
 
-from fanart.models import (
+from fanart.models.tables import (
     Artwork, ArtworkVersion, Artifact, ArtworkArtifact, ArtworkAuthor)
 
 from fanart.views.base import ViewBase, instanceclass

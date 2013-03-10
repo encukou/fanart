@@ -5,7 +5,7 @@ import os
 
 import yaml
 
-from fanart.models import NewsItem
+from fanart.models.tables import NewsItem
 
 def import_news(session):
     path = os.path.join(os.path.dirname(__file__), 'old_news.yaml')

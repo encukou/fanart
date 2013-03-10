@@ -13,7 +13,7 @@ import pkg_resources
 from fanart.views.base import ViewBase, instanceclass
 from fanart.views import users, news, api, shoutbox, art, helpers
 from fanart.tasks import run_tasks
-from fanart import models
+from fanart.models import tables
 
 def view_root(context, request):
     print(request.application_url, request.path_info, context.url)
@@ -34,13 +34,9 @@ def view_403(context, request):
         except Exception:
             break
     view = Class403(view, '403')
-    response = Response(render('errors/403-forbidden.mako',
-            dict(
-                request=request,
-                this=view,
-                detail=context.detail,
-                h=helpers),
-            request))
+    response = view.render_response(
+        'errors/403-forbidden.mako', request,
+        detail=context.detail)
     response.status_int = 403
     return response
 
@@ -72,8 +68,8 @@ class Site(ViewBase):
 
     def render(self, request):
         # XXX: Better number of stories
-        news_items = request.db.query(models.NewsItem).order_by(models.NewsItem.published.desc())[:3]
-        art_items = request.db.query(models.Artwork).order_by(models.Artwork.created_at.desc())[:12]
+        news_items = request.db.query(tables.NewsItem).order_by(tables.NewsItem.published.desc())[:3]
+        art_items = request.db.query(tables.Artwork).order_by(tables.Artwork.created_at.desc())[:12]
         return self.render_response('root.mako', request, news=news_items, artworks=art_items)
 
     @instanceclass
@@ -109,9 +105,9 @@ class Site(ViewBase):
     child_task = instanceclass(run_tasks.RunTask)
 
     def wrap(self, item):
-        if isinstance(item, models.User):
+        if isinstance(item, tables.User):
             return self['users'][item]
-        elif isinstance(item, models.Artwork):
+        elif isinstance(item, tables.Artwork):
             return self['art'][item]
         else:
             raise ValueError(item)

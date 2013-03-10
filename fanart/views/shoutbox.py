@@ -4,14 +4,13 @@ from datetime import datetime
 
 from pyramid import httpexceptions
 
-from fanart.models import ChatMessage
+from fanart.models.tables import ChatMessage
+from fanart.views.base import ViewBase, instanceclass
+from fanart import markdown
 
 def shoutbox_items(request, n=10):
     return request.db.query(ChatMessage).order_by(ChatMessage.published.desc())[:n]
 
-from fanart.views.base import ViewBase, instanceclass
-from fanart.models import NewsItem
-from fanart import markdown
 
 class Shoutbox(ViewBase):
     friendly_name = 'Historie Shoutboxu'

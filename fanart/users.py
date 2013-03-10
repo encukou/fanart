@@ -1,7 +1,7 @@
 # Encoding: UTF-8
 
 
-from fanart import models
+from fanart.models import tables
 
 def get_user(request):
     try:
@@ -9,7 +9,7 @@ def get_user(request):
     except KeyError:
         pass
     else:
-        user = request.db.query(models.User).get(user_id)
+        user = request.db.query(tables.User).get(user_id)
         if user is not None:
             return user
-    return models.User(name='Host', logged_in=False)
+    return tables.User(name='Host', logged_in=False)

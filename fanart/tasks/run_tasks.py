@@ -10,7 +10,7 @@ import hashlib
 import shutil
 
 from fanart.views.base import ViewBase, instanceclass
-from fanart import models
+from fanart.models import tables
 
 IDENTIFY_BINARY = '/usr/bin/identify'
 CONVERT_BINARY = '/usr/bin/convert'
@@ -26,8 +26,8 @@ class RunTask(ViewBase):
         return response
 
 def select_task(request):
-    query = request.db.query(models.ArtworkArtifact)
-    query = query.filter(models.ArtworkArtifact.type == 'scratch')
+    query = request.db.query(tables.ArtworkArtifact)
+    query = query.filter(tables.ArtworkArtifact.type == 'scratch')
     query = query.limit(1)
     try:
         artwork_artifact = query.one()
@@ -95,7 +95,7 @@ def identify_artifact(request, artwork_artifact):
 
 
 def link_artifact(request, artifact_version, new_type):
-    new_artwork_artifact = models.ArtworkArtifact(
+    new_artwork_artifact = tables.ArtworkArtifact(
         artwork_version=artifact_version.artwork_version,
         artifact=artifact_version.artifact,
         type=new_type,
@@ -188,14 +188,14 @@ def generate_artifact(request, artwork_artifact, new_type):
             shutil.move(crushed_filename, path)
             open(crushed_filename, 'w').close()
         try:
-            new_artifact = models.Artifact(
+            new_artifact = tables.Artifact(
                 storage_type='scratch',
                 storage_location=filename,
                 hash=digest,
                 )
             request.db.add(new_artifact)
             request.db.flush()
-            new_artwork_artifact = models.ArtworkArtifact(
+            new_artwork_artifact = tables.ArtworkArtifact(
                 artwork_version=orig_artwork_version,
                 artifact=new_artifact,
                 type=new_type,

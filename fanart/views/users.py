@@ -8,8 +8,8 @@ import colander
 import deform
 
 from fanart.views.base import ViewBase, instanceclass
-from fanart.views import helpers as view_helpers
-from fanart import models, helpers
+from fanart.views import helpers
+from fanart.models import tables
 
 class StringListSchema(colander.SequenceSchema):
     tag = colander.SchemaNode(colander.String(), missing='', title='')
@@ -21,7 +21,7 @@ class MemoryTmpStore(dict):
 
 def UserSchema(request):
     temp_store = helpers.FileUploadTempStore(request)
-    class UserSchema(view_helpers.FormSchema):
+    class UserSchema(helpers.FormSchema):
         gender = colander.SchemaNode(colander.String(), missing=None,
                 title='Pohlaví',
                 validator=colander.OneOf(('male', 'female', '')),
@@ -78,11 +78,11 @@ def NewUserSchema(request):
             raise colander.Invalid(node, 'Hesla se neshodují.')
 
     def validate_username(node, value):
-        if models.User.name_exists(request.db, value):
+        if tables.User.name_exists(request.db, value):
             raise colander.Invalid(node, 'Uživatel s tímto jménem už existuje. Vyber si prosím jiné jméno.')
 
     locale_name = get_locale_name(request)
-    class NewUserSchema(view_helpers.FormSchema):
+    class NewUserSchema(helpers.FormSchema):
         user_name = colander.SchemaNode(colander.String(),
                 validator=validate_username,
                 title='Jméno')
@@ -96,10 +96,10 @@ def NewUserSchema(request):
 
     return NewUserSchema().bind(request=request)
 
-class LogoutFormSchema(view_helpers.FormSchema):
+class LogoutFormSchema(helpers.FormSchema):
     pass
 
-class LoginFormSchema(view_helpers.FormSchema):
+class LoginFormSchema(helpers.FormSchema):
     user_name = colander.SchemaNode(colander.String(),
         title='Jméno')
     password = colander.SchemaNode(colander.String(), missing='',
@@ -165,7 +165,7 @@ class Users(ViewBase):
                     db = request.db
                     db.rollback()
                     try:
-                        new_user = models.User.create_local(db,
+                        new_user = tables.User.create_local(db,
                             **appstruct)
                         db.add(new_user)
                         db.flush()
@@ -191,7 +191,7 @@ class Users(ViewBase):
         def render(self, request):
             if 'submit' in request.POST:
                 try:
-                    request.session['user_id'] = models.User.login_user_by_password(
+                    request.session['user_id'] = tables.User.login_user_by_password(
                             session=request.db,
                             user_name=request.POST['user_name'],
                             password=request.POST['password'],
@@ -236,7 +236,7 @@ class Users(ViewBase):
                 return httpexceptions.HTTPNotFound()
 
     def get(self, id):
-        if isinstance(id, models.User):
+        if isinstance(id, tables.User):
             return UserByID(self, id.id).by_name
         return UserByID(self, id)
 
@@ -247,7 +247,7 @@ class UserByID(ViewBase):
             id = int(id)
         except ValueError:
             raise IndexError(id)
-        self.user = self.request.db.query(models.User).get(id)
+        self.user = self.request.db.query(tables.User).get(id)
         if self.user is None:
             raise IndexError(id)
 
@@ -351,7 +351,7 @@ class UserByName(ViewBase):
                             return
                         print('Adding', type_, value)
                         added_contacts.add(type_.lower())
-                        contact = models.UserContact(
+                        contact = tables.UserContact(
                                 user_id = user.id,
                                 type = type_.strip(),
                                 value = value.strip(),

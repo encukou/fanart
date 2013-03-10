@@ -4,7 +4,7 @@ from pyramid import testing
 
 def _initTestingDB():
     from sqlalchemy import create_engine
-    from fanart.models import initialize_sql
+    from fanart.tables import initialize_sql
     session = initialize_sql(create_engine('sqlite://'))
     return session
 

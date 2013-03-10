@@ -7,7 +7,7 @@ from pyramid.response import Response
 from pyramid import httpexceptions
 
 from fanart.views.base import ViewBase, instanceclass
-from fanart.models import NewsItem
+from fanart.models.tables import NewsItem
 from fanart import markdown
 
 class News(ViewBase):
