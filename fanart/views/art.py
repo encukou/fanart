@@ -328,8 +328,11 @@ class Art(ViewBase):
     friendly_name = 'Obrázky'
 
     def render(self, request):
+        query = request.db.query(Artwork)
+        query = query.filter(~Artwork.rejected)
+        query = query.filter(~Artwork.hidden)
         return self.render_response(
-            'art/index.mako', request)
+            'art/index.mako', request, artworks=query.all())
 
     def get(self, item):
         try:

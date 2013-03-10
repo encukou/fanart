@@ -10,9 +10,11 @@
             % if thumb.storage_type == 'scratch':
                 <div class="row-hack">
                     <div class="thumbnail">
-                        <% # XXX: this is kinda dumb
+                        <% # XXX: this src generation is kinda dumb; make it pluggable
+                            src = request.root.url + '/scratch/' + thumb.storage_location
+                            link = wrap(artwork).link
                         %>
-                        <img src="${request.root.url + '/scratch/' + thumb.storage_location}">
+                        ${link(Markup('<img src="{}">'.format(src)))}
                     </div>
                 </div>
             % else:

@@ -165,3 +165,11 @@ serif = 'Gentium Book Basic', serif
         font-family: $sans
         font-size: 80%
         padding-right: 1em
+
+.art-list:
+    text-align: center
+
+    .art-card:
+        display: inline-table
+        margin-left: 1em
+        margin-right: 1em
