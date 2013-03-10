@@ -23,9 +23,16 @@
         </div>
     </details>
 % endfor
-    <ul class="link-line">
-        <li class="action-link"><a href="${request.root['news'].url}">Archiv novinek</a></li>
-% if request.user.logged_in:
+<ul class="link-line">
+    <li class="action-link"><a href="${request.root['news'].url}">Archiv novinek</a></li>
+    % if request.user.logged_in:
         <li class="action-link"><a href="${request.root['news']['new'].url}">Napsat novinku</a></li>
-% endif
-    </ul>
+    % endif
+</ul>
+
+<h1>Obrázky</h1>
+<div class="art-list">
+    % for artwork in artworks:
+        ${self.helpers.art_card(artwork)}
+    % endfor
+</div>

@@ -73,7 +73,8 @@ class Site(ViewBase):
     def render(self, request):
         # XXX: Better number of stories
         news_items = request.db.query(models.NewsItem).order_by(models.NewsItem.published.desc())[:3]
-        return self.render_response('root.mako', request, news=news_items)
+        art_items = request.db.query(models.Artwork).order_by(models.Artwork.created_at.desc())[:12]
+        return self.render_response('root.mako', request, news=news_items, artworks=art_items)
 
     @instanceclass
     class child_css(ViewBase):
