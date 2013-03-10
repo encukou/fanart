@@ -83,6 +83,7 @@ def identify_artifact(request, artwork_artifact):
     extra = extra.strip()
     request.db.commit()
     return dict(
+        action='identify_artifact',
         name=artwork_artifact.artwork.name,
         command_line=command_line,
         stdout=stdout,
@@ -93,7 +94,28 @@ def identify_artifact(request, artwork_artifact):
         )
 
 
+def link_artifact(request, artifact_version, new_type):
+    new_artwork_artifact = models.ArtworkArtifact(
+        artwork_version=artifact_version.artwork_version,
+        artifact=artifact_version.artifact,
+        type=new_type,
+        )
+    request.db.add(new_artwork_artifact)
+    request.db.flush()
+    identification = identify_artifact(request, new_artwork_artifact)
+    request.db.commit()
+    return dict(
+        action='link_artifact',
+        new_type=new_type,
+        artifact_size=(
+            artifact_version.artifact.width, artifact_version.artifact.height),
+        )
+
+
 def generate_artifact(request, artwork_artifact, new_type):
+    scratch_artifact = artwork_artifact.artifact
+    orig_artwork_version = artwork_artifact.artwork_version
+    assert artwork_artifact.type == 'scratch'
     path = get_scratch_path(request, artwork_artifact)
     print(artwork_artifact.artwork.id)
     comment = 'Vystaveno na poke.fanart.cz/art/{id}'.format(
@@ -104,15 +126,26 @@ def generate_artifact(request, artwork_artifact, new_type):
         '-comment', comment,
         ]
     if new_type == 'thumb':
-        command_line += [
-            '-resize', '162x100',
-            ]
+        if (artwork_artifact.artifact.width > 162 or
+                artwork_artifact.artifact.height > 100):
+            command_line += [
+                '-resize', '162x100',
+                ]
     elif new_type == 'view':
+        if (scratch_artifact.width <= 162 and
+                scratch_artifact.height <= 100):
+            return link_artifact(
+                request,
+                orig_artwork_version.artwork_artifacts['thumb'], new_type)
         command_line += [
             '-resize', '500x400',
             ]
     elif new_type == 'full':
-        pass
+        if (scratch_artifact.width <= 500 and
+                scratch_artifact.height <= 400):
+            return link_artifact(
+                request,
+                orig_artwork_version.artwork_artifacts['view'], new_type)
     else:
         raise ValueError(new_type)
     filetype = 'png'
@@ -163,7 +196,7 @@ def generate_artifact(request, artwork_artifact, new_type):
             request.db.add(new_artifact)
             request.db.flush()
             new_artwork_artifact = models.ArtworkArtifact(
-                artwork_version=artwork_artifact.artwork_version,
+                artwork_version=orig_artwork_version,
                 artifact=new_artifact,
                 type=new_type,
                 )
@@ -176,6 +209,7 @@ def generate_artifact(request, artwork_artifact, new_type):
             raise
 
     return dict(
+        action='generate_artifact',
         name=artwork_artifact.artwork.name,
         new_type=new_type,
         command_line=command_line,
@@ -195,6 +229,7 @@ def remove_scratch_artifact(request, artwork_artifact):
     request.db.delete(artwork_artifact)
     request.db.commit()
     return dict(
+        action='remove_scratch_artifact',
         name=artwork_artifact.artwork.name,
         id=artwork_artifact.id,
         )

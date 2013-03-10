@@ -278,7 +278,9 @@ class PieceManager(ViewBase):
 
 
 class ArtPage(ViewBase):
-    def __init__(self, parent, item):
+    artifact_type = 'view'
+
+    def __init__(self, parent, item, name=None):
         if isinstance(item, str):
             query = parent.request.db.query(Artwork)
             try:
@@ -292,9 +294,12 @@ class ArtPage(ViewBase):
             except NoResultFound:
                 raise LookupError(item)
         self.friendly_name = item.name
+        self.page_title = item.name
         if not item.identifier:
             raise LookupError(item)
-        super().__init__(parent, str(item.identifier))
+        if not name:
+            name = str(item.identifier)
+        super().__init__(parent, name)
         self.artwork = item
 
     def render(self, request):
@@ -302,6 +307,21 @@ class ArtPage(ViewBase):
             'art/art.mako', request,
             artwork=self.artwork,
             )
+
+    def child_fullview(self, item):
+        return FullView(self, self.artwork)
+
+
+class FullView(ArtPage):
+    fullview = True
+    artifact_type = 'full'
+
+    def __init__(self, parent, name=None):
+        super().__init__(parent, parent.artwork, name='fullview')
+        self.friendly_name = 'Celokuk'
+
+    def child_fullview(self, item):
+        raise httpexceptions.HTTPNotFound("Dál už to nejde")
 
 
 class Art(ViewBase):

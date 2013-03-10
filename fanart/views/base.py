@@ -24,6 +24,8 @@ class instanceclass(object):
             return instanceclass
 
 class ViewBase(object):
+    fullview = False
+
     def __init__(self, parent, name):
         self.__parent__ = self.parent = parent
         try:

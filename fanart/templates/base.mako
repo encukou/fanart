@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="${request.application_url + '/css/ie6'}" type="text/css" media="screen" charset="utf-8" />
   <![endif]-->
 </head>
-<body class="fanart no-js wide">
+<body class="fanart no-js wide ${'full-view' if this.fullview else ''}">
     <header>
         <div class="title" title="Česká PokéGalerie pana Smeargla ^_^"><a href="${this.root.url}">&nbsp;</a></div>
     </header>
