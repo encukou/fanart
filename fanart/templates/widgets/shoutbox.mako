@@ -15,7 +15,7 @@
     % endif
     % for item in shoutbox_items(request):
         <section class="item">
-        <h3 class="date-header">${h.format_date(item.published, format='compact')} <span class="head-text">${item.sender.name}</span></h3>
+        <h3 class="date-header">${h.format_date(item.published, format='compact')} <span class="head-text">${wrap(item.sender).link()}</span></h3>
         <div class="message markdown">${h.markdown2html(item.source)}</div>
         </section>
     % endfor
