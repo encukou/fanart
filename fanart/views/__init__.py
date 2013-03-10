@@ -110,3 +110,7 @@ class Site(ViewBase):
     def wrap(self, item):
         if isinstance(item, models.User):
             return self['users'][item]
+        elif isinstance(item, models.Artwork):
+            return self['art'][item]
+        else:
+            raise ValueError(item)

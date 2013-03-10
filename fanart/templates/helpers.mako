@@ -2,7 +2,7 @@
     <div class="art-card">
         <div class="row-hack">
             <div class="name">
-                <div>${artwork.name}</div>
+                <div>${wrap(artwork).link()}</div>
             </div>
         </div>
         <% thumb = artwork.current_version.artifacts.get('thumb') %>

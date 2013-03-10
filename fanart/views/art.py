@@ -17,7 +17,6 @@ from fanart.models import (
 
 from fanart.views.base import ViewBase, instanceclass
 from fanart.views import helpers as view_helpers
-from fanart.models import NewsItem
 from fanart.helpers import make_identifier
 from fanart import markdown
 
@@ -159,7 +158,6 @@ class PieceManager(ViewBase):
             self.friendly_name = item.name
         super().__init__(parent, str(item.id))
         self.artwork = item
-        print(self.url)
 
     def render(self, request):
         if not request.user.logged_in:
@@ -279,11 +277,44 @@ class PieceManager(ViewBase):
             )
 
 
+class ArtPage(ViewBase):
+    def __init__(self, parent, item):
+        if isinstance(item, str):
+            query = parent.request.db.query(Artwork)
+            try:
+                item = int(item)
+            except ValueError:
+                query = query.filter_by(identifier=item)
+            else:
+                query = query.filter_by(id=item)
+            try:
+                item = query.one()
+            except NoResultFound:
+                raise LookupError(item)
+        self.friendly_name = item.name
+        if not item.identifier:
+            raise LookupError(item)
+        super().__init__(parent, str(item.identifier))
+        self.artwork = item
+
+    def render(self, request):
+        return self.render_response(
+            'art/art.mako', request,
+            artwork=self.artwork,
+            )
+
+
 class Art(ViewBase):
     friendly_name = 'Obrázky'
 
     def render(self, request):
         return self.render_response(
             'art/index.mako', request)
+
+    def get(self, item):
+        try:
+            return ArtPage(self, item)
+        except LookupError:
+            return self['manage'][item]
 
     child_manage = instanceclass(ArtManager)
