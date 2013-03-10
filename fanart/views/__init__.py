@@ -13,7 +13,7 @@ import pkg_resources
 from fanart.views.base import ViewBase, instanceclass
 from fanart.views import users, news, api, shoutbox, art, helpers
 from fanart.tasks import run_tasks
-from fanart.models import NewsItem
+from fanart import models
 
 def view_root(context, request):
     print(request.application_url, request.path_info, context.url)
@@ -72,7 +72,7 @@ class Site(ViewBase):
 
     def render(self, request):
         # XXX: Better number of stories
-        news_items = request.db.query(NewsItem).order_by(NewsItem.published.desc())[:3]
+        news_items = request.db.query(models.NewsItem).order_by(models.NewsItem.published.desc())[:3]
         return self.render_response('root.mako', request, news=news_items)
 
     @instanceclass
@@ -106,3 +106,7 @@ class Site(ViewBase):
 
     # XXX: We should have a Celery runner here or something
     child_task = instanceclass(run_tasks.RunTask)
+
+    def wrap(self, item):
+        if isinstance(item, models.User):
+            return self['users'][item]

@@ -6,6 +6,7 @@ from pyramid.location import lineage
 from pyramid.response import Response
 from pyramid.encode import urlencode
 from pyramid.decorator import reify
+from markupsafe import Markup
 
 from fanart.views import helpers
 
@@ -77,4 +78,16 @@ class ViewBase(object):
     def render_response(self, template, request, **kwargs):
         kwargs.setdefault('this', self)
         kwargs.setdefault('h', helpers)
+        kwargs.setdefault('wrap', request.root.wrap)
+        kwargs.setdefault('Markup', Markup)
         return Response(render(template, kwargs, request))
+
+    def link(self, link_text=None, extra_classes=()):
+        if link_text is None:
+            link_text = self.friendly_name
+        if extra_classes:
+            classes = Markup(' class="{}"').format(' '.join(extra_classes))
+        else:
+            classes = ''
+        return Markup('<a href="{}"{}>{}</a>').format(
+                self.url, classes, link_text)

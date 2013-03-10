@@ -236,6 +236,8 @@ class Users(ViewBase):
                 return httpexceptions.HTTPNotFound()
 
     def get(self, id):
+        if isinstance(id, models.User):
+            return UserByID(self, id.id).by_name
         return UserByID(self, id)
 
 class UserByID(ViewBase):

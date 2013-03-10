@@ -40,7 +40,7 @@ def select_task(request):
                 artwork_artifact.artifact.filetype is None):
             yield lambda: identify_artifact(request, artwork_artifact)
         artwork_version = artwork_artifact.artwork_version
-        existing_types = [aa.type for aa in artwork_version.artwork_artifacts]
+        existing_types = artwork_version.artwork_artifacts.keys()
         for new_type in ['thumb', 'view', 'full']:
             if new_type not in existing_types:
                 yield lambda: generate_artifact(

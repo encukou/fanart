@@ -33,7 +33,7 @@
         % endif
         <div class="row-hack">
             <div class="authors">
-                <div>© ${', '.join(a.name for a in artwork.authors)}</div>
+                <div>© ${Markup(', ').join(wrap(a).link() for a in artwork.authors)}</div>
             </div>
         </div>
     </div>
