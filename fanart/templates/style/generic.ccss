@@ -78,3 +78,6 @@ body.no-details details:
     &[open], &.open:
         summary::before:
             content: `"▾"` !important
+
+summary:
+    display: block
