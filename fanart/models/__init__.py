@@ -4,9 +4,10 @@ import sqlalchemy.orm
 from sqlalchemy.orm import (scoped_session, reconstructor, sessionmaker,
         relationship, backref)
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.sql import functions
+from sqlalchemy.sql import functions, and_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.orm.collections import attribute_mapped_collection
 
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy import Integer, Unicode, DateTime, Boolean, BINARY
@@ -125,6 +126,9 @@ class Artifact(Base):
     storage_type = Column(Unicode, nullable=True)
     storage_location = Column(Unicode, nullable=False)
     hash = Column(BINARY(16), nullable=True)
+    width = Column(Integer, nullable=True)
+    height = Column(Integer, nullable=True)
+    filetype = Column(Unicode, nullable=True)
 
 class ArtworkArtifact(Base):
     __tablename__ = 'artwork_artifacts'
@@ -152,6 +156,11 @@ ChatMessage.recipient = relationship(User,
 
 Artwork.authors = association_proxy('artwork_authors', 'author')
 Artwork.versions = association_proxy('artwork_versions', 'artwork_version')
+Artwork.current_version = relationship(ArtworkVersion,
+        primaryjoin=and_(
+            ArtworkVersion.artwork_id == Artwork.id, ArtworkVersion.current),
+        uselist=False,
+        )
 
 ArtworkVersion.uploader = relationship(User,
         primaryjoin=ArtworkVersion.uploader_id == User.id,
@@ -163,10 +172,15 @@ ArtworkVersion.artifacts = association_proxy('artwork_artifacts', 'artifact')
 
 ArtworkArtifact.artwork_version = relationship(ArtworkVersion,
         primaryjoin=ArtworkArtifact.artwork_version_id == ArtworkVersion.id,
-        backref='artwork_artifacts')
+        backref=backref(
+            'artwork_artifacts',
+            collection_class=attribute_mapped_collection("type"),
+            )
+        )
 ArtworkArtifact.artifact = relationship(Artifact,
         primaryjoin=ArtworkArtifact.artifact_id == Artifact.id,
         backref='artwork_artifacts')
+ArtworkArtifact.artwork = association_proxy('artwork_version', 'artwork')
 
 ArtworkAuthor.author = relationship(User,
         primaryjoin=ArtworkAuthor.author_id == User.id,

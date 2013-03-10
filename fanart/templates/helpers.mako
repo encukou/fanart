@@ -5,12 +5,32 @@
                 <div>${artwork.name}</div>
             </div>
         </div>
-        <div class="row-hack">
-            <div class="thumbnail missing">
-                <div class="icon-time icon-4x"></div>
-                <div class="please-wait">Chvilku strpení...</div>
+        <% thumb = artwork.current_version.artifacts.get('thumb') %>
+        % if thumb:
+            % if thumb.storage_type == 'scratch':
+                <div class="row-hack">
+                    <div class="thumbnail">
+                        <% # XXX: this is kinda dumb
+                        %>
+                        <img src="${request.root.url + '/scratch/' + thumb.storage_location}">
+                    </div>
+                </div>
+            % else:
+            <div class="row-hack">
+                <div class="thumbnail">
+                    <div class="icon-question-sign icon-4x"></div>
+                    <div class="extra-text">Neznámý obrázek?!</div>
+                </div>
             </div>
-        </div>
+            % endif
+        % else:
+            <div class="row-hack">
+                <div class="thumbnail">
+                    <div class="icon-time icon-4x"></div>
+                    <div class="extra-text">Chvilku strpení...</div>
+                </div>
+            </div>
+        % endif
         <div class="row-hack">
             <div class="authors">
                 <div>© ${', '.join(a.name for a in artwork.authors)}</div>

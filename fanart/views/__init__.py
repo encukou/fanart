@@ -12,6 +12,7 @@ import pkg_resources
 
 from fanart.views.base import ViewBase, instanceclass
 from fanart.views import users, news, api, shoutbox, art, helpers
+from fanart.tasks import run_tasks
 from fanart.models import NewsItem
 
 def view_root(context, request):
@@ -102,3 +103,6 @@ class Site(ViewBase):
     child_api = instanceclass(api.Api)
     child_shoutbox = instanceclass(shoutbox.Shoutbox)
     child_art = instanceclass(art.Art)
+
+    # XXX: We should have a Celery runner here or something
+    child_task = instanceclass(run_tasks.RunTask)

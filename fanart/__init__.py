@@ -73,6 +73,7 @@ def main(global_config, **settings):
     config.add_translation_dirs('colander:locale/', 'deform:locale/')
     config.add_static_view('static', 'fanart:static', cache_max_age=3600)
     config.add_static_view('static-deform', 'deform:static')
+    config.add_static_view('scratch', path=settings['fanart.scratch_dir'])
     config.add_view('fanart.views.view_root', context='fanart.views.ViewBase')
     config.add_view('fanart.views:view_403', context='pyramid.httpexceptions.HTTPForbidden')
     return config.make_wsgi_app()

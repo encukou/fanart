@@ -201,9 +201,8 @@ class PieceManager(ViewBase):
                 messages.append(
                     '''
                     Obrázek ještě nebyl přijat.
-                    Jako prevenci proti spamu a neslušným vtípkům se na přidané
-                        obrázky nejdřív dívají moderátoři, jestli se do Galerie
-                        hodí.
+                    Jako prevenci proti spamu a neslušným vtípkům kontrolujeme,
+                        jestli se sem přidané obrázky hodí.
                     Prosím, chvíli počkej, než se k obrázku někdo dostane.
                     ''')
 
