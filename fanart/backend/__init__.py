@@ -1,6 +1,8 @@
 
 from pyramid.decorator import reify
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy import orm, exc
+from sqlalchemy.sql import functions
+import bcrypt
 
 from fanart.models import tables
 from fanart.helpers import make_identifier
@@ -39,18 +41,14 @@ class Users(object):
 
     def __getitem__(self, name_or_identifier):
         query = self._query
-        try:
-            name_or_identifier = int(name_or_identifier)
-        except ValueError:
-            pass
         if isinstance(name_or_identifier, int):
             query = query.filter(tables.User.id == name_or_identifier)
         else:
             ident = make_identifier(name_or_identifier)
-            query = query.filter(tables.User.identifier == ident)
+            query = query.filter(tables.User.normalized_name == ident)
         try:
             user = query.one()
-        except NoResultFound:
+        except orm.exc.NoResultFound:
             raise LookupError(name_or_identifier)
         else:
             return User(self.backend, user)
@@ -61,3 +59,44 @@ class Users(object):
     def __iter__(self):
         for user in self._query:
             yield User(self.backend, user)
+
+    def add(self, name, password):
+        db = self.backend._db
+        new_id = (db.query(functions.max(tables.User.id)).one()[0] or 0) + 1
+        try:
+            user = tables.User(
+                    id=new_id,
+                    name=name,
+                    normalized_name=make_identifier(name),
+                    password=bcrypt.hashpw(password, bcrypt.gensalt()),
+                )
+            db.add(user)
+            db.commit()
+        except exc.IntegrityError:
+            db.rollback()
+            raise ValueError('Name already exists')
+        return User(self.backend, user)
+
+
+class User(object):
+    def __init__(self, backend, _user):
+        self.backend = backend
+        self._user = _user
+
+    @property
+    def id(self):
+        return self._user.id
+
+    @property
+    def name(self):
+        return self._user.name
+
+    @property
+    def identifier(self):
+        return self._user.normalized_name
+
+    def __eq__(self, other):
+        return self._user == other._user
+
+    def __neq__(self, other):
+        return not self == other

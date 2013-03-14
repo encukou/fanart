@@ -21,7 +21,7 @@ class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=False)
     name = Column(Unicode, nullable=True)
-    normalized_name = Column(Unicode, nullable=True)
+    normalized_name = Column(Unicode, unique=True, nullable=True)
     password = Column(Unicode, nullable=True)
     gender = Column(Unicode(6), nullable=True)
     bio = Column(Unicode, nullable=True)
