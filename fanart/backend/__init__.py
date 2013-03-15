@@ -24,7 +24,7 @@ class Backend(object):
 
     def login(self, user):
         """Log in as the given user. No auth is done."""
-        self._user = user
+        self._user = user._user
 
     @reify
     def users(self):
@@ -60,7 +60,11 @@ class Users(object):
         for user in self._query:
             yield User(self.backend, user)
 
-    def add(self, name, password):
+    def add(self, name, password, _crypt_strength=None):
+        if _crypt_strength is None:
+            salt = bcrypt.gensalt()
+        else:
+            salt = bcrypt.gensalt(_crypt_strength)
         db = self.backend._db
         new_id = (db.query(functions.max(tables.User.id)).one()[0] or 0) + 1
         try:
@@ -68,7 +72,7 @@ class Users(object):
                     id=new_id,
                     name=name,
                     normalized_name=make_identifier(name),
-                    password=bcrypt.hashpw(password, bcrypt.gensalt()),
+                    password=bcrypt.hashpw(password, salt),
                 )
             db.add(user)
             db.commit()
@@ -76,6 +80,14 @@ class Users(object):
             db.rollback()
             raise ValueError('Name already exists')
         return User(self.backend, user)
+
+    def name_taken(self, name):
+        db = self.backend._db
+        normalized_name = make_identifier(name)
+        if self._query.filter_by(normalized_name=normalized_name).count():
+            return True
+        else:
+            return False
 
 
 class User(object):
@@ -100,3 +112,7 @@ class User(object):
 
     def __neq__(self, other):
         return not self == other
+
+    def check_password(self, password):
+        hashed = self._user.password
+        return bcrypt.hashpw(password, hashed) == hashed
