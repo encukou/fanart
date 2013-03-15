@@ -13,6 +13,11 @@ def make_virtual_user(name):
 
 ADMIN = make_virtual_user('ADMIN')
 
+
+class AccessError(ValueError):
+    pass
+
+
 class Backend(object):
     def __init__(self, db_session):
         self._db = db_session
@@ -24,11 +29,54 @@ class Backend(object):
 
     def login(self, user):
         """Log in as the given user. No auth is done."""
-        self._user = user._user
+        self._user = user._obj
 
     @reify
     def users(self):
         return Users(self)
+
+
+def allow_none(user, prop, instance, op, value=None):
+    return False
+
+
+def allow_any(user, prop, instance, op, value=None):
+    return True
+
+
+def allow_logged_in(user, prop, instance, op, value=None):
+    return user.logged_in
+
+
+def allow_self(user, prop, instance, op, value=None):
+    return user == instance._obj
+
+
+class Property(object):
+    def __init__(self, column_name, get_access=allow_any,
+                 set_access=allow_none):
+        self.column_name = column_name
+        self.get_access = get_access
+        self.set_access = set_access
+
+    def __get__(self, instance, owner):
+        if instance:
+            value = getattr(instance._obj, self.column_name)
+            user = instance.backend._user
+            if user is not ADMIN:
+                if not self.get_access(user, self, instance, 'get', value):
+                    raise AccessError('Cannot set %s' % self.column_name)
+            return value
+        else:
+            return self
+
+    def __set__(self, instance, value):
+        print('@')
+        user = instance.backend._user
+        if user is not ADMIN:
+            if not self.set_access(user, self, instance, 'set', value):
+                raise AccessError('Cannot set %s' % self.column_name)
+        setattr(instance._obj, self.column_name, value)
 
 
 class Users(object):
@@ -61,6 +109,7 @@ class Users(object):
             yield User(self.backend, user)
 
     def add(self, name, password, _crypt_strength=None):
+        self.backend._db.rollback()
         if _crypt_strength is None:
             salt = bcrypt.gensalt()
         else:
@@ -93,26 +142,34 @@ class Users(object):
 class User(object):
     def __init__(self, backend, _user):
         self.backend = backend
-        self._user = _user
+        self._obj = _user
 
     @property
     def id(self):
-        return self._user.id
+        return self._obj.id
 
     @property
     def name(self):
-        return self._user.name
+        return self._obj.name
 
     @property
     def identifier(self):
-        return self._user.normalized_name
+        return self._obj.normalized_name
 
     def __eq__(self, other):
-        return self._user == other._user
+        return self._obj == other._obj
 
     def __neq__(self, other):
         return not self == other
 
     def check_password(self, password):
-        hashed = self._user.password
+        hashed = self._obj.password
         return bcrypt.hashpw(password, hashed) == hashed
+
+    gender = Property('gender', allow_any, allow_self)
+    bio = Property('bio', allow_any, allow_self)
+    email = Property('email', allow_any, allow_self)
+    date_of_birth = Property('date_of_birth', allow_any, allow_self)
+    show_email = Property('show_email', allow_any, allow_self)
+    show_age = Property('show_age', allow_any, allow_self)
+    show_birthday = Property('show_birthday', allow_any, allow_self)

@@ -1,5 +1,7 @@
 import pytest
 
+from fanart import backend as backend_mod
+
 def test_zero_users(backend):
     assert len(backend.users) == 0
     assert list(backend.users) == []
@@ -37,6 +39,25 @@ def test_duplicate_user_name(backend):
     backend.users.add('Doppelgänger 2', 'super*secret', _crypt_strength=0)
 
 def test_check_password(backend):
-    user = backend.users.add('alice', 'super*secret', _crypt_strength=0)
+    user = backend.users.add('Alice', 'super*secret', _crypt_strength=0)
     assert user.check_password('super*secret')
     assert not user.check_password('super!secret')
+
+def test_login(backend):
+    user = backend.users.add('Bob', 'super*secret', _crypt_strength=0)
+    backend.login(user)
+
+def test_access(backend):
+    user = backend.users.add('Carol', 'super*secret', _crypt_strength=0)
+    with pytest.raises(backend_mod.AccessError):
+        user.bio = "Some person"
+    assert user.bio is None
+    backend.login(user)
+    user.bio = "Some person"
+    assert user.bio == "Some person"
+
+def test_admin_access(backend):
+    user = backend.users.add('Dave', 'super*secret', _crypt_strength=0)
+    backend.login_admin()
+    user.bio = "Some person"
+    assert user.bio == "Some person"
