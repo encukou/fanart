@@ -31,6 +31,10 @@ class Backend(object):
         """Log in as the given user. No auth is done."""
         self._user = user._obj
 
+    @property
+    def logged_in_user(self):
+        return User(self, self._user)
+
     @reify
     def users(self):
         return Users(self)
@@ -143,6 +147,7 @@ class User(object):
     def __init__(self, backend, _user):
         self.backend = backend
         self._obj = _user
+        self.contacts = {}  # XXX
 
     @property
     def id(self):
@@ -155,6 +160,10 @@ class User(object):
     @property
     def identifier(self):
         return self._obj.normalized_name
+
+    @property
+    def is_virtual(self):
+        return not self._obj.logged_in
 
     def __eq__(self, other):
         return self._obj == other._obj

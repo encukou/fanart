@@ -45,7 +45,11 @@ def test_check_password(backend):
 
 def test_login(backend):
     user = backend.users.add('Bob', 'super*secret', _crypt_strength=0)
+    assert backend.logged_in_user != user
+    assert backend.logged_in_user.is_virtual
     backend.login(user)
+    assert backend.logged_in_user == user
+    assert not backend.logged_in_user.is_virtual
 
 def test_access(backend):
     user = backend.users.add('Carol', 'super*secret', _crypt_strength=0)

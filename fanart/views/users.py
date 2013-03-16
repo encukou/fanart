@@ -78,8 +78,9 @@ def NewUserSchema(request):
             raise colander.Invalid(node, 'Hesla se neshodují.')
 
     def validate_username(node, value):
-        if tables.User.name_exists(request.db, value):
-            raise colander.Invalid(node, 'Uživatel s tímto jménem už existuje. Vyber si prosím jiné jméno.')
+        if request.backend.users.name_taken(value):
+            template = 'Jméno „{}“ je zabrané. Vyber si prosím jiné jméno.'
+            raise colander.Invalid(node, template.format(value))
 
     locale_name = get_locale_name(request)
     class NewUserSchema(helpers.FormSchema):
@@ -134,8 +135,8 @@ class Users(ViewBase):
         friendly_name = 'Založení účtu'
         def __init__(self, *args, **kwargs):
             ViewBase.__init__(self, *args, **kwargs)
-            user = self.request.user
-            if user.logged_in:
+            user = self.request.backend.logged_in_user
+            if not user.is_virtual:
                 raise httpexceptions.HTTPForbidden('Už jsi přihlášen%s.' %
                         dict(female='a', male='').get(user.gender, '/a'))
 
@@ -153,7 +154,8 @@ class Users(ViewBase):
                     print(e, type(e), e.error)
                     pass
                 else:
-                    if appstruct.pop('password2', None) != appstruct.get('password'):
+                    password2 = appstruct.pop('password2', None)
+                    if password2 != appstruct.get('password'):
                         field = form['password2']
                         err = deform.ValidationFailure(field, {}, None)
                         err.msg = 'Hesla se neshodují'
@@ -162,25 +164,18 @@ class Users(ViewBase):
                         form.err = err
                         raise err
 
-                    db = request.db
-                    db.rollback()
                     try:
-                        new_user = tables.User.create_local(db,
-                            **appstruct)
-                        db.add(new_user)
-                        db.flush()
-                    except RuntimeError:
-                        err = deform.ValidationFailure('Uživatel už existuje.')
+                        request.backend.users.add(
+                            appstruct['user_name'],
+                            appstruct['password'])
+                    except ValueError:
+                        err = deform.ValidationFailure('Jméno je už zabrané.')
                         err.field = form.dzdd
                         raise err
                     else:
                         request.session['user_id'] = new_user.id
-                        del request.user
-                        db.commit()
-                        try:
-                            return httpexceptions.HTTPSeeOther(self.root.url + '/me')
-                        except httpexceptions.HTTPException:
-                            return httpexceptions.HTTPSeeOther(self.root.url)
+                        url = self.root.url + '/me'
+                        return httpexceptions.HTTPSeeOther(url)
             return self.render_response('users/new.mako', request,
                     user=request.user,
                     form=form.render(appdata),
@@ -191,15 +186,15 @@ class Users(ViewBase):
         def render(self, request):
             if 'submit' in request.POST:
                 try:
-                    request.session['user_id'] = tables.User.login_user_by_password(
-                            session=request.db,
-                            user_name=request.POST['user_name'],
-                            password=request.POST['password'],
-                        ).id
-                except ValueError:
+                    user = request.backend.users[request.POST['user_name']]
+                    if not user.check_password(request.POST['password']):
+                        raise ValueError('bed password')
+                except (LookupError, ValueError):
                     request.session.flash('Špatné jméno nebo heslo',
                         queue='login')
                 else:
+                    request.backend.login(user)
+                    request.session['user_id'] = user.id
                     request.session.flash('Přihlášeno!', queue='login')  # XXX: Gender
                 try:
                     url = request.GET['redirect']
@@ -247,7 +242,7 @@ class UserByID(ViewBase):
             id = int(id)
         except ValueError:
             raise IndexError(id)
-        self.user = self.request.db.query(tables.User).get(id)
+        self.user = self.request.backend.users[id]
         if self.user is None:
             raise IndexError(id)
 
@@ -272,7 +267,7 @@ class UserByID(ViewBase):
 class UserByName(ViewBase):
     def __init__(self, parent, name=None):
         self.user = parent.user
-        super(UserByName, self).__init__(parent, self.user.normalized_name)
+        super(UserByName, self).__init__(parent, self.user.identifier)
 
     @property
     def friendly_name(self):
@@ -280,7 +275,7 @@ class UserByName(ViewBase):
 
     @property
     def __name__(self):
-        return str(self.user.normalized_name)
+        return str(self.user.identifier)
 
     def render(self, request):
         return self.render_response('users/user.mako', request,
@@ -292,10 +287,10 @@ class UserByName(ViewBase):
         friendly_name = 'Nastavení účtu'
 
         def render(self, request):
-            if not request.user.logged_in:
+            if request.user.is_virtual:
                 raise httpexceptions.HTTPForbidden('Nejsi přihlášen/a.')
             user = self.parent.user
-            if request.user is not user:
+            if request.user != user:
                 raise httpexceptions.HTTPForbidden('Nemůžeš měnit cizí účty.')
             schema = UserSchema(request)
             form = deform.Form(schema, buttons=(
@@ -310,19 +305,19 @@ class UserByName(ViewBase):
             if user.show_age: appdata['field_visibility'].add('age')
             if user.show_birthday: appdata['field_visibility'].add('birthday')
             appdata['contacts'] = []
-            for contact in user.contacts:
-                if contact.type.lower() == 'web':
-                    appdata['web'] = contact.value
-                elif contact.type.lower() == 'xmpp':
-                    appdata['xmpp_nick'] = contact.value
-                elif contact.type.lower() == 'irc':
-                    appdata['irc_nick'] = contact.value
-                elif contact.type.lower() == 'deviantart':
-                    appdata['deviantart_nick'] = contact.value
-                elif contact.type.lower() == 'email':
-                    appdata['email'] = contact.value
+            for type_, contact in user.contacts.items():
+                if type_.lower() == 'web':
+                    appdata['web'] = contact
+                elif type_.lower() == 'xmpp':
+                    appdata['xmpp_nick'] = contact
+                elif type_.lower() == 'irc':
+                    appdata['irc_nick'] = contact
+                elif type_.lower() == 'deviantart':
+                    appdata['deviantart_nick'] = contact
+                elif type_.lower() == 'e-mail':
+                    appdata['email'] = contact
                 else:
-                    appdata['contacts'].append(contact.type + ': ' + contact.value)
+                    appdata['contacts'].append(type_ + ': ' + contact)
             appdata['contacts'].append('')
             if 'submit' in request.POST:
                 controls = list(request.POST.items())
@@ -332,8 +327,7 @@ class UserByName(ViewBase):
                     print(e, type(e), e.error)
                     pass
                 else:
-                    db = request.db
-                    db.rollback()
+                    user = request.user
                     print(appdata)
                     user.gender = appdata['gender']
                     user.bio = appdata['bio']
@@ -344,41 +338,30 @@ class UserByName(ViewBase):
                     user.show_birthday = 'birthday' in appdata['field_visibility']
                     print(user.show_email, user.show_age, user.show_birthday)
 
-                    user.contacts[:] = []
-                    added_contacts = set()
-                    def add_contact(type_, value):
-                        if type_.lower() in added_contacts:
-                            return
-                        print('Adding', type_, value)
-                        added_contacts.add(type_.lower())
-                        contact = tables.UserContact(
-                                user_id = user.id,
-                                type = type_.strip(),
-                                value = value.strip(),
-                            )
-                        db.add(contact)
+                    new_contacts = {}
                     user.email = appdata['email']
                     if 'email' in appdata['field_visibility'] and appdata['email']:
-                        add_contact('Email', appdata['email'])
+                        new_contacts['E-mail'] = appdata['email']
                     if appdata['web']:
-                        add_contact('Web', appdata['web'])
+                        new_contacts['Web'] = appdata['web']
                     if appdata['xmpp_nick']:
-                        add_contact('XMPP', appdata['xmpp_nick'])
+                        new_contacts['XMPP'] = appdata['xmpp_nick']
                     if appdata['irc_nick']:
-                        add_contact('IRC', appdata['irc_nick'])
+                        new_contacts['IRC'] = appdata['irc_nick']
                     if appdata['deviantart_nick']:
-                        add_contact('deviantArt', appdata['deviantart_nick'])
+                        new_contacts['deviantArt'] = appdata['deviantart_nick']
                     for contacts in appdata['contacts']:
                         for contact in contacts.split(','):
                             type_, sep, value = contact.partition(':')
                             if type_.strip():
                                 if sep and value.strip():
                                     if value.strip():
-                                        add_contact(type_, value)
+                                        new_contacts[type_] = value
                                 else:
+                                    new_contacts[type_] = '?'
                                     add_contact(type_, '?')
 
-                    db.commit()
+                    user.contacts = new_contacts
                     return httpexceptions.HTTPSeeOther(self.parent.url)
             return self.render_response('users/edit.mako', request,
                     user=request.user,

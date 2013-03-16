@@ -1,6 +1,8 @@
 <%inherit file="../base.mako" />
 
-% if request.user.logged_in:
+% if request.user.is_virtual:
+    <div>Chceš-li poslat zprávu, prosím, přihlaš se.</div>
+% else:
     <form action="${this['post'].url}" method="POST" class="simple" enctype="multipart/form-data" accept-charset="utf-8">
     <fieldset>
     <input type="text" name="content" class="long-text" value="${request.POST.get('content', '')}">
@@ -10,8 +12,6 @@
     <button type="submit" name="submit" value="submit">Poslat</button>
     </fieldset>
     </form>
-% else:
-    <div>Chceš-li poslat zprávu, prosím, přihlaš se.</div>
 % endif
 
 % for item in items:

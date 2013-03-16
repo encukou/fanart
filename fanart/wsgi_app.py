@@ -17,6 +17,7 @@ import deform
 
 from fanart.models.tables import initialize_sql
 from fanart.views import Site
+from fanart.backend import Backend
 from fanart import users
 
 def check_csrf(request):
@@ -54,8 +55,14 @@ def main(global_config, **settings):
         fanart_settings = settings
 
         @reify
+        def backend(self):
+            backend = Backend(sqla_session)
+            users.get_user(self, backend)
+            return backend
+
+        @property
         def user(self):
-            return users.get_user(self)
+            return self.backend.logged_in_user
 
         @reify
         def csrf_token(self):

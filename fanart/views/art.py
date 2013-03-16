@@ -48,12 +48,12 @@ class ArtManager(ViewBase):
         page_title = 'Nahrát obrázek'
 
         def render_form(self):
-            if not self.request.user.logged_in:
+            if self.request.user.is_virtual:
                 raise httpexceptions.HTTPForbidden("Nejsi přihlášen/a.")
             return self.render_response('art/upload.mako', self.request)
 
         def render(self, request):
-            if not request.user.logged_in:
+            if request.user.is_virtual:
                 raise httpexceptions.HTTPForbidden("Nejsi přihlášen/a.")
             print(request.fanart_settings)
             if 'submit' in request.POST:
@@ -90,7 +90,7 @@ class ArtManager(ViewBase):
                         artwork_version = ArtworkVersion(
                             artwork=artwork,
                             uploaded_at=datetime.utcnow(),
-                            uploader=request.user,
+                            uploader=request.user._obj,
                             current=True,
                             )
                         request.db.add(artwork_version)
@@ -106,7 +106,7 @@ class ArtManager(ViewBase):
 
                         author_link = ArtworkAuthor(
                             artwork=artwork,
-                            author=request.user,
+                            author=request.user._obj,
                             )
 
                         artifact_link = ArtworkArtifact(
@@ -160,10 +160,10 @@ class PieceManager(ViewBase):
         self.artwork = item
 
     def render(self, request):
-        if not request.user.logged_in:
+        if request.user.is_virtual:
             raise httpexceptions.HTTPForbidden("Nejsi přihlášen/a.")
         artwork = self.artwork
-        if request.user not in artwork.authors:
+        if request.user._obj not in artwork.authors:
             raise httpexceptions.HTTPForbidden("Sem můžou jen autoři obrázku.")
         schema = PieceSchema(request)
 

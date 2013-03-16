@@ -4,7 +4,7 @@
 
 <details open id="shoutbox">
     <summary>Shoutbox</summary>
-    % if request.user.logged_in:
+    % if not request.backend.logged_in_user.is_virtual:
         <form action="${this.root['shoutbox', 'post'].get_url(redirect=this.url)}" method="POST" id="shoutbox-form" enctype="multipart/form-data" accept-charset="utf-8">
         <fieldset>
             <input type="text" name="content" id="text">

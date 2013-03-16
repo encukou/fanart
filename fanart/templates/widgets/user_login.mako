@@ -7,7 +7,7 @@
     % for message in this.request.session.pop_flash('login'):
         <div class="flash">${message}</div>
     % endfor
-    % if not user.logged_in:
+    % if user.is_virtual:
         <div class="login">
             ${render_mini_login_form(this) |n}
         </div>

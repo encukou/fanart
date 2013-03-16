@@ -42,44 +42,6 @@ class User(Base):
     def __unicode__(self):
         return '<User %s:"%s">' % (self.id, self.name)
 
-    @classmethod
-    def name_exists(cls, session, name):
-        normalized_name = cls.normalize_name(name)
-        if session.query(User).filter_by(normalized_name=normalized_name).count():
-            return True
-        else:
-            return False
-
-    @classmethod
-    def normalize_name(cls, name):
-        return make_identifier(name)
-
-    @classmethod
-    def create_local(cls, session, user_name, password):
-        normalized_name = cls.normalize_name(user_name)
-        if cls.name_exists(session, user_name):
-            raise ValueError('Name already exists')
-        return User(
-                id=(session.query(functions.max(cls.id)).one()[0] or 0) + 1,
-                name=user_name,
-                normalized_name=normalized_name,
-                password=bcrypt.hashpw(password, bcrypt.gensalt()),
-            )
-
-    @classmethod
-    def login_user_by_password(cls, session, user_name, password):
-        normalized_name = cls.normalize_name(user_name)
-        try:
-            user = session.query(User).filter_by(normalized_name=normalized_name).one()
-        except sqlalchemy.orm.exc.NoResultFound:
-            raise ValueError('User not found')
-        except sqlalchemy.orm.exc.MultipleResultsFound:
-            raise ValueError('Multiple users found')
-        if bcrypt.hashpw(password, user.password):
-            return user
-        else:
-            raise ValueError('Passwords did not match')
-
 class UserContact(Base):
     __tablename__ = 'user_contacts'
     user_id = Column(Integer, ForeignKey('users.id'), primary_key=True, nullable=False)

@@ -24,14 +24,14 @@ class Shoutbox(ViewBase):
         friendly_name = 'Napsat zprávu do Shoutboxu'
 
         def render(self, request):
-            if not request.user.logged_in:
+            if request.user.is_virtual:
                 raise httpexceptions.HTTPForbidden("Nejsi přihlášen/a.")
             if 'submit' in request.POST:
                 request.db.rollback()
                 now = datetime.utcnow()
                 source = request.POST['content']
                 if source:
-                    item = ChatMessage(published=now, source=source, sender=request.user)
+                    item = ChatMessage(published=now, source=source, sender=request.user._obj)
                     request.db.add(item)
                     request.db.commit()
                 try:

@@ -34,7 +34,7 @@ class News(ViewBase):
                 heading = request.POST['heading']
                 if not source or not heading:
                     return self.render_form()
-                item = NewsItem(published=now, heading=heading, source=source, reporter=request.user)
+                item = NewsItem(published=now, heading=heading, source=source, reporter=request.user._obj)
                 request.db.add(item)
                 request.db.commit()
                 return httpexceptions.HTTPSeeOther(self.parent.url)

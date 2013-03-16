@@ -3,13 +3,16 @@
 
 from fanart.models import tables
 
-def get_user(request):
+def get_user(request, backend):
     try:
         user_id = request.session['user_id']
     except KeyError:
         pass
     else:
-        user = request.db.query(tables.User).get(user_id)
-        if user is not None:
-            return user
-    return tables.User(name='Host', logged_in=False)
+        try:
+            user = backend.users[user_id]
+        except LookupError:
+            pass
+        else:
+            backend.login(user)
+    return backend.logged_in_user

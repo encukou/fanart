@@ -89,11 +89,11 @@ class Site(ViewBase):
             return response
 
     def child_me(self, name):
-        uid = self.request.user.id
+        uid = self.request.backend.logged_in_user.id
         if uid is None:
             raise httpexceptions.HTTPNotFound('Nejsi přihlášen/a')
         else:
-            return self['users'].get(self.request.user.id).by_name
+            return self['users'].get(uid).by_name
 
     child_users = instanceclass(users.Users)
     child_news = instanceclass(news.News)
