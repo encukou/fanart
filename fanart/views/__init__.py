@@ -13,6 +13,7 @@ import pkg_resources
 from fanart.views.base import ViewBase, instanceclass
 from fanart.views import users, news, api, shoutbox, art, helpers
 from fanart.tasks import run_tasks
+from fanart import backend
 from fanart.models import tables
 
 def view_root(context, request):
@@ -105,7 +106,9 @@ class Site(ViewBase):
     child_task = instanceclass(run_tasks.RunTask)
 
     def wrap(self, item):
-        if isinstance(item, tables.User):
+        if isinstance(item, backend.User):
+            return self['users'][item]
+        elif isinstance(item, tables.User):
             return self['users'][item]
         elif isinstance(item, tables.Artwork):
             return self['art'][item]

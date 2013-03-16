@@ -10,6 +10,7 @@ import deform
 from fanart.views.base import ViewBase, instanceclass
 from fanart.views import helpers
 from fanart.models import tables
+from fanart import backend
 
 class StringListSchema(colander.SequenceSchema):
     tag = colander.SchemaNode(colander.String(), missing='', title='')
@@ -231,7 +232,9 @@ class Users(ViewBase):
                 return httpexceptions.HTTPNotFound()
 
     def get(self, id):
-        if isinstance(id, tables.User):
+        if isinstance(id, backend.User):
+            return UserByID(self, id.id).by_name
+        elif isinstance(id, tables.User):
             return UserByID(self, id.id).by_name
         return UserByID(self, id)
 

@@ -44,6 +44,10 @@ class Backend(object):
     def news(self):
         return News(self)
 
+    @reify
+    def shoutbox(self):
+        return Shoutbox(self)
+
     def commit(self):
         self._db.commit()
 
@@ -276,6 +280,7 @@ class NewsItem(Item):
     def __repr__(self):
         return '<{0} {1!r}>'.format(type(self).__qualname__, self.heading)
 
+
 class News(Collection):
     item_table = tables.NewsItem
     item_class = NewsItem
@@ -303,5 +308,43 @@ class News(Collection):
     @property
     def from_newest(self):
         new_query = self._query.order_by(None)
-        new_query = new_query.order_by(tables.NewsItem.published.desc())
+        new_query = new_query.order_by(self.item_table.published.desc())
+        return type(self)(self.backend, new_query)
+
+
+class ChatMessage(Item):
+    published = ColumnProperty('published')
+    source = ColumnProperty('source')
+    sender = WrappedProperty('sender', User)
+    recipient = WrappedProperty('recipient', User)
+
+
+class Shoutbox(Collection):
+    item_table = tables.ChatMessage
+    item_class = ChatMessage
+    order_clauses = [tables.ChatMessage.published]
+
+    def add(self, source, *, recipient=None):
+        if not access_allowed(allow_logged_in, self):
+            raise AccessError('Cannot add news item')
+        db = self.backend._db
+        sender = self.backend.logged_in_user
+        if sender.is_virtual:
+            sender_obj = None
+        else:
+            sender_obj = sender._obj
+        item = self.item_table(
+                source=source,
+                sender=sender_obj,
+                recipient=recipient._obj if recipient else None,
+                published=datetime.utcnow(),
+            )
+        db.add(item)
+        db.flush()
+        return self.item_class(self.backend, item)
+
+    @property
+    def from_newest(self):
+        new_query = self._query.order_by(None)
+        new_query = new_query.order_by(self.item_table.published.desc())
         return type(self)(self.backend, new_query)

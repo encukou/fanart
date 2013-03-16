@@ -1,5 +1,3 @@
-<% from fanart.views.shoutbox import shoutbox_items %>
-
 <% user = this.request.user %>
 
 <details open id="shoutbox">
@@ -13,7 +11,7 @@
         </fieldset>
         </form>
     % endif
-    % for item in shoutbox_items(request):
+    % for item in request.backend.shoutbox.from_newest[:10]:
         <section class="item">
         <h3 class="date-header">
             ${h.format_date(item.published, format='compact')}

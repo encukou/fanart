@@ -8,16 +8,13 @@ from fanart.models.tables import ChatMessage
 from fanart.views.base import ViewBase, instanceclass
 from fanart import markdown
 
-def shoutbox_items(request, n=10):
-    return request.db.query(ChatMessage).order_by(ChatMessage.published.desc())[:n]
-
 
 class Shoutbox(ViewBase):
     friendly_name = 'Historie Shoutboxu'
 
     def render(self, request):
-        return self.render_response(
-            'shoutbox/all.mako', request, items=shoutbox_items(request, n=50))
+        items = request.backend.shoutbox.from_newest[:50]
+        return self.render_response('shoutbox/all.mako', request, items=items)
 
     @instanceclass
     class child_post(ViewBase):
@@ -27,12 +24,9 @@ class Shoutbox(ViewBase):
             if request.user.is_virtual:
                 raise httpexceptions.HTTPForbidden("Nejsi přihlášen/a.")
             if 'submit' in request.POST:
-                request.db.rollback()
-                now = datetime.utcnow()
                 source = request.POST['content']
                 if source:
-                    item = ChatMessage(published=now, source=source, sender=request.user._obj)
-                    request.db.add(item)
+                    request.shoutbox.add(source)
                 try:
                     url = request.GET['redirect']
                 except KeyError:
