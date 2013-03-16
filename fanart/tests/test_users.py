@@ -12,6 +12,12 @@ def test_add_user(backend):
     assert user.identifier == 'john'
     assert user.id == int(user.id)
 
+def test_add_user_2(backend):
+    user = backend.users.add('John', 'super*secret', _crypt_strength=0)
+    assert user.name == 'John'
+    assert user.identifier == 'john'
+    assert user.id == int(user.id)
+
 def test_lookup_user(backend):
     user = backend.users.add('Jack', 'super*secret', _crypt_strength=0)
     assert backend.users['Jack'] == user

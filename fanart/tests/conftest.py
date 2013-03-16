@@ -15,5 +15,6 @@ def db_session(sqla_engine):
     return scoped_session(sessionmaker(sqla_engine))
 
 @pytest.fixture
-def backend(db_session):
+def backend(db_session, request):
+    request.addfinalizer(db_session.rollback)
     return Backend(db_session)

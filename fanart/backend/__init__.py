@@ -39,6 +39,12 @@ class Backend(object):
     def users(self):
         return Users(self)
 
+    def commit(self):
+        self._db.commit()
+
+    def rollback(self):
+        self._db.rollback()
+
 
 def allow_none(user, prop, instance, op, value=None):
     return False
@@ -113,25 +119,22 @@ class Users(object):
             yield User(self.backend, user)
 
     def add(self, name, password, _crypt_strength=None):
-        self.backend._db.rollback()
+        if self.name_taken(name):
+            raise ValueError('Name already exists')
         if _crypt_strength is None:
             salt = bcrypt.gensalt()
         else:
             salt = bcrypt.gensalt(_crypt_strength)
         db = self.backend._db
         new_id = (db.query(functions.max(tables.User.id)).one()[0] or 0) + 1
-        try:
-            user = tables.User(
-                    id=new_id,
-                    name=name,
-                    normalized_name=make_identifier(name),
-                    password=bcrypt.hashpw(password, salt),
-                )
-            db.add(user)
-            db.commit()
-        except exc.IntegrityError:
-            db.rollback()
-            raise ValueError('Name already exists')
+        user = tables.User(
+                id=new_id,
+                name=name,
+                normalized_name=make_identifier(name),
+                password=bcrypt.hashpw(password, salt),
+            )
+        db.add(user)
+        db.flush()
         return User(self.backend, user)
 
     def name_taken(self, name):

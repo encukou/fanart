@@ -115,7 +115,6 @@ class ArtManager(ViewBase):
                             artifact=artifact,
                             )
 
-                        request.db.commit()
                     except:
                         os.unlink(path)
                         raise
@@ -259,7 +258,6 @@ class PieceManager(ViewBase):
                         if not query.count():
                             artwork.identifier = identifier
                             break
-                request.db.commit()
             return httpexceptions.HTTPSeeOther(self.url)
         appdata = dict()
         appdata['image_name'] = artwork.name

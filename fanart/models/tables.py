@@ -14,7 +14,6 @@ from sqlalchemy import Integer, Unicode, DateTime, Boolean, BINARY
 
 from fanart.helpers import make_identifier
 
-DBSession = scoped_session(sessionmaker())
 Base = declarative_base()
 
 class User(Base):
@@ -106,7 +105,10 @@ class ArtworkAuthor(Base):
     author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
 UserContact.user = relationship(User,
-    backref=backref('contacts', cascade="all, delete-orphan"))
+    backref=backref(
+            'contacts',
+            cascade="all, delete-orphan",
+            collection_class=attribute_mapped_collection("type")))
 
 NewsItem.reporter = relationship(User,
         primaryjoin=NewsItem.reporter_id == User.id)
@@ -151,8 +153,7 @@ ArtworkAuthor.artwork = relationship(Artwork,
         primaryjoin=ArtworkAuthor.artwork_id == Artwork.id,
         backref='artwork_authors')
 
-def populate():
-    session = DBSession()
+def populate(session):
     session.add(User(id=3, name='Test', normalized_name='test',
         # password is: 'pass'
         password='$2a$04$B6eLb5G5cQjpmtqtkh.JfOWjMKbAHIsKmh1ULOR7AK7/6xcpqvCxy'))
@@ -164,12 +165,13 @@ def populate():
 
     session.commit()
 
-def initialize_sql(engine):
+def initialize_sql(engine, sessionmaker_args={}):
+    DBSession = scoped_session(sessionmaker())
     DBSession.configure(bind=engine)
     Base.metadata.bind = engine
     Base.metadata.create_all(engine)
     try:
-        populate()
+        populate(DBSession())
     except IntegrityError as e:
         DBSession.rollback()
     return DBSession

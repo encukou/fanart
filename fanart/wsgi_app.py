@@ -8,12 +8,14 @@ from pyramid.request import Request
 from pyramid.events import ContextFound, NewRequest
 from pyramid.httpexceptions import HTTPForbidden, HTTPSeeOther
 from pyramid.decorator import reify
+from pyramid.tweens import EXCVIEW
 import pyramid_beaker
 from sqlalchemy import engine_from_config
 from pyramid.i18n import get_localizer
 from pyramid.threadlocal import get_current_request
 from pkg_resources import resource_filename
 import deform
+from zope.sqlalchemy import ZopeTransactionExtension
 
 from fanart.models.tables import initialize_sql
 from fanart.views import Site
@@ -43,6 +45,18 @@ def translator(term):
 
 deform_renderer = deform.ZPTRendererFactory(
     [resource_filename('deform', 'templates/')], translator=translator)
+
+def autocommit(handler, registry):
+    def tween(request):
+        try:
+            response = handler(request)
+        except:
+            request.backend.rollback()
+            raise
+        else:
+            request.backend.commit()
+        return response
+    return tween
 
 def main(global_config, **settings):
     """ This function returns a WSGI application.
@@ -75,6 +89,7 @@ def main(global_config, **settings):
             session_factory=session_factory,
         )
     deform.Form.set_default_renderer(deform_renderer)
+    config.add_tween('fanart.wsgi_app.autocommit', under=EXCVIEW)
     config.add_subscriber(check_request_for_csrf, NewRequest)
     config.add_subscriber(set_locale, NewRequest)
     config.add_translation_dirs('colander:locale/', 'deform:locale/')

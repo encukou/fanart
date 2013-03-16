@@ -33,7 +33,6 @@ class Shoutbox(ViewBase):
                 if source:
                     item = ChatMessage(published=now, source=source, sender=request.user._obj)
                     request.db.add(item)
-                    request.db.commit()
                 try:
                     url = request.GET['redirect']
                 except KeyError:
