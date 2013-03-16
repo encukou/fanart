@@ -11,7 +11,9 @@ def sqla_engine():
 
 @pytest.fixture(scope='module')
 def db_session(sqla_engine):
+    sqla_engine.echo = False
     tables.Base.metadata.create_all(sqla_engine)
+    sqla_engine.echo = True
     return scoped_session(sessionmaker(sqla_engine))
 
 @pytest.fixture
