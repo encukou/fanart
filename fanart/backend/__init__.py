@@ -5,7 +5,7 @@ from sqlalchemy.sql import functions
 import bcrypt
 
 from fanart.models import tables
-from fanart.helpers import make_identifier
+from fanart import helpers
 
 
 def make_virtual_user(name):
@@ -46,20 +46,25 @@ class Backend(object):
         self._db.rollback()
 
 
-def allow_none(user, prop, instance, op, value=None):
+def allow_none(user, instance):
     return False
 
 
-def allow_any(user, prop, instance, op, value=None):
+def allow_any(user, instance):
     return True
 
 
-def allow_logged_in(user, prop, instance, op, value=None):
+def allow_logged_in(user, instance):
     return user.logged_in
 
 
-def allow_self(user, prop, instance, op, value=None):
+def allow_self(user, instance):
     return user == instance._obj
+
+
+def access_allowed(access_func, obj):
+    user = obj.backend._user
+    return user is ADMIN or access_func(user, obj)
 
 
 class Property(object):
@@ -71,21 +76,15 @@ class Property(object):
 
     def __get__(self, instance, owner):
         if instance:
-            value = getattr(instance._obj, self.column_name)
-            user = instance.backend._user
-            if user is not ADMIN:
-                if not self.get_access(user, self, instance, 'get', value):
-                    raise AccessError('Cannot set %s' % self.column_name)
-            return value
+            if not access_allowed(self.get_access, instance):
+                raise AccessError('Cannot set %s' % self.column_name)
+            return getattr(instance._obj, self.column_name)
         else:
             return self
 
     def __set__(self, instance, value):
-        print('@')
-        user = instance.backend._user
-        if user is not ADMIN:
-            if not self.set_access(user, self, instance, 'set', value):
-                raise AccessError('Cannot set %s' % self.column_name)
+        if not access_allowed(self.set_access, instance):
+            raise AccessError('Cannot set %s' % self.column_name)
         setattr(instance._obj, self.column_name, value)
 
 
@@ -102,7 +101,7 @@ class Users(object):
         if isinstance(name_or_identifier, int):
             query = query.filter(tables.User.id == name_or_identifier)
         else:
-            ident = make_identifier(name_or_identifier)
+            ident = helpers.make_identifier(name_or_identifier)
             query = query.filter(tables.User.normalized_name == ident)
         try:
             user = query.one()
@@ -130,7 +129,7 @@ class Users(object):
         user = tables.User(
                 id=new_id,
                 name=name,
-                normalized_name=make_identifier(name),
+                normalized_name=helpers.make_identifier(name),
                 password=bcrypt.hashpw(password, salt),
             )
         db.add(user)
@@ -139,7 +138,7 @@ class Users(object):
 
     def name_taken(self, name):
         db = self.backend._db
-        normalized_name = make_identifier(name)
+        normalized_name = helpers.make_identifier(name)
         if self._query.filter_by(normalized_name=normalized_name).count():
             return True
         else:
@@ -150,7 +149,6 @@ class User(object):
     def __init__(self, backend, _user):
         self.backend = backend
         self._obj = _user
-        self.contacts = {}  # XXX
 
     @property
     def id(self):
@@ -185,3 +183,24 @@ class User(object):
     show_email = Property('show_email', allow_any, allow_self)
     show_age = Property('show_age', allow_any, allow_self)
     show_birthday = Property('show_birthday', allow_any, allow_self)
+
+    @property
+    def contacts(self):
+        contacts = self._obj.contacts
+        if not access_allowed(allow_self, self):
+            # immutable
+            contacts = dict(contacts)
+        return helpers.NormalizedKeyDict(
+            underlying_dict=contacts,
+            normalizer=helpers.make_identifier)
+
+    @contacts.setter
+    def contacts(self, new_value):
+        if access_allowed(allow_self, self):
+            existing = set(self._obj.contacts)
+            new = set(new_value)
+            for deleted_key in existing - new:
+                del self._obj.contacts[deleted_key]
+            self._obj.contacts.update(new_value)
+        else:
+            raise AccessError('Cannot set contacts')

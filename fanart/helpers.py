@@ -1,5 +1,6 @@
 import io
 import re
+import collections.abc
 
 from unidecode import unidecode
 
@@ -20,3 +21,95 @@ def make_identifier(name):
     if re.match('^[0-9]*$', name):
         name = 'n' + name
     return name
+
+
+class NormalizedKeyDict(collections.abc.MutableMapping):
+    """A dict proxy that normalizes keys
+
+    By default, this is a dict with case-insensitive but case-preserving keys:
+    >>> d = NormalizedKeyDict()
+    >>> d['Key'] = 'val'
+    >>> d['key']
+    'val'
+    >>> d['KEY']
+    'val'
+    >>> list(d.keys())
+    ['Key']
+
+    The key normalizing function (by default str.lower()) is customizable.
+    For example, you can map all keys with the same length to the same value:
+    >>> d = NormalizedKeyDict(normalizer=len)
+    >>> d['abc'] = 'val'
+    >>> d['123']
+    'val'
+    >>> d['ABCD']
+    Traceback (most recent call last):
+    ...
+    KeyError: 'ABCD'
+
+    You can also pass an underlying dict-like object for the proxy to
+    manipulate:
+    >>> u = {'a': 1, 'b': 2}
+    >>> d = NormalizedKeyDict(underlying_dict=u)
+    >>> d['A'] = 'one'
+    >>> d['c'] = 3
+    >>> assert u == {'A': 'one', 'b': 2, 'c': 3}
+    """
+    def __init__(self, *, underlying_dict=None, normalizer=str.lower):
+        super().__init__()
+        self._keys = {}
+        if underlying_dict is None:
+            self._vals = {}
+        else:
+            self._vals = underlying_dict
+        self.normalize = normalizer
+        for key in self._vals.keys():
+            self._keys[normalizer(key)] = key
+        if len(self._keys) != len(self._vals):
+            raise ValueError('duplicate keys')
+
+    def __setitem__(self, key, value):
+        normalized_key = self.normalize(key)
+        try:
+            old_key = self._keys.pop(normalized_key)
+        except KeyError:
+            pass
+        else:
+            del self._vals[old_key]
+        self._keys[self.normalize(key)] = key
+        self._vals[key] = value
+
+    def __delitem__(self, key):
+        old_key = self._keys.pop(self.normalize(key))
+        del self._vals[old_key]
+
+    def __getitem__(self, key):
+        normalized = self.normalize(key)
+        try:
+            current_key = self._keys[normalized]
+        except KeyError:
+            raise KeyError(key)
+        else:
+            return self._vals[current_key]
+
+    def __contains__(self, key):
+        return self.normalize(key) in self._keys
+
+    def __iter__(self):
+        return iter(self._keys.values())
+
+    def __len__(self):
+        return len(self._keys)
+
+    def __repr__(self):
+        return '<{}(underlying_dict={}, normalizer={})>'.format(
+            self.__qualname__, self._vals, self.normalize)
+
+    def normalized_dict(self):
+        """Return the dict's contents with normalized keys
+
+        >>> d = NormalizedKeyDict()
+        >>> d.update(a=1, B=2, cD=3)
+        >>> assert d.normalized_dict() == dict(a=1, b=2, cd=3)
+        """
+        return {k: self._vals[self._keys[k]] for k in self._keys}

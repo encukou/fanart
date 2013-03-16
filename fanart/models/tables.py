@@ -1,5 +1,5 @@
-import bcrypt
 
+import bcrypt
 import sqlalchemy.orm
 from sqlalchemy.orm import (scoped_session, reconstructor, sessionmaker,
         relationship, backref)
@@ -7,18 +7,19 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import functions, and_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm.collections import attribute_mapped_collection
-
+from sqlalchemy.orm.collections import (
+    attribute_mapped_collection, column_mapped_collection)
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy import Integer, Unicode, DateTime, Boolean, BINARY
 
-from fanart.helpers import make_identifier
+from fanart.helpers import make_identifier, NormalizedKeyDict
 
 Base = declarative_base()
 
+
 class User(Base):
     __tablename__ = 'users'
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=False)
+    id = Column(Integer, primary_key=True, nullable=False)
     name = Column(Unicode, nullable=True)
     normalized_name = Column(Unicode, unique=True, nullable=True)
     password = Column(Unicode, nullable=True)
@@ -46,6 +47,10 @@ class UserContact(Base):
     user_id = Column(Integer, ForeignKey('users.id'), primary_key=True, nullable=False)
     type = Column(Unicode, primary_key=True, nullable=False)
     value = Column(Unicode, nullable=False)
+
+    def __init__(self, type_, value):
+        self.type = type_
+        self.value = value
 
 class NewsItem(Base):
     __tablename__ = 'news_items'
@@ -104,11 +109,14 @@ class ArtworkAuthor(Base):
     artwork_id = Column(Integer, ForeignKey('artworks.id'), nullable=False)
     author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
-UserContact.user = relationship(User,
-    backref=backref(
-            'contacts',
+User.contacts = association_proxy('_contactdict', 'value', creator=UserContact)
+UserContact.user = relationship(
+        User,
+        backref=backref(
+            '_contactdict',
             cascade="all, delete-orphan",
-            collection_class=attribute_mapped_collection("type")))
+            collection_class=attribute_mapped_collection('type')))
+
 
 NewsItem.reporter = relationship(User,
         primaryjoin=NewsItem.reporter_id == User.id)

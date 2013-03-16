@@ -26,7 +26,7 @@ requires = [
 if sys.version_info[:3] < (2,5,0):
     requires.append('pysqlite')
 
-setup(name='fanart',
+setup_args = dict(name='fanart',
       version='0.0',
       description='fanart',
       long_description=README,
@@ -53,3 +53,5 @@ setup(name='fanart',
       """,
       )
 
+if __name__ == '__main__':
+    setup(setup_args)

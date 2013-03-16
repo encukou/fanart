@@ -7,7 +7,7 @@ from fanart.models import tables
 
 @pytest.fixture(scope='module')
 def sqla_engine():
-    return sqlalchemy.create_engine('sqlite://')
+    return sqlalchemy.create_engine('sqlite://', echo=True)
 
 @pytest.fixture(scope='module')
 def db_session(sqla_engine):
@@ -16,5 +16,9 @@ def db_session(sqla_engine):
 
 @pytest.fixture
 def backend(db_session, request):
-    request.addfinalizer(db_session.rollback)
+    def finalize():
+        db_session.flush()
+        db_session.rollback()
+    request.addfinalizer(finalize)
+    db_session.rollback()
     return Backend(db_session)

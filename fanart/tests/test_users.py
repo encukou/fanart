@@ -71,3 +71,53 @@ def test_admin_access(backend):
     backend.login_admin()
     user.bio = "Some person"
     assert user.bio == "Some person"
+
+@pytest.mark.parametrize(("as_admin"), [True, False])
+def test_user_contacts(backend, as_admin):
+    user = backend.users.add('Ellen', 'super*secret', _crypt_strength=0)
+    if as_admin:
+        backend.login_admin()
+    else:
+        backend.login(user)
+    assert user.contacts == {}
+    user.contacts['E-mail'] = 'ellen@home.test'
+    assert user.contacts['e.mail'] == 'ellen@home.test'
+    assert user.contacts.normalized_dict() == {'e-mail': 'ellen@home.test'}
+    assert 'XMPP' not in user.contacts
+
+    backend._db.flush()
+
+    user.contacts = {'xmPp': 'ellen@jabber.test'}
+    assert 'XMPP' in user.contacts
+    assert 'e-mail' not in user.contacts
+    assert user.contacts['XMPP'] == 'ellen@jabber.test'
+
+    backend._db.flush()
+
+    # Implementation detail (SQLA-model level)
+    assert user._obj.contacts == {'xmPp': 'ellen@jabber.test'}
+
+def test_user_contact_update(backend):
+    user = backend.users.add('Ellen', 'super*secret', _crypt_strength=0)
+    backend.login(user)
+    assert user.contacts == {}
+
+    user.contacts['E-mail'] = 'ellen@home.local'
+    user.contacts['XMPP'] = 'ellen@jabber.local'
+    assert user.contacts.normalized_dict() == {
+        'e-mail': 'ellen@home.local',
+        'xmpp': 'ellen@jabber.local'}
+
+    new_contacts = {'e-mail': 'ellen@home.test', 'irc': 'ellen'}
+    user.contacts = new_contacts
+
+    assert user.contacts.normalized_dict() == new_contacts
+
+def test_contacts_private(backend):
+    user = backend.users.add('Ellen', 'super*secret', _crypt_strength=0)
+    other = backend.users.add('Fanny', 'super*secret', _crypt_strength=0)
+    backend.login(other)
+    with pytest.raises(backend_mod.AccessError):
+        user.contacts = {}
+    user.contacts['myspace'] = 'ellie1234'
+    assert 'myspace' not in user.contacts
