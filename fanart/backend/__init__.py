@@ -1,6 +1,9 @@
 from datetime import datetime
 import operator
 import functools
+import uuid
+import hashlib
+import os
 
 from pyramid.decorator import reify
 from sqlalchemy import orm, exc
@@ -22,8 +25,9 @@ class AccessError(ValueError):
 
 
 class Backend(object):
-    def __init__(self, db_session):
+    def __init__(self, db_session, scratch_dir):
         self._db = db_session
+        self._scratch_dir = scratch_dir
         self._user = make_virtual_user('Host')
 
     def login_admin(self):
@@ -368,7 +372,7 @@ class Artwork(Item):
     created_at = ColumnProperty('created_at')
     name = ColumnProperty('name', allow_any, allow_authors)
     approved = ColumnProperty('approved')
-    hidden = ColumnProperty('hidden')
+    hidden = ColumnProperty('hidden', allow_any, allow_authors)
     rejected = ColumnProperty('rejected')
 
     @property
@@ -384,11 +388,55 @@ class Artwork(Item):
         return authors
 
     @authors.setter
-    def contacts(self, new_value):
+    def authors(self, new_value):
         if access_allowed(allow_self, self):
-            self._obj.authors = new_value
+            self.authors[:] = new_value
         else:
             raise AccessError('Cannot set authors')
+
+    def upload(self, input_file):
+        basename = '_' + str(uuid.uuid4()).replace('-', '')
+        fname = os.path.join(self.backend._scratch_dir, basename)
+        file_hash = hashlib.sha256()
+        try:
+            with open(fname, 'wb') as output_file:
+                input_file.seek(0)
+                while True:
+                    data = input_file.read(2**16)
+                    if not data:
+                        break
+                    file_hash.update(data)
+                    output_file.write(data)
+                output_file.flush()
+                os.fsync(output_file.fileno())
+            artifact = tables.Artifact(
+                storage_type='scratch',
+                storage_location=basename,
+                hash=file_hash.digest(),
+                )
+            self.backend._db.add(artifact)
+
+            artwork_version = tables.ArtworkVersion(
+                artwork=self._obj,
+                uploaded_at=datetime.utcnow(),
+                uploader=self.backend.logged_in_user._obj,
+                current=True,
+                )
+            self.backend._db.add(artwork_version)
+            self.backend._db.flush()
+
+            artifact_link = tables.ArtworkArtifact(
+                type='scratch',
+                artwork_version=artwork_version,
+                artifact=artifact,
+                )
+            self.backend._db.add(artifact_link)
+            self.backend._db.flush()
+
+            return ArtworkVersion(self.backend, artwork_version)
+        except:
+            os.remove(fname)
+            raise
 
 
 class Artworks(Collection):
@@ -411,3 +459,24 @@ class Artworks(Collection):
             item.authors.append(user._obj)
 
         return self.item_class(self.backend, item)
+
+
+class ArtworkVersion(Item):
+    artwork = WrappedProperty('artwork', Artwork)
+    uploaded_at = ColumnProperty('uploaded_at')
+    uploader = WrappedProperty('uploader', User)
+    current = ColumnProperty('current')
+
+    @property
+    def artifacts(self):
+        artifacts = self._obj.artifacts.items()
+        return {k: Artifact(self.backend, v) for k, v in artifacts}
+
+
+class Artifact(Item):
+    storage_type = ColumnProperty('storage_type')
+    storage_location = ColumnProperty('storage_location')
+    hash = ColumnProperty('hash')
+    width = ColumnProperty('width')
+    height = ColumnProperty('height')
+    filetype = ColumnProperty('filetype')

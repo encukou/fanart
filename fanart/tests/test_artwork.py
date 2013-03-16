@@ -1,4 +1,6 @@
 from datetime import datetime
+import os
+import binascii
 
 import pytest
 
@@ -31,3 +33,22 @@ def test_add_artwork(backend, as_admin):
         assert list(art.authors) == []
     else:
         assert list(art.authors) == [user]
+
+@pytest.mark.login
+def test_add_version(backend):
+    art = backend.art.add('A Masterpiece')
+
+    start = datetime.utcnow()
+    fname = os.path.join(os.path.dirname(__file__), 'data', '64x64.png')
+    with open(fname, 'rb') as file:
+        art_version = art.upload(file)
+
+    assert start <= art_version.uploaded_at <= datetime.utcnow()
+    assert art_version.uploader == backend.logged_in_user
+
+    artifact = art_version.artifacts['scratch']
+    assert binascii.hexlify(artifact.hash) == (
+        b'6371b34fa71fc8e5904e14aa1af5c2212beb37cbc8f91c303473c2c10f8a0b04')
+    assert artifact.width == None
+    assert artifact.height == None
+    assert artifact.filetype == None

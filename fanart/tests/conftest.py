@@ -17,10 +17,14 @@ def db_session(sqla_engine):
     return scoped_session(sessionmaker(sqla_engine))
 
 @pytest.fixture
-def backend(db_session, request):
+def backend(db_session, tmpdir, request):
     def finalize():
         db_session.flush()
         db_session.rollback()
     request.addfinalizer(finalize)
     db_session.rollback()
-    return Backend(db_session)
+    backend = Backend(db_session, str(tmpdir))
+    if 'login' in request.keywords:
+        user = backend.users.add('Sylvie', 'super*secret', _crypt_strength=0)
+        backend.login(user)
+    return backend

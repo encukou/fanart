@@ -57,68 +57,13 @@ class ArtManager(ViewBase):
                 raise httpexceptions.HTTPForbidden("Nejsi přihlášen/a.")
             print(request.fanart_settings)
             if 'submit' in request.POST:
-                request.db.rollback()
-                now = datetime.utcnow()
                 image = request.POST['image']
                 input_file = image.file
                 if input_file:
-                    path = request.fanart_settings['fanart.scratch_dir']
-                    if not os.path.exists(path):
-                        os.makedirs(path)
-                    file_hash = hashlib.sha256()
-                    slug = str(uuid.uuid4()).replace('-', '')
-                    path = os.path.join(path, slug)
-                    try:
-                        with open(path, 'wb') as output_file:
-                            input_file.seek(0)
-                            while True:
-                                data = input_file.read(2<<16)
-                                if not data:
-                                    break
-                                file_hash.update(data)
-                                output_file.write(data)
-                            output_file.flush()
-                            os.fsync(output_file.fileno())
-                        artwork = Artwork(
-                            created_at=datetime.utcnow(),
-                            name=request.POST['title'],
-                            identifier=None,
-                            )
-                        request.db.add(artwork)
-                        request.db.flush()
-
-                        artwork_version = ArtworkVersion(
-                            artwork=artwork,
-                            uploaded_at=datetime.utcnow(),
-                            uploader=request.user._obj,
-                            current=True,
-                            )
-                        request.db.add(artwork_version)
-                        request.db.flush()
-
-                        artifact = Artifact(
-                            storage_type='scratch',
-                            storage_location=slug,
-                            hash=file_hash.digest(),
-                            )
-                        request.db.add(artifact)
-                        request.db.flush()
-
-                        author_link = ArtworkAuthor(
-                            artwork=artwork,
-                            author=request.user._obj,
-                            )
-
-                        artifact_link = ArtworkArtifact(
-                            type='scratch',
-                            artwork_version=artwork_version,
-                            artifact=artifact,
-                            )
-
-                    except:
-                        os.unlink(path)
-                        raise
-                    return httpexceptions.HTTPSeeOther(self.parent[artwork].url)
+                    name = request.POST['title'] or None
+                    art = request.backend.art.add(name)
+                    art.upload(input_file)
+                    return httpexceptions.HTTPSeeOther(self.parent[art].url)
             return self.render_form()
 
 

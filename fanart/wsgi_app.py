@@ -70,7 +70,7 @@ def main(global_config, **settings):
 
         @reify
         def backend(self):
-            backend = Backend(sqla_session)
+            backend = Backend(sqla_session, settings['fanart.scratch_dir'])
             users.get_user(self, backend)
             return backend
 
