@@ -1,4 +1,6 @@
 from datetime import datetime
+import operator
+import functools
 
 from pyramid.decorator import reify
 from sqlalchemy import orm, exc
@@ -48,6 +50,10 @@ class Backend(object):
     def shoutbox(self):
         return Shoutbox(self)
 
+    @reify
+    def art(self):
+        return Artworks(self)
+
     def commit(self):
         self._db.commit()
 
@@ -69,6 +75,10 @@ def allow_logged_in(user, instance):
 
 def allow_self(user, instance):
     return user == instance._obj
+
+
+def allow_authors(user, instance):
+    return user in instance._obj.authors
 
 
 def access_allowed(access_func, obj):
@@ -348,3 +358,56 @@ class Shoutbox(Collection):
         new_query = self._query.order_by(None)
         new_query = new_query.order_by(self.item_table.published.desc())
         return type(self)(self.backend, new_query)
+
+
+class Artwork(Item):
+    @property
+    def identifier(self):
+        return self._obj.identifier
+
+    created_at = ColumnProperty('created_at')
+    name = ColumnProperty('name', allow_any, allow_authors)
+    approved = ColumnProperty('approved')
+    hidden = ColumnProperty('hidden')
+    rejected = ColumnProperty('rejected')
+
+    @property
+    def authors(self):
+        authors = self._obj.authors
+        if access_allowed(allow_authors, self):
+            authors = helpers.WrapList(
+                authors,
+                operator.attrgetter('_obj'),
+                functools.partial(User, self.backend))
+        else:
+            authors = tuple(contacts)
+        return authors
+
+    @authors.setter
+    def contacts(self, new_value):
+        if access_allowed(allow_self, self):
+            self._obj.authors = new_value
+        else:
+            raise AccessError('Cannot set authors')
+
+
+class Artworks(Collection):
+    item_table = tables.Artwork
+    item_class = Artwork
+
+    def add(self, name=None):
+        if not access_allowed(allow_logged_in, self):
+            raise AccessError('Cannot add art')
+        db = self.backend._db
+        item = self.item_table(
+                name=name or '',
+                created_at=datetime.utcnow(),
+            )
+        db.add(item)
+        db.flush()
+
+        user = self.backend.logged_in_user
+        if not user.is_virtual:
+            item.authors.append(user._obj)
+
+        return self.item_class(self.backend, item)

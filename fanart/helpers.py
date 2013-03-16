@@ -113,3 +113,56 @@ class NormalizedKeyDict(collections.abc.MutableMapping):
         >>> assert d.normalized_dict() == dict(a=1, b=2, cd=3)
         """
         return {k: self._vals[self._keys[k]] for k in self._keys}
+
+
+class WrapList(collections.abc.MutableSequence):
+    """A list proxy that translates items on access
+
+    wrap() is called when items are stored in the list, unwrap() when they're
+    retreived.
+
+    >>> u = []
+    >>> w = WrapList(u, str, int)
+    >>> list(w)
+    []
+    >>> w.append(3)
+    >>> list(w)
+    [3]
+    >>> u
+    ['3']
+    >>> w.pop()
+    3
+    """
+    def __init__(self, underlying_list, wrap, unwrap):
+        self.list = underlying_list
+        self.wrap = wrap
+        self.unwrap=unwrap
+
+    def insert(self, index, item):
+        self.list.insert(index, self.wrap(item))
+
+    def append(self, item):
+        self.list.append(self.wrap(item))
+
+    def __delitem__(self, index):
+        del self.list[index]
+
+    def __setitem__(self, index, item):
+        self.list[index] = self.wrap(item)
+
+    def __getitem__(self, index):
+        return self.unwrap(self.list[index])
+
+    def __contains__(self, item):
+        return self.wrap(item) in self.list
+
+    def __iter__(self):
+        for item in self.list:
+            yield self.unwrap(item)
+
+    def __len__(self):
+        return len(self.list)
+
+    def __repr__(self):
+        return '<{}(underlying_list={}, wrap={}, unwrap={})>'.format(
+            self.__qualname__, self.list, self.wrap, self.unwrap)

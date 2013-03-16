@@ -7,6 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import functions, and_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.orm.collections import (
     attribute_mapped_collection, column_mapped_collection)
 from sqlalchemy import Column, ForeignKey
@@ -108,6 +109,7 @@ class ArtworkAuthor(Base):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     artwork_id = Column(Integer, ForeignKey('artworks.id'), nullable=False)
     author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    order = Column(Integer, nullable=True)
 
 User.contacts = association_proxy('_contactdict', 'value', creator=UserContact)
 UserContact.user = relationship(
@@ -126,13 +128,14 @@ ChatMessage.sender = relationship(User,
 ChatMessage.recipient = relationship(User,
         primaryjoin=ChatMessage.recipient_id == User.id)
 
-Artwork.authors = association_proxy('artwork_authors', 'author')
+Artwork.authors = association_proxy(
+        'artwork_authors', 'author',
+        creator=lambda author: ArtworkAuthor(author=author))
 Artwork.versions = association_proxy('artwork_versions', 'artwork_version')
 Artwork.current_version = relationship(ArtworkVersion,
         primaryjoin=and_(
             ArtworkVersion.artwork_id == Artwork.id, ArtworkVersion.current),
-        uselist=False,
-        )
+        uselist=False)
 
 ArtworkVersion.uploader = relationship(User,
         primaryjoin=ArtworkVersion.uploader_id == User.id,
@@ -146,9 +149,7 @@ ArtworkArtifact.artwork_version = relationship(ArtworkVersion,
         primaryjoin=ArtworkArtifact.artwork_version_id == ArtworkVersion.id,
         backref=backref(
             'artwork_artifacts',
-            collection_class=attribute_mapped_collection("type"),
-            )
-        )
+            collection_class=attribute_mapped_collection("type")))
 ArtworkArtifact.artifact = relationship(Artifact,
         primaryjoin=ArtworkArtifact.artifact_id == Artifact.id,
         backref='artwork_artifacts')
@@ -159,7 +160,12 @@ ArtworkAuthor.author = relationship(User,
         backref='artwork_authors')
 ArtworkAuthor.artwork = relationship(Artwork,
         primaryjoin=ArtworkAuthor.artwork_id == Artwork.id,
-        backref='artwork_authors')
+        backref=backref(
+            'artwork_authors',
+            cascade="all, delete-orphan",
+            order_by=ArtworkAuthor.order,
+            collection_class=ordering_list('order', reorder_on_append=True)))
+
 
 def populate(session):
     session.add(User(id=3, name='Test', normalized_name='test',
