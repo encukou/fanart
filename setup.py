@@ -54,4 +54,4 @@ setup_args = dict(name='fanart',
       )
 
 if __name__ == '__main__':
-    setup(setup_args)
+    setup(**setup_args)
