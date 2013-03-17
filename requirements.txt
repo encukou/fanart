@@ -1,0 +1,34 @@
+-e .
+
+-e git+git@github.com:clevercss/clevercss.git@2131d490d7cf007598cd5b86b098d6efb9ae5d8e#egg=CleverCSS-dev
+Beaker==1.6.4
+Chameleon==2.11
+Mako==0.7.3
+Markdown==2.3
+MarkupSafe==0.15
+PasteDeploy==1.5.0
+PyYAML==3.10
+Pygments==1.6
+SQLAlchemy==0.8.0
+Unidecode==0.04.12
+WebOb==1.2.3
+colander==1.0a2
+cssutils==0.9.10b1
+deform==0.9.7
+distribute==0.6.35
+peppercorn==0.4
+py3k-bcrypt==0.3
+pyramid==1.4
+pyramid-beaker==0.7
+pyramid-debugtoolbar==1.0.4
+pyramid-tm==0.7
+pytz==2013b
+repoze.lru==0.6
+transaction==1.4.1
+translationstring==1.1
+venusian==1.0a7
+waitress==0.8.2
+zope.deprecation==4.0.2
+zope.interface==4.0.5
+
+###

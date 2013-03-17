@@ -1,0 +1,10 @@
+
+# Test requirements:
+
+execnet==1.1
+py==1.4.13
+pytest==2.3.4
+pytest-xdist==1.8
+six==1.2.0
+
+###
