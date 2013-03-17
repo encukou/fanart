@@ -7,7 +7,7 @@ import os
 
 from pyramid.decorator import reify
 from sqlalchemy import orm, exc
-from sqlalchemy.sql import functions
+from sqlalchemy.sql import functions, and_, or_
 import bcrypt
 
 from fanart.models import tables
@@ -54,7 +54,7 @@ class Backend(object):
     def shoutbox(self):
         return Shoutbox(self)
 
-    @reify
+    @property
     def art(self):
         return Artworks(self)
 
@@ -92,10 +92,11 @@ def access_allowed(access_func, obj):
 
 class ColumnProperty(object):
     def __init__(self, column_name, get_access=allow_any,
-                 set_access=allow_none):
+                 set_access=allow_none, check=None):
         self.column_name = column_name
         self.get_access = get_access
         self.set_access = set_access
+        self.check = check
 
     def __get__(self, instance, owner):
         if instance:
@@ -108,6 +109,8 @@ class ColumnProperty(object):
     def __set__(self, instance, value):
         if not access_allowed(self.set_access, instance):
             raise AccessError('Cannot set %s' % self.column_name)
+        if self.check and not self.check(instance, value):
+            raise ValueError('Cannot set %s to %s' % (self.column_name, value))
         setattr(instance._obj, self.column_name, value)
 
 
@@ -190,6 +193,9 @@ class Item(object):
 
     def __neq__(self, other):
         return not self == other
+
+    def __hash__(self):
+        return hash(type(self)) ^ hash(self._obj.id)
 
 
 class User(Item):
@@ -365,15 +371,48 @@ class Shoutbox(Collection):
 
 
 class Artwork(Item):
+    """A piece of art in the gallery
+
+    The state of an artwork is controlled by several flags:
+
+    hidden - author does not wish this work to be displayed
+    complete - the work has at least one completely processed version attached
+    approved - the work is part of the public gallery
+
+    and two other attributes
+    name - the name of the piece: can be changed by authors, but never unset
+    identifier - the art's identifier; needed for publishing the art
+
+    State diagram:
+
+                        [not named, not complete]
+                           ↑           |
+      Uploading+processing |           | Naming
+                           ↓           ↓
+        [not named, complete]      [named, not complete]
+                           |           |
+                    Naming |           | Uploading+processing
+                           ↓           ↕
+                        [named, complete]
+                           =           =
+       [named, complete, hidden] ↔ [named, complete, not hidden]
+                                       |
+                                       | Approval
+                                       | (auto-create identifier if needed)
+                                       ↓
+                                   [named, complete, approved]
+
+    """
     @property
     def identifier(self):
         return self._obj.identifier
 
     created_at = ColumnProperty('created_at')
-    name = ColumnProperty('name', allow_any, allow_authors)
+    name = ColumnProperty('name', allow_any, allow_authors,
+                          check=lambda i, x: x)
     approved = ColumnProperty('approved')
     hidden = ColumnProperty('hidden', allow_any, allow_authors)
-    rejected = ColumnProperty('rejected')
+    complete = ColumnProperty('complete')
 
     @property
     def authors(self):
@@ -394,7 +433,21 @@ class Artwork(Item):
         else:
             raise AccessError('Cannot set authors')
 
+    @property
+    def versions(self):
+        return ArtworkVersions(self.backend, artwork=self)
+
+    @property
+    def current_version(self):
+        return ArtworkVersion(self.backend, self._obj.current_version)
+
     def upload(self, input_file):
+        """Upload a fileto be added to the artwork.
+
+        This adds a new Version to the artwork,
+        The file is scheduled for processing; at some point in the future,
+        thumbnails will be generated and the new Version will be usable.
+        """
         basename = '_' + str(uuid.uuid4()).replace('-', '')
         fname = os.path.join(self.backend._scratch_dir, basename)
         file_hash = hashlib.sha256()
@@ -438,10 +491,65 @@ class Artwork(Item):
             os.remove(fname)
             raise
 
+    def set_identifier(self):
+        """Auto-create a unique identifier for the art"""
+        if not self.hidden and self.name and not self.identifier:
+            # For all of these, use make_identifier to keep
+            # these within [a-z0-9-]*
+            art_identifier = helpers.make_identifier(self.name)
+            def gen_identifiers():
+                # We don't want "-" (empty)
+                # We also don't want things that DON'T include a "-"
+                # (i.e. single words): those might clash with future
+                # additions to the URL namespace
+                # And we also don't want numbers; reserve those for
+                # numeric IDs.
+                if art_identifier != '-' and '-' in art_identifier:
+                    try:
+                        int(art_identifier)
+                    except ValueError:
+                        pass
+                    else:
+                        yield art_identifier
+                # If that's taken, prepend the author's name(s)
+                bases = [
+                    helpers.make_identifier('{}-{}'.format(
+                        a.name, art_identifier))
+                    for a in self.authors]
+                for base in bases:
+                    yield base
+                # And if that's still not enough, append a number
+                for i in itertools.count(start=1):
+                    for base in bases:
+                        yield '{}-{}'.format(base, i)
+            for identifier in gen_identifiers():
+                query = self.backend._db.query(tables.Artwork)
+                query = query.filter(tables.Artwork.identifier == identifier)
+                if not query.count():
+                    self._obj.identifier = identifier
+                    break
+
 
 class Artworks(Collection):
     item_table = tables.Artwork
     item_class = Artwork
+    flags = {'hidden', 'complete', 'approved'}
+
+    def __init__(self, backend, _query=None):
+        super().__init__(backend, _query)
+        user = self.backend.logged_in_user
+        if _query is None:
+            self._query = self._query.join(tables.Artwork.artwork_authors)
+            if user._obj is not ADMIN:
+                # A user can only see artwork if:
+                # the work is approved and not hidden
+                artfilter = and_(~self.item_table.hidden,
+                                 self.item_table.approved)
+                # or, if it's theirs
+                if not user.is_virtual:
+                    artfilter = or_(
+                        artfilter, tables.ArtworkAuthor.author == user._obj)
+                self._query = self._query.filter(artfilter)
 
     def add(self, name=None):
         if not access_allowed(allow_logged_in, self):
@@ -460,17 +568,43 @@ class Artworks(Collection):
 
         return self.item_class(self.backend, item)
 
+    def filter_author(self, author):
+        query = self._query
+        query = query.filter(tables.ArtworkAuthor.author == author._obj)
+        return type(self)(self.backend, query)
+
+    def filter_flags(self, **flag_dict):
+        query = self._query
+        for flag, value in flag_dict.items():
+            if flag in self.flags:
+                query = query.filter(getattr(self.item_table, flag) == value)
+            else:
+                raise ValueError(flag)
+        return type(self)(self.backend, query)
+
 
 class ArtworkVersion(Item):
     artwork = WrappedProperty('artwork', Artwork)
     uploaded_at = ColumnProperty('uploaded_at')
     uploader = WrappedProperty('uploader', User)
     current = ColumnProperty('current')
+    complete = ColumnProperty('complete')
 
     @property
     def artifacts(self):
         artifacts = self._obj.artifacts.items()
         return {k: Artifact(self.backend, v) for k, v in artifacts}
+
+
+class ArtworkVersions(Collection):
+    item_table = tables.ArtworkVersion
+    item_class = ArtworkVersion
+    order_clauses = [tables.ArtworkVersion.uploaded_at]
+
+    def __init__(self, backend, _query=None, artwork=None):
+        super().__init__(backend, _query=_query)
+        if artwork:
+            self._query.filter(tables.ArtworkVersion.artwork == artwork._obj)
 
 
 class Artifact(Item):

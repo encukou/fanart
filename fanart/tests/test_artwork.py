@@ -34,6 +34,8 @@ def test_add_artwork(backend, as_admin):
     else:
         assert list(art.authors) == [user]
 
+    assert list(art.versions) == []
+
 @pytest.mark.login
 def test_add_version(backend):
     art = backend.art.add('A Masterpiece')
@@ -52,3 +54,44 @@ def test_add_version(backend):
     assert artifact.width == None
     assert artifact.height == None
     assert artifact.filetype == None
+
+    assert list(art.versions) == [art_version]
+
+@pytest.mark.login
+def test_author_filter(backend):
+    art = backend.art.add('A Masterpiece')
+    assert list(backend.art.filter_author(backend.logged_in_user)) == [art]
+
+    user = backend.users.add('Johnny', 'super*secret', _crypt_strength=0)
+    assert list(backend.art.filter_author(user)) == []
+
+@pytest.mark.login
+def test_nonauthor_access(backend):
+    art = backend.art.add('A Masterpiece')
+
+    user = backend.users.add('Johnny', 'super*secret', _crypt_strength=0)
+    backend.login(user)
+    assert backend.logged_in_user == user
+    assert list(backend.art) == []
+
+@pytest.mark.login
+def test_flag_filter(backend):
+    user = backend.logged_in_user
+    default = backend.art.add('A Masterpiece')
+    hidden = backend.art.add('A Masterpiece')
+    complete = backend.art.add('A Masterpiece')
+    both = backend.art.add('A Masterpiece')
+    hidden.hidden = True
+    both.hidden = True
+
+    backend.login_admin()
+
+    complete.complete = True
+    both.complete = True
+
+    assert set(backend.art) == {default, hidden, complete, both}
+    assert set(backend.art.filter_flags(hidden=False)) == {default, complete}
+    assert set(backend.art.filter_flags(hidden=True)) == {hidden, both}
+    assert set(backend.art.filter_flags(complete=False)) == {default, hidden}
+    assert set(backend.art.filter_flags(complete=True)) == {complete, both}
+    assert set(backend.art.filter_flags(complete=True, hidden=True)) == {both}

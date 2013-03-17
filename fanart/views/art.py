@@ -26,18 +26,13 @@ class ArtManager(ViewBase):
     page_title = 'Správa obrázků'
 
     def render(self, request):
-        query = request.db.query(Artwork)
-        query = query.join(Artwork.artwork_authors)
-        query = query.filter(ArtworkAuthor.author == request.user)
-        query = query.filter(Artwork.identifier == None)
-        uploaded_files = query.all()
-        if not uploaded_files:
+        art_to_manage = list(request.backend.art.filter_author(request.user))
+        if not art_to_manage:
             return httpexceptions.HTTPSeeOther(self['upload'].url)
-        elif len(uploaded_files) == 1:
-            print('!')
-            return httpexceptions.HTTPSeeOther(self[uploaded_files[0]].url)
+        elif len(art_to_manage) == 1:
+            return httpexceptions.HTTPSeeOther(self[art_to_manage[0]].url)
         return self.render_response(
-            'art/manage.mako', request)
+            'art/manage.mako', request, artworks=art_to_manage)
 
     def get(self, item):
         return PieceManager(self, item)
@@ -87,17 +82,12 @@ class PieceManager(ViewBase):
     friendly_name = 'Nepojmenovaný obrázek'
 
     def __init__(self, parent, item):
-        if isinstance(item, str):
+        if isinstance(item, (int, str)):
             try:
                 item = int(item)
             except ValueError:
                 raise LookupError(item)
-            query = parent.request.db.query(Artwork)
-            query = query.filter_by(id=item)
-            try:
-                item = query.one()
-            except NoResultFound:
-                raise LookupError(item)
+            item = parent.request.backend.art[item]
         if item.name:
             self.friendly_name = item.name
         super().__init__(parent, str(item.id))
@@ -107,7 +97,7 @@ class PieceManager(ViewBase):
         if request.user.is_virtual:
             raise httpexceptions.HTTPForbidden("Nejsi přihlášen/a.")
         artwork = self.artwork
-        if request.user._obj not in artwork.authors:
+        if request.user not in artwork.authors:
             raise httpexceptions.HTTPForbidden("Sem můžou jen autoři obrázku.")
         schema = PieceSchema(request)
 
@@ -118,20 +108,8 @@ class PieceManager(ViewBase):
                 Obrázek je nahraný, ale ještě není v Galerii.
                 Zkontroluj, zda je všechno správně, a klikni na Přidat.
                 ''')
-        elif artwork.rejected:
-            messages.append(
-                '''
-                Obrázek byl odmítnut. Do této Galerie se nehodí.
-                Pokud si myslíš, že došlo k omylu, kontaktuj administrátory
-                    stránky.
-                ''')
-                # XXX: Link to rules!
         else:
-            query = request.db.query(ArtworkArtifact)
-            query = query.join(ArtworkArtifact.artwork_version)
-            query = query.filter(ArtworkArtifact.type == 'scratch')
-            query = query.filter(ArtworkVersion.artwork == artwork)
-            if query.count():
+            if not artwork.complete:
                 if not artwork.hidden:
                     messages.append(
                         '''
@@ -163,46 +141,10 @@ class PieceManager(ViewBase):
                 print(e, type(e), e.error)
                 pass
             else:
-                request.db.rollback()
+                artwork.hidden = appstruct['publish'] == 'n'
                 if appstruct['image_name']:
                     artwork.name = appstruct['image_name']
-                artwork.hidden = appstruct['publish'] == 'n'
-                if not artwork.hidden and artwork.name:
-                    # Auto-create a unique identifier for the art!
-                    # For all of these, use make_identifier to keep
-                    # these within [a-z0-9-]*
-                    art_identifier = make_identifier(artwork.name)
-                    def gen_identifiers():
-                        # We don't want "-" (empty)
-                        # We also don't want things that DON'T include a "-"
-                        # (i.e. single words): those might clash with future
-                        # additions to the URL namespace
-                        # And we also don't want numbers; reserve those for
-                        # numeric IDs.
-                        if art_identifier != '-' and '-' in art_identifier:
-                            try:
-                                int(art_identifier)
-                            except ValueError:
-                                pass
-                            else:
-                                yield art_identifier
-                        # If that's taken, prepend the author's name(s)
-                        bases = [
-                            make_identifier('{}-{}'.format(
-                                a.name, art_identifier))
-                            for a in artwork.authors]
-                        for base in bases:
-                            yield base
-                        # And if that's still not enough, append a number
-                        for i in itertools.count(start=1):
-                            for base in bases:
-                                yield '{}-{}'.format(base, i)
-                    for identifier in gen_identifiers():
-                        query = request.db.query(Artwork)
-                        query = query.filter(Artwork.identifier == identifier)
-                        if not query.count():
-                            artwork.identifier = identifier
-                            break
+                    artwork.set_identifier()
             return httpexceptions.HTTPSeeOther(self.url)
         appdata = dict()
         appdata['image_name'] = artwork.name
@@ -229,15 +171,9 @@ class ArtPage(ViewBase):
             try:
                 item = int(item)
             except ValueError:
-                query = query.filter_by(identifier=item)
-            else:
-                query = query.filter_by(id=item)
-            try:
-                item = query.one()
-            except NoResultFound:
-                raise LookupError(item)
+                pass
+            artwork = parent.backend.art[item]
         self.friendly_name = item.name
-        self.page_title = item.name
         if not item.identifier:
             raise LookupError(item)
         if not name:
@@ -271,11 +207,10 @@ class Art(ViewBase):
     friendly_name = 'Obrázky'
 
     def render(self, request):
-        query = request.db.query(Artwork)
-        query = query.filter(~Artwork.rejected)
-        query = query.filter(~Artwork.hidden)
+        all_art = request.backend.art
+        artworks = list(all_art.filter_flags(approved=True, hidden=False))
         return self.render_response(
-            'art/index.mako', request, artworks=query.all())
+            'art/index.mako', request, artworks=artworks)
 
     def get(self, item):
         try:

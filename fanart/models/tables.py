@@ -77,7 +77,7 @@ class Artwork(Base):
     identifier = Column(Unicode, nullable=True, unique=True)
     approved = Column(Boolean, nullable=False, default=False)
     hidden = Column(Boolean, nullable=False, default=False)
-    rejected = Column(Boolean, nullable=False, default=False)
+    complete = Column(Boolean, nullable=False, default=False)
 
 class ArtworkVersion(Base):
     __tablename__ = 'artwork_versions'
@@ -86,6 +86,7 @@ class ArtworkVersion(Base):
     uploaded_at = Column(DateTime, index=True, nullable=False)
     uploader_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     current = Column(Boolean, nullable=False, default=False)
+    complete = Column(Boolean, nullable=False, default=False)
 
 class Artifact(Base):
     __tablename__ = 'artifacts'

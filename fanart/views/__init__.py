@@ -70,8 +70,10 @@ class Site(ViewBase):
     def render(self, request):
         # XXX: Better number of stories
         news_items = request.backend.news.from_newest[:3]
-        art_items = request.db.query(tables.Artwork).order_by(tables.Artwork.created_at.desc())[:12]
-        return self.render_response('root.mako', request, news=news_items, artworks=art_items)
+        art_items = request.backend.art.filter_flags(
+            hidden=False, approved=True)[:12]
+        return self.render_response(
+            'root.mako', request, news=news_items, artworks=art_items)
 
     @instanceclass
     class child_css(ViewBase):
@@ -111,6 +113,8 @@ class Site(ViewBase):
         elif isinstance(item, tables.User):
             return self['users'][item]
         elif isinstance(item, tables.Artwork):
+            return self['art'][item]
+        elif isinstance(item, backend.Artwork):
             return self['art'][item]
         else:
             raise ValueError(item)

@@ -5,7 +5,7 @@ body:
     background-color: $mid_background
     color: $text_on_mid
     margin: 0
-    font-family: $serif
+    /* font-family: $serif */
 
 img:
     border-style: none
