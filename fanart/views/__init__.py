@@ -14,7 +14,6 @@ from fanart.views.base import ViewBase, instanceclass
 from fanart.views import users, news, api, shoutbox, art, helpers
 from fanart.tasks import run_tasks
 from fanart import backend
-from fanart.models import tables
 
 def view_root(context, request):
     print(request.application_url, request.path_info, context.url)
@@ -110,10 +109,6 @@ class Site(ViewBase):
     def wrap(self, item):
         if isinstance(item, backend.User):
             return self['users'][item]
-        elif isinstance(item, tables.User):
-            return self['users'][item]
-        elif isinstance(item, tables.Artwork):
-            return self['art'][item]
         elif isinstance(item, backend.Artwork):
             return self['art'][item]
         else:

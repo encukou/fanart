@@ -1,8 +1,5 @@
 # Encoding: UTF-8
 
-
-from fanart.models import tables
-
 def get_user(request, backend):
     try:
         user_id = request.session['user_id']

@@ -12,9 +12,6 @@ from sqlalchemy.orm.exc import NoResultFound
 import colander
 import deform
 
-from fanart.models.tables import (
-    Artwork, ArtworkVersion, Artifact, ArtworkArtifact, ArtworkAuthor)
-
 from fanart.views.base import ViewBase, instanceclass
 from fanart.views import helpers as view_helpers
 from fanart.helpers import make_identifier
@@ -167,12 +164,7 @@ class ArtPage(ViewBase):
 
     def __init__(self, parent, item, name=None):
         if isinstance(item, str):
-            query = parent.request.db.query(Artwork)
-            try:
-                item = int(item)
-            except ValueError:
-                pass
-            artwork = parent.backend.art[item]
+            item = parent.backend.art[item]
         self.friendly_name = item.name
         if not item.identifier:
             raise LookupError(item)

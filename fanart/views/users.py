@@ -9,7 +9,6 @@ import deform
 
 from fanart.views.base import ViewBase, instanceclass
 from fanart.views import helpers
-from fanart.models import tables
 from fanart import backend
 
 class StringListSchema(colander.SequenceSchema):
@@ -166,7 +165,7 @@ class Users(ViewBase):
                         raise err
 
                     try:
-                        request.backend.users.add(
+                        new_user = request.backend.users.add(
                             appstruct['user_name'],
                             appstruct['password'])
                     except ValueError:
@@ -233,8 +232,6 @@ class Users(ViewBase):
 
     def get(self, id):
         if isinstance(id, backend.User):
-            return UserByID(self, id.id).by_name
-        elif isinstance(id, tables.User):
             return UserByID(self, id.id).by_name
         return UserByID(self, id)
 

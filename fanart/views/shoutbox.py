@@ -4,7 +4,6 @@ from datetime import datetime
 
 from pyramid import httpexceptions
 
-from fanart.models.tables import ChatMessage
 from fanart.views.base import ViewBase, instanceclass
 from fanart import markdown
 
