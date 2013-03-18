@@ -57,7 +57,6 @@ engine.inlinePatterns["emphasis2"] = SimpleTagPattern(
         r'(_)(.+?)\2', 'em')
 
 # Allow the <b>, <u> and <i> tags – legacy syntax users are used to
-print(engine.inlinePatterns)
 html_index = engine.inlinePatterns.index('link')
 for tag in 'bui':
     engine.inlinePatterns.insert(html_index, 'html_' + tag, SimpleTagPattern(

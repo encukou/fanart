@@ -15,7 +15,6 @@ from pyramid.i18n import get_localizer
 from pyramid.threadlocal import get_current_request
 from pkg_resources import resource_filename
 import deform
-from zope.sqlalchemy import ZopeTransactionExtension
 
 from fanart.models.tables import initialize_sql
 from fanart.views import Site
@@ -61,17 +60,17 @@ def autocommit(handler, registry):
 def main(global_config, **settings):
     """ This function returns a WSGI application.
     """
-    engine = engine_from_config(settings, 'sqlalchemy.')
-    sqla_session = initialize_sql(engine)
 
     class FARequest(Request):
-        db = sqla_session
         fanart_settings = settings
 
         @reify
         def backend(self):
+            engine = engine_from_config(settings, 'sqlalchemy.')
+            sqla_session = initialize_sql(engine)
             backend = Backend(sqla_session, settings['fanart.scratch_dir'])
             users.get_user(self, backend)
+            print(list(backend.users))
             return backend
 
         @property
