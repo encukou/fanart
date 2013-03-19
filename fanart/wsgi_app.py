@@ -60,17 +60,19 @@ def autocommit(handler, registry):
 def main(global_config, **settings):
     """ This function returns a WSGI application.
     """
+    engine = engine_from_config(settings, 'sqlalchemy.')
+    sqla_session = initialize_sql(engine)
+
+    def make_backend():
+        return Backend(sqla_session, settings['fanart.scratch_dir'])
 
     class FARequest(Request):
         fanart_settings = settings
 
         @reify
         def backend(self):
-            engine = engine_from_config(settings, 'sqlalchemy.')
-            sqla_session = initialize_sql(engine)
-            backend = Backend(sqla_session, settings['fanart.scratch_dir'])
+            backend = make_backend()
             users.get_user(self, backend)
-            print(list(backend.users))
             return backend
 
         @property
@@ -97,4 +99,6 @@ def main(global_config, **settings):
     config.add_static_view('scratch', path=settings['fanart.scratch_dir'])
     config.add_view('fanart.views.view_root', context='fanart.views.ViewBase')
     config.add_view('fanart.views:view_403', context='pyramid.httpexceptions.HTTPForbidden')
-    return config.make_wsgi_app()
+    app = config.make_wsgi_app()
+    app._fanart__make_backend = make_backend
+    return app

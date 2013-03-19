@@ -43,16 +43,23 @@ def webapp_config(tmpdir):
         'fanart.scratch_dir': str(tmpdir),
         'available_languages': 'cs',
         'mako.directories': 'fanart:templates/',
-        'sqlalchemy.url': 'sqlite://',
+        'sqlalchemy.url': 'sqlite:///{}/fanart.db'.format(tmpdir),
         }
 
 @pytest.fixture()
-def webapp_url(request, webapp_config):
-    app = wsgi_app.main(None, **webapp_config)
-    server = make_server('', TEST_PORT, app)
+def webapp(webapp_config):
+    return wsgi_app.main(None, **webapp_config)
+
+@pytest.fixture()
+def webapp_url(request, webapp):
+    server = make_server('', TEST_PORT, webapp)
     threading.Thread(target=server.serve_forever).start()
     request.addfinalizer(server.shutdown)
     return 'http://localhost:{}'.format(TEST_PORT)
+
+@pytest.fixture()
+def webapp_backend(webapp):
+    return webapp._fanart__make_backend()
 
 @pytest.fixture(scope='session')
 def selenium(request):
@@ -65,13 +72,16 @@ def selenium(request):
     else:
         return selenium
 
+@pytest.fixture()
+def Keys(selenium):
+    return selenium.webdriver.common.keys.Keys
+
 @pytest.fixture(scope='session',
     params=["HTMLUNIT", "HTMLUNITWITHJS", "FIREFOX", "CHROME"])
 def browser(selenium, request):
     try:
         cap = selenium.webdriver.common.desired_capabilities
         cap = getattr(cap.DesiredCapabilities, request.param)
-        cap["chrome.binary"] = "/usr/bin/chromium-browser"
         browser = selenium.webdriver.Remote(desired_capabilities=cap)
     except urllib.error.URLError as e:
         pytest.skip('could not connect to selenium server: {}'.format(e))
