@@ -298,14 +298,47 @@ class Users(Collection):
             return False
 
 
+class Post(Item):
+    posted_at = ColumnProperty('posted_at')
+    poster = WrappedProperty('poster', User)
+    source = ColumnProperty('source')
+
+
+class Posts(Collection):
+    item_table = tables.Post
+    item_class = Post
+
+    def add(self, source):
+        if not access_allowed(allow_logged_in, self):
+            raise AccessError('Cannot add post')
+        db = self.backend._db
+        poster = self.backend.logged_in_user
+        if poster.is_virtual:
+            poster_obj = None
+        else:
+            poster_obj = poster._obj
+        item = self.item_table(
+                source=source,
+                poster=poster_obj,
+                posted_at=datetime.utcnow(),
+            )
+        db.add(item)
+        db.flush()
+        return self.item_class(self.backend, item)
+
+
 class NewsItem(Item):
     heading = ColumnProperty('heading')
-    source = ColumnProperty('source')
     published = ColumnProperty('published')
     reporter = WrappedProperty('reporter', User)
+    post = WrappedProperty('post', Post)
 
     def __repr__(self):
         return '<{0} {1!r}>'.format(type(self).__qualname__, self.heading)
+
+    @property
+    def source(self):
+        return self.post.source
 
 
 class News(Collection):
@@ -322,9 +355,10 @@ class News(Collection):
             reporter_obj = None
         else:
             reporter_obj = reporter._obj
+        post = self.backend.posts.add(source)
         item = self.item_table(
                 heading=heading,
-                source=source,
+                post=post._obj,
                 reporter=reporter_obj,
                 published=datetime.utcnow(),
             )
@@ -621,33 +655,3 @@ class Artifact(Item):
     width = ColumnProperty('width')
     height = ColumnProperty('height')
     filetype = ColumnProperty('filetype')
-
-
-
-class Post(Item):
-    posted_at = ColumnProperty('posted_at')
-    poster = WrappedProperty('poster', User)
-    source = ColumnProperty('source')
-
-
-class Posts(Collection):
-    item_table = tables.Post
-    item_class = Post
-
-    def add(self, source):
-        if not access_allowed(allow_logged_in, self):
-            raise AccessError('Cannot add post')
-        db = self.backend._db
-        poster = self.backend.logged_in_user
-        if poster.is_virtual:
-            poster_obj = None
-        else:
-            poster_obj = poster._obj
-        item = self.item_table(
-                source=source,
-                poster=poster_obj,
-                posted_at=datetime.utcnow(),
-            )
-        db.add(item)
-        db.flush()
-        return self.item_class(self.backend, item)

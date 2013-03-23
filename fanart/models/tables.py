@@ -58,8 +58,8 @@ class NewsItem(Base):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     published = Column(DateTime, index=True, nullable=False)
     heading = Column(Unicode, nullable=False)
-    source = Column(Unicode, nullable=False)
     reporter_id = Column(Integer, ForeignKey('users.id'), nullable=True)
+    post_id = Column(Integer, ForeignKey('posts.id'), nullable=True)
 
 class ChatMessage(Base):
     __tablename__ = 'chat_messages'
@@ -130,6 +130,8 @@ UserContact.user = relationship(
 
 NewsItem.reporter = relationship(User,
         primaryjoin=NewsItem.reporter_id == User.id)
+NewsItem.post = relationship(Post,
+        primaryjoin=NewsItem.post_id == Post.id)
 
 ChatMessage.sender = relationship(User,
         primaryjoin=ChatMessage.sender_id == User.id)
@@ -183,10 +185,6 @@ def populate(session):
         # password is: 'pass'
         password='$2a$04$B6eLb5G5cQjpmtqtkh.JfOWjMKbAHIsKmh1ULOR7AK7/6xcpqvCxy'))
     session.flush()
-
-    if session.query(NewsItem).count() == 0:
-        from fanart.models.import_old import import_news
-        import_news(session)
 
     session.commit()
 
