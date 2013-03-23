@@ -53,12 +53,14 @@ serif = 'Gentium Book Basic', serif
 
     hr:
         display: block
-        background-color: $dark_background
         border-style: none
+        background-color: $dark_background
         height: 1px
-        width: 90%
-        margin-top: 4em
+        width: 96%
+        margin: auto
+        margin-top: 2em
         margin-bottom: 2em
+        background: `linear-gradient(` to right, $mid_background 0%, $dark_background 20%, $dark_background 80%, $mid_background 100% `)`
 
 #usernav #shoutbox:
     section:

@@ -44,3 +44,11 @@
 % for author, description in artwork.author_descriptions.items():
     ${self.helpers.comment(description, poster=author)}
 % endfor
+
+<dl class="art-info">
+    <dt>Vytvořeno</dt>
+        <dd>${h.format_date(artwork.created_at)}</dd>
+    <dt>Klíč. slova</dt>
+        <dd>žádná</dd>
+</dl>
+<span class="fix"></span>
