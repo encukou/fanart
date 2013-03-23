@@ -77,8 +77,8 @@ def Keys(selenium):
     return selenium.webdriver.common.keys.Keys
 
 @pytest.fixture(scope='session',
-    params=["HTMLUNIT", "HTMLUNITWITHJS", "FIREFOX", "CHROME"])
-def browser(selenium, request):
+    params=["FIREFOX", "CHROME", "HTMLUNIT", "HTMLUNITWITHJS"])
+def browser_impl(selenium, request):
     try:
         cap = selenium.webdriver.common.desired_capabilities
         cap = getattr(cap.DesiredCapabilities, request.param)
@@ -89,3 +89,19 @@ def browser(selenium, request):
         pytest.skip('web driver exception: {}'.format(e))
     request.addfinalizer(browser.quit)
     return browser
+
+@pytest.fixture
+def browser(browser_impl):
+    browser_impl.get('about:blank')
+    return browser_impl
+
+@pytest.mark.tryfirst
+def pytest_runtest_makereport(item, call, __multicall__):
+    # execute all other hooks to obtain the report object
+    rep = __multicall__.execute()
+
+    # set an report attribute for each phase of a call, which can
+    # be "setup", "call", "teardown"
+
+    setattr(item, "rep_" + rep.when, rep)
+    return rep

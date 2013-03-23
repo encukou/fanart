@@ -254,7 +254,10 @@ class Users(Collection):
             return super().__getitem__(item)
         except LookupError:
             query = self._query
-            ident = helpers.make_identifier(item)
+            try:
+                ident = helpers.make_identifier(item)
+            except (TypeError, ValueError):
+                raise LookupError(item)
             query = query.filter(self.item_table.normalized_name == ident)
             try:
                 user = query.one()

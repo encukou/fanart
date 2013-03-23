@@ -25,3 +25,17 @@ def test_create_user(browser, webapp_url, webapp_backend, Keys):
 
     assert {u.name for u in webapp_backend.users} == {'Test', 'new user'}
     assert webapp_backend.users['new user'].check_password('super*secret')
+
+def test_login(browser, webapp_url, webapp_backend, Keys):
+    browser.get(webapp_url)
+    field = browser.find_element_by_css_selector('#side_login [name=user_name]')
+    field.send_keys(Keys.CLEAR, 'test')
+    field = browser.find_element_by_css_selector('#side_login [name=password]')
+    field.send_keys(Keys.CLEAR, 'pass')
+    field = browser.find_element_by_css_selector('#side_login button.submit')
+    field.click()
+
+    flash = browser.find_element_by_css_selector('#usernav .flash')
+    assert flash.text == 'Přihlášeno!'
+    name_link = browser.find_element_by_css_selector('#usernav .name-link a')
+    assert name_link.text == 'Test'
