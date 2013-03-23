@@ -1,5 +1,3 @@
-import sys
-
 def test_homepage_title(browser, webapp_url):
     browser.get(webapp_url)
     assert browser.title

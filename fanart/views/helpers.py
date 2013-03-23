@@ -1,13 +1,15 @@
 # Encoding: UTF-8
 
 
-import datetime
+from io import StringIO
 
 import pytz
 import colander
 import deform
 
 from fanart.markdown import convert as markdown2html
+
+markdown2html
 
 local_timezone = pytz.timezone('Europe/Prague')
 

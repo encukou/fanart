@@ -1,19 +1,15 @@
 
-import bcrypt
-import sqlalchemy.orm
 from sqlalchemy.orm import (scoped_session, reconstructor, sessionmaker,
         relationship, backref)
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.sql import functions, and_
+from sqlalchemy.sql import and_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.orderinglist import ordering_list
-from sqlalchemy.orm.collections import (
-    attribute_mapped_collection, column_mapped_collection)
+from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy import Integer, Unicode, DateTime, Boolean, BINARY
 
-from fanart.helpers import make_identifier, NormalizedKeyDict
 
 Base = declarative_base()
 
@@ -195,6 +191,6 @@ def initialize_sql(engine, sessionmaker_args={}):
     Base.metadata.create_all(engine)
     try:
         populate(DBSession())
-    except IntegrityError as e:
+    except IntegrityError:
         DBSession.rollback()
     return DBSession

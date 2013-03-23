@@ -1,11 +1,8 @@
 # Encoding: UTF-8
 
-from datetime import datetime
-
 from pyramid import httpexceptions
 
 from fanart.views.base import ViewBase, instanceclass
-from fanart import markdown
 
 
 class Shoutbox(ViewBase):

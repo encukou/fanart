@@ -1,17 +1,12 @@
 # Encoding: UTF-8
 
 
-import re
-
 import markdown
-from markdown.inlinepatterns import (Pattern, DoubleTagPattern,
-        SimpleTagPattern, HtmlPattern)
+from markdown.inlinepatterns import DoubleTagPattern, SimpleTagPattern
 from markdown.blockprocessors import BlockProcessor
-from markdown.extensions import headerid, fenced_code, def_list, tables, abbr, nl2br
+from markdown.extensions import fenced_code, def_list, tables, abbr, nl2br
 from fanart.thirdparty import urlize, mdx_downheader, wikilinks
 
-from pyramid.response import Response
-from pyramid import httpexceptions
 
 def build_url(label, base, end):
     # XXX: URLs for Wikilinks

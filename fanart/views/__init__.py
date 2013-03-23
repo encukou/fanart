@@ -1,17 +1,10 @@
-# Encoding: UTF-8
-
-
-import os
-
-from pyramid.renderers import render
 from pyramid.response import Response
-from pyramid.threadlocal import get_current_request
 from pyramid import httpexceptions
 import clevercss
 import pkg_resources
 
 from fanart.views.base import ViewBase, instanceclass
-from fanart.views import users, news, api, shoutbox, art, helpers
+from fanart.views import users, news, api, shoutbox, art
 from fanart.tasks import run_tasks
 from fanart import backend
 
@@ -107,9 +100,9 @@ class Site(ViewBase):
     child_task = instanceclass(run_tasks.RunTask)
 
     def wrap(self, item):
-        if isinstance(item, backend.User):
+        if isinstance(item, backend.users.User):
             return self['users'][item]
-        elif isinstance(item, backend.Artwork):
+        elif isinstance(item, backend.art.Artwork):
             return self['art'][item]
         else:
             raise ValueError(item)

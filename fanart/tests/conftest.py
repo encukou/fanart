@@ -65,7 +65,7 @@ def webapp_backend(webapp):
 def selenium(request):
     try:
         import selenium.webdriver
-        from selenium.webdriver.common.keys import Keys
+        import selenium.webdriver.common.keys
         import selenium.webdriver.common.desired_capabilities
     except ImportError:
         pytest.skip('could not import selenium')

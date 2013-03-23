@@ -9,7 +9,7 @@ import contextlib
 import hashlib
 import shutil
 
-from fanart.views.base import ViewBase, instanceclass
+from fanart.views.base import ViewBase
 from fanart.models import tables
 
 IDENTIFY_BINARY = '/usr/bin/identify'
@@ -102,7 +102,7 @@ def link_artifact(request, artifact_version, new_type):
         )
     request.db.add(new_artwork_artifact)
     request.db.flush()
-    identification = identify_artifact(request, new_artwork_artifact)
+    identify_artifact(request, new_artwork_artifact)
     request.db.commit()
     return dict(
         action='link_artifact',

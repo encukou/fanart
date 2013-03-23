@@ -69,6 +69,8 @@ def test_author_filter(backend):
 def test_nonauthor_access(backend):
     art = backend.art.add('A Masterpiece')
 
+    assert list(backend.art) == [art]
+
     user = backend.users.add('Johnny', 'super*secret', _crypt_strength=0)
     backend.login(user)
     assert backend.logged_in_user == user
@@ -76,7 +78,6 @@ def test_nonauthor_access(backend):
 
 @pytest.mark.login
 def test_flag_filter(backend):
-    user = backend.logged_in_user
     default = backend.art.add('A Masterpiece')
     hidden = backend.art.add('A Masterpiece')
     complete = backend.art.add('A Masterpiece')

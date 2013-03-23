@@ -1,21 +1,11 @@
 # Encoding: UTF-8
 
-from datetime import datetime
-import os
-import hashlib
-import uuid
-import itertools
-
 from pyramid import httpexceptions
-from pyramid.response import Response
-from sqlalchemy.orm.exc import NoResultFound
 import colander
 import deform
 
 from fanart.views.base import ViewBase, instanceclass
 from fanart.views import helpers as view_helpers
-from fanart.helpers import make_identifier
-from fanart import markdown
 
 
 class ArtManager(ViewBase):

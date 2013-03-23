@@ -31,6 +31,8 @@ def test_lookup_user(backend):
     with pytest.raises(LookupError):
         backend.users[str(user.id)]
 
+    assert user != otheruser
+
 def test_duplicate_user_name(backend):
     user = backend.users.add('Doppelgänger', 'super*secret', _crypt_strength=0)
 
@@ -42,7 +44,8 @@ def test_duplicate_user_name(backend):
     with pytest.raises(ValueError):
         backend.users.add('Doppelganger', 'super*secret', _crypt_strength=0)
 
-    backend.users.add('Doppelgänger 2', 'super*secret', _crypt_strength=0)
+    other = backend.users.add('Doppelgänger 2', 'super*secret', _crypt_strength=0)
+    assert user != other
 
 def test_check_password(backend):
     user = backend.users.add('Alice', 'super*secret', _crypt_strength=0)

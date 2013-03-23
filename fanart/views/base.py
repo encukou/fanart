@@ -1,10 +1,7 @@
-import urllib.request, urllib.parse, urllib.error
-
 from pyramid.renderers import render
-from pyramid.traversal import find_interface, resource_path
+from pyramid.traversal import find_interface
 from pyramid.location import lineage
 from pyramid.response import Response
-from pyramid.encode import urlencode
 from pyramid.decorator import reify
 from markupsafe import Markup
 

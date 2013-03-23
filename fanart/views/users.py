@@ -3,7 +3,6 @@
 
 from pyramid import httpexceptions
 from pyramid import traversal
-from pyramid.i18n import get_locale_name
 import colander
 import deform
 
@@ -82,7 +81,6 @@ def NewUserSchema(request):
             template = 'Jméno „{}“ je zabrané. Vyber si prosím jiné jméno.'
             raise colander.Invalid(node, template.format(value))
 
-    locale_name = get_locale_name(request)
     class NewUserSchema(helpers.FormSchema):
         user_name = colander.SchemaNode(colander.String(),
                 validator=validate_username,
@@ -231,7 +229,7 @@ class Users(ViewBase):
                 return httpexceptions.HTTPNotFound()
 
     def get(self, id):
-        if isinstance(id, backend.User):
+        if isinstance(id, backend.users.User):
             return UserByID(self, id.id).by_name
         return UserByID(self, id)
 
@@ -359,7 +357,6 @@ class UserByName(ViewBase):
                                         new_contacts[type_] = value
                                 else:
                                     new_contacts[type_] = '?'
-                                    add_contact(type_, '?')
 
                     user.contacts = new_contacts
                     return httpexceptions.HTTPSeeOther(self.parent.url)

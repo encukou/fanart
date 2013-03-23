@@ -1,19 +1,14 @@
 # Encoding: UTF-8
 
 
-from datetime import datetime
-
-from pyramid.response import Response
 from pyramid import httpexceptions
 
 from fanart.views.base import ViewBase, instanceclass
-from fanart import markdown
 
 class News(ViewBase):
     friendly_name = 'Novinky'
 
     def render(self, request):
-        now = datetime.utcnow()
         # XXX: Better number of stories
         news_items = request.backend.news.from_newest[:7]
         return self.render_response('news/all.mako', request, news=news_items)

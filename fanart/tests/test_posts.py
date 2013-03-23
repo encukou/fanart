@@ -1,9 +1,5 @@
 from datetime import datetime
 
-import pytest
-
-from fanart import backend as backend_mod
-
 def test_zero_posts(backend):
     assert len(backend.posts) == 0
     assert list(backend.posts) == []
