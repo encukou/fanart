@@ -21,7 +21,10 @@ class User(Base):
     normalized_name = Column(Unicode, unique=True, nullable=True)
     password = Column(Unicode, nullable=True)
     gender = Column(Unicode(6), nullable=True)
-    bio = Column(Unicode, nullable=True)
+    bio_post_id = Column(
+        Integer,
+        ForeignKey('posts.id', use_alter=True, name='fk_user_bio_post'),
+        nullable=True)
     email = Column(Unicode, nullable=True)
     date_of_birth = Column(DateTime, nullable=True)
     show_email = Column(Boolean, default=False)
@@ -114,7 +117,10 @@ class Post(Base):
     posted_at = Column(DateTime, index=True, nullable=False)
     source = Column(Unicode, nullable=False)
     poster_id = Column(Integer, ForeignKey('users.id'), nullable=True)
+    new_version_id = Column(Integer, ForeignKey('posts.id'), nullable=True)
 
+User.bio_post = relationship(Post,
+        primaryjoin=User.bio_post_id == Post.id)
 User.contacts = association_proxy('_contactdict', 'value', creator=UserContact)
 UserContact.user = relationship(
         User,
@@ -174,6 +180,9 @@ ArtworkAuthor.artwork = relationship(Artwork,
 
 Post.poster = relationship(User,
         primaryjoin=Post.poster_id == User.id)
+Post.new_version = relationship(Post,
+        primaryjoin=Post.new_version_id == Post.id,
+        remote_side=[Post.id])
 
 
 def populate(session):

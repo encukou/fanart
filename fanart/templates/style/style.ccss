@@ -7,7 +7,7 @@ text_on_mid = #130e04
 dark_foreground = #44381f
 dark_secondary_color = #3e4929
 link_hover_color = white
-disabled_color = $dark_background
+disabled_color = $text_on_mid.mix(50%, $dark_background)
 
 flash_color = #ffffff
 flash_border = #d37a13

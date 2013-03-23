@@ -7,10 +7,71 @@ from fanart.backend.helpers import ColumnProperty, WrappedProperty
 from fanart.backend.users import User
 
 
+EMPTY_POST = tables.Post(
+    posted_at=None,
+    poster=None,
+    source='',
+    id=object(),
+)
+
+
+def _add_new_post(backend, source):
+    poster = backend.logged_in_user
+    db = backend._db
+    if poster.is_virtual:
+        poster_obj = None
+    else:
+        poster_obj = poster._obj
+    item = tables.Post(
+            source=source,
+            poster=poster_obj,
+            posted_at=datetime.utcnow(),
+        )
+    db.add(item)
+    db.flush()
+    return item
+
+
 class Post(Item):
+    def __init__(self, backend, obj):
+        if obj is None:
+            obj = EMPTY_POST
+        super().__init__(backend, obj)
+
     posted_at = ColumnProperty('posted_at')
     poster = WrappedProperty('poster', User)
     source = ColumnProperty('source')
+
+    @property
+    def new_version(self):
+        if self._obj.new_version:
+            return Post(self.backend, self._obj.new_version)
+        else:
+            return None
+
+    def replace(self, new_source):
+        """Add a new post that is a newer version of this one.
+        """
+        if new_source == self._obj.source:
+            return self
+        if self._obj.new_version:
+            raise ValueError('Cannot update old post')
+        if self._obj is EMPTY_POST:
+            return Post(self.backend, _add_new_post(self.backend, new_source))
+        else:
+            new_post = _add_new_post(self.backend, new_source)
+            self._obj.new_version = new_post
+            query = self.backend._db.query(tables.Post)
+            query = query.filter(tables.Post.new_version_id == self._obj.id)
+            query.update({'new_version_id': new_post.id})
+            self.backend._db.expire_all()  # XXX: uppdate(synchronize_session='evaluate')?
+            return Post(self.backend, new_post)
+
+    def __repr__(self):
+        if self._obj is EMPTY_POST:
+            return '<Post (empty)>'
+        else:
+            return '<Post {}>'.format(self.id)
 
 
 class Posts(Collection):
@@ -20,19 +81,7 @@ class Posts(Collection):
     def add(self, source):
         if not access_allowed(allow_logged_in, self):
             raise AccessError('Cannot add post')
-        db = self.backend._db
-        poster = self.backend.logged_in_user
-        if poster.is_virtual:
-            poster_obj = None
-        else:
-            poster_obj = poster._obj
-        item = self.item_table(
-                source=source,
-                poster=poster_obj,
-                posted_at=datetime.utcnow(),
-            )
-        db.add(item)
-        db.flush()
+        item = _add_new_post(self.backend, source)
         return self.item_class(self.backend, item)
 
 

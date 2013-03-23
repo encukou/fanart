@@ -31,12 +31,29 @@ class User(Item):
         return bcrypt.hashpw(password, hashed) == hashed
 
     gender = ColumnProperty('gender', allow_any, allow_self)
-    bio = ColumnProperty('bio', allow_any, allow_self)
     email = ColumnProperty('email', allow_any, allow_self)
     date_of_birth = ColumnProperty('date_of_birth', allow_any, allow_self)
     show_email = ColumnProperty('show_email', allow_any, allow_self)
     show_age = ColumnProperty('show_age', allow_any, allow_self)
     show_birthday = ColumnProperty('show_birthday', allow_any, allow_self)
+
+    @property
+    def bio_post(self):
+        from fanart.backend.text import Post
+        return Post(self.backend, self._obj.bio_post)
+
+    @property
+    def bio(self):
+        return self.bio_post.source
+
+    @bio.setter
+    def bio(self, new_bio):
+        if not access_allowed(allow_self, self):
+            raise AccessError('Not allowed')
+        new_post = self.bio_post.replace(new_bio)
+        if new_post is not None:
+            new_post = new_post._obj
+        self._obj.bio_post = new_post
 
     @property
     def contacts(self):

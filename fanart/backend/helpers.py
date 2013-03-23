@@ -1,4 +1,6 @@
 from sqlalchemy import orm
+from pyramid.path import DottedNameResolver
+from pyramid.decorator import reify
 
 from fanart.backend.access import (
     allow_any, allow_none, access_allowed, AccessError)
@@ -48,6 +50,17 @@ class WrappedProperty(ColumnProperty):
         if value is not None:
             value = value._obj
         super().__set__(instance, value)
+
+class DeferredWrappedProperty(WrappedProperty):
+    def __init__(self, column_name, wrapping_class_name,
+                 get_access=allow_any, set_access=allow_none):
+        self.wrapping_class_name = wrapping_class_name
+        super().__init__(column_name, get_access, set_access)
+
+    @reify
+    def wrapping_class(self):
+        resolver = DottedNameResolver()
+        return resolver.resolve(self.wrapping_class_name)
 
 
 class Collection(object):
@@ -103,7 +116,10 @@ class Item(object):
         return self._obj.id
 
     def __eq__(self, other):
-        return self._obj == other._obj
+        try:
+            return self._obj == other._obj
+        except AttributeError:
+            return NotImplemented
 
     def __neq__(self, other):
         return not self == other

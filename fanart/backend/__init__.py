@@ -15,6 +15,11 @@
 
 from fanart.backend.base import Backend
 from fanart.backend.access import AccessError
+import fanart.backend.users
+import fanart.backend.art
+import fanart.backend.helpers
+import fanart.backend.text
 
 Backend
 AccessError
+fanart

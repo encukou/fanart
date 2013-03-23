@@ -192,7 +192,7 @@ body.wide #content form:
                     float: left
                     width: 38%
                     text-align: right
-                    margin-top: 0.5ex
+                    margin-top: 0
                     margin-bottom: 1ex
                     margin-left: 0
                     margin-right: 0
@@ -209,7 +209,7 @@ body.wide #content form:
                 input[type=password], input[type=text], input[type=search], button[type=submit]:
                     min-width: 10rem
 
-                textarea, ul:
+                textarea, ul, .markdown.preview:
                     width: 61%
                     max-width: 30em
 

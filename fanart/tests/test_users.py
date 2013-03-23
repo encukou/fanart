@@ -64,7 +64,7 @@ def test_access(backend):
     user = backend.users.add('Carol', 'super*secret', _crypt_strength=0)
     with pytest.raises(backend_mod.AccessError):
         user.bio = "Some person"
-    assert user.bio is None
+    assert user.bio == ''
     backend.login(user)
     user.bio = "Some person"
     assert user.bio == "Some person"

@@ -95,6 +95,7 @@ $(function() {
         }
         $(md_textarea).change(changed).keypress(changed).keydown(changed).
             keyup(changed).click(changed);
+        changed();
     });
 });
 

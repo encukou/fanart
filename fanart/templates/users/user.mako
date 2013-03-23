@@ -2,7 +2,9 @@
 <%inherit file="../base.mako" />
 
 % if user.bio:
-    ${user.bio}
+    <div class="markdown">
+        ${h.markdown2html(user.bio)}
+    </div>
 % endif
 % if user.contacts:
     <h2>Kontakty</h2>

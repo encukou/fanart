@@ -40,7 +40,8 @@ def UserSchema(request):
                 ]))
         bio = colander.SchemaNode(colander.String(), missing=None,
                 title='Něco o tobě',
-                widget=deform.widget.TextAreaWidget())
+                widget=deform.widget.TextAreaWidget(
+                    css_class='markdown-textarea'))
         # XXX: E-mail seems buggy in colander?
         email = colander.SchemaNode(colander.String(), missing=None,
                 #validator = colander.Email,
