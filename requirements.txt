@@ -1,6 +1,6 @@
 -e .
 
--e git+git@github.com:clevercss/clevercss.git@2131d490d7cf007598cd5b86b098d6efb9ae5d8e#egg=CleverCSS-dev
+-e git+git://github.com/clevercss/clevercss.git@2131d490d7cf007598cd5b86b098d6efb9ae5d8e#egg=CleverCSS-dev
 Beaker==1.6.4
 Chameleon==2.11
 Mako==0.7.3
