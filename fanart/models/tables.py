@@ -112,6 +112,13 @@ class ArtworkAuthor(Base):
     author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     order = Column(Integer, nullable=True)
 
+class Post(Base):
+    __tablename__ = 'posts'
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    posted_at = Column(DateTime, index=True, nullable=False)
+    source = Column(Unicode, nullable=False)
+    poster_id = Column(Integer, ForeignKey('users.id'), nullable=True)
+
 User.contacts = association_proxy('_contactdict', 'value', creator=UserContact)
 UserContact.user = relationship(
         User,
@@ -166,6 +173,9 @@ ArtworkAuthor.artwork = relationship(Artwork,
             cascade="all, delete-orphan",
             order_by=ArtworkAuthor.order,
             collection_class=ordering_list('order', reorder_on_append=True)))
+
+Post.poster = relationship(User,
+        primaryjoin=Post.poster_id == User.id)
 
 
 def populate(session):
