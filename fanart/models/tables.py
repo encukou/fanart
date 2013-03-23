@@ -99,9 +99,8 @@ class Artifact(Base):
 
 class ArtworkArtifact(Base):
     __tablename__ = 'artwork_artifacts'
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    type = Column(Unicode, nullable=False)
-    artwork_version_id = Column(Integer, ForeignKey('artwork_versions.id'), nullable=False)
+    type = Column(Unicode, nullable=False, primary_key=True)
+    artwork_version_id = Column(Integer, ForeignKey('artwork_versions.id'), nullable=False, primary_key=True)
     artifact_id = Column(Integer, ForeignKey('artifacts.id'), nullable=False)
 
 class ArtworkAuthor(Base):
@@ -116,11 +115,27 @@ class Post(Base):
     __tablename__ = 'posts'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     posted_at = Column(DateTime, index=True, nullable=False)
-    source = Column(Unicode, nullable=False)
     poster_id = Column(Integer, ForeignKey('users.id'), nullable=True)
-    new_version_id = Column(Integer, ForeignKey('posts.id'), nullable=True)
+    source = Column(Unicode, nullable=False)
+    active_text_id = Column(
+        Integer,
+        ForeignKey('post_texts.id', use_alter=True, name='fk_post_active_text'),
+        nullable=True)
 
-User.bio_post = relationship(Post,
+class PostText(Base):
+    __tablename__ = 'post_texts'
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    post_id = Column(Integer, ForeignKey('posts.id'), nullable=False)
+    posted_at = Column(DateTime, index=True, nullable=False)
+    poster_id = Column(Integer, ForeignKey('users.id'), nullable=True)
+    source = Column(Unicode, nullable=False)
+
+class ArtworkComment(Base):
+    __tablename__ = 'artwork_comments'
+    artwork_id = Column(Integer, ForeignKey('artworks.id'), nullable=False, primary_key=True)
+    post_id = Column(Integer, ForeignKey('posts.id'), nullable=True, primary_key=True)
+
+User.bio_post = relationship(Post, post_update=True,
         primaryjoin=User.bio_post_id == Post.id)
 User.contacts = association_proxy('_contactdict', 'value', creator=UserContact)
 UserContact.user = relationship(
@@ -183,9 +198,25 @@ ArtworkAuthor.artwork = relationship(Artwork,
 
 Post.poster = relationship(User,
         primaryjoin=Post.poster_id == User.id)
-Post.new_version = relationship(Post,
-        primaryjoin=Post.new_version_id == Post.id,
-        remote_side=[Post.id])
+Post.active_text = relationship(PostText,
+        primaryjoin=Post.active_text_id == PostText.id)
+
+PostText.post = relationship(Post,
+        primaryjoin=PostText.post_id == Post.id,
+        backref=backref(
+            "texts",
+            order_by=PostText.posted_at))
+PostText.poster = relationship(User,
+        primaryjoin=PostText.poster_id == User.id)
+
+ArtworkComment.artwork = relationship(Artwork,
+        primaryjoin=ArtworkComment.artwork_id == Artwork.id,
+        backref='artwork_comments')
+ArtworkComment.post = relationship(Post,
+        primaryjoin=ArtworkComment.post_id == Post.id,
+        backref=backref(
+            'artwork_comments',
+            order_by=Post.posted_at))
 
 
 def populate(session):

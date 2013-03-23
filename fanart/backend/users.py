@@ -44,13 +44,13 @@ class User(Item):
 
     @property
     def bio(self):
-        return self.bio_post.source
+        return self.bio_post.source or ''
 
     @bio.setter
     def bio(self, new_bio):
         if not access_allowed(allow_self, self):
             raise AccessError('Not allowed')
-        new_post = self.bio_post.replace(new_bio)
+        new_post = self.bio_post.edit(new_bio)
         if new_post is not None:
             new_post = new_post._obj
         self._obj.bio_post = new_post

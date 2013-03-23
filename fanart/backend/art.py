@@ -129,7 +129,7 @@ class Artwork(Item):
             raise AccessError('Not an author')
         artwork_author = self._own_artwork_author
         post = Post(self.backend, artwork_author.description)
-        new_post = post.replace(new_source)
+        new_post = post.edit(new_source)
         artwork_author.description = new_post._obj
 
     def upload(self, input_file):
@@ -219,6 +219,10 @@ class Artwork(Item):
                 if not query.count():
                     self._obj.identifier = identifier
                     break
+
+    @property
+    def comments(self):
+        return Comments(self.backend, self)
 
 
 class Artworks(Collection):
@@ -313,3 +317,34 @@ class Artifact(Item):
     width = ColumnProperty('width')
     height = ColumnProperty('height')
     filetype = ColumnProperty('filetype')
+
+
+class Comment(Post):
+    pass
+
+
+class Comments(Collection):
+    item_table = tables.Post
+    item_class = Comment
+
+    def __init__(self, backend, art=None, _query=None):
+        super().__init__(backend, _query=_query)
+        self.art = art
+        if art:
+            query = self._query
+            query = query.join(tables.Post.artwork_comments)
+            query = query.filter(tables.ArtworkComment.artwork == art._obj)
+            self._query = query
+
+    def _clone(self, new_query):
+        return type(self)(self.backend, self.art, new_query)
+
+    def add(self, source):
+        post = self.backend.posts.add(source)
+        item = tables.ArtworkComment(
+                artwork=self.art._obj,
+                post=post._obj,
+            )
+        self.backend._db.add(item)
+        self.backend._db.flush()
+        return Comment(self.backend, post._obj)

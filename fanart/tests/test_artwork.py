@@ -130,3 +130,30 @@ def test_description(backend):
     assert list(art.author_descriptions.keys()) == [orig_user, user]
     assert art.author_descriptions[orig_user].source == 'Some text'
     assert art.author_descriptions[user].source == 'My own text'
+
+@pytest.mark.login
+def test_comments(backend):
+    art = backend.art.add('Yet Another Masterpiece')
+
+    assert list(art.comments) == []
+
+    comment1 = art.comments.add('Comment 1')
+
+    assert list(art.comments) == [comment1]
+    assert comment1.source == 'Comment 1'
+    assert comment1.poster == backend.logged_in_user
+
+    comment2 = art.comments.add('Comment 2')
+
+    assert list(art.comments) == [comment1, comment2]
+    assert comment2.source == 'Comment 2'
+
+    comment3 = art.comments.add('Comment 3')
+
+    assert list(art.comments) == [comment1, comment2, comment3]
+    assert comment3.source == 'Comment 3'
+
+    comment2.edit('Middle comment')
+
+    assert list(art.comments) == [comment1, comment2, comment3]
+    assert comment2.source == 'Middle comment'

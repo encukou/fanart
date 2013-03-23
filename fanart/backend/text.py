@@ -15,21 +15,10 @@ EMPTY_POST = tables.Post(
 )
 
 
-def _add_new_post(backend, source):
-    poster = backend.logged_in_user
-    db = backend._db
-    if poster.is_virtual:
-        poster_obj = None
-    else:
-        poster_obj = poster._obj
-    item = tables.Post(
-            source=source,
-            poster=poster_obj,
-            posted_at=datetime.utcnow(),
-        )
-    db.add(item)
-    db.flush()
-    return item
+class PostText(Item):
+    posted_at = ColumnProperty('posted_at')
+    poster = WrappedProperty('poster', User)
+    source = ColumnProperty('source')
 
 
 class Post(Item):
@@ -40,7 +29,14 @@ class Post(Item):
 
     posted_at = ColumnProperty('posted_at')
     poster = WrappedProperty('poster', User)
-    source = ColumnProperty('source')
+    active_text = WrappedProperty('active_text', PostText)
+
+    @property
+    def source(self):
+        if self.active_text:
+            return self.active_text.source
+        else:
+            return None
 
     @property
     def new_version(self):
@@ -49,23 +45,31 @@ class Post(Item):
         else:
             return None
 
-    def replace(self, new_source):
+    def edit(self, new_source, _time=None):
         """Add a new post that is a newer version of this one.
         """
-        if new_source == self._obj.source:
+        if new_source == self.source:
             return self
-        if self._obj.new_version:
-            raise ValueError('Cannot update old post')
         if self._obj is EMPTY_POST:
-            return Post(self.backend, _add_new_post(self.backend, new_source))
+            return self.backend.posts.add(new_source)
         else:
-            new_post = _add_new_post(self.backend, new_source)
-            self._obj.new_version = new_post
-            query = self.backend._db.query(tables.Post)
-            query = query.filter(tables.Post.new_version_id == self._obj.id)
-            query.update({'new_version_id': new_post.id})
-            self.backend._db.expire_all()  # XXX: uppdate(synchronize_session='evaluate')?
-            return Post(self.backend, new_post)
+            poster = self.backend.logged_in_user
+            db = self.backend._db
+            if poster.is_virtual:
+                poster_obj = None
+            else:
+                poster_obj = poster._obj
+            item = tables.PostText(
+                    source=new_source,
+                    poster=poster_obj,
+                    posted_at=_time or datetime.utcnow(),
+                    post=self._obj,
+                )
+            db.add(item)
+            db.flush()
+
+            self._obj.active_text = item
+            return self
 
     def __repr__(self):
         if self._obj is EMPTY_POST:
@@ -81,8 +85,24 @@ class Posts(Collection):
     def add(self, source):
         if not access_allowed(allow_logged_in, self):
             raise AccessError('Cannot add post')
-        item = _add_new_post(self.backend, source)
-        return self.item_class(self.backend, item)
+
+        poster = self.backend.logged_in_user
+        db = self.backend._db
+        if poster.is_virtual:
+            poster_obj = None
+        else:
+            poster_obj = poster._obj
+        time = datetime.utcnow()
+        item = self.item_table(
+                source=source,
+                poster=poster_obj,
+                posted_at=time,
+            )
+        db.add(item)
+        post = self.item_class(self.backend, item)
+        post.edit(source, _time=time)
+
+        return post
 
 
 class NewsItem(Item):

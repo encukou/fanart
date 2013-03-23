@@ -81,6 +81,9 @@ class Collection(object):
         for item in self._query:
             yield self.item_class(self.backend, item)
 
+    def _clone(self, new_query):
+        return type(self)(self.backend, new_query)
+
     def __getitem__(self, item):
         if isinstance(item, slice):
             if item.step not in (None, 1):
@@ -89,7 +92,7 @@ class Collection(object):
             new_query = self._query.offset(start)
             if item.stop:
                 new_query = new_query.limit(item.stop - start)
-            return type(self)(self.backend, new_query)
+            return self._clone(new_query)
         else:
             try:
                 item.__index__()
