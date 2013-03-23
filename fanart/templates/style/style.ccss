@@ -22,6 +22,7 @@ serif = 'Gentium Book Basic', serif
 @import url(layout.ccss)
 @import url(forms.ccss)
 @import url(markdown.ccss)
+@import url(art.ccss)
 
 #content:
     dl.contact_info:
@@ -96,80 +97,3 @@ serif = 'Gentium Book Basic', serif
         margin-top: 2ex
         font-size: 80%
         font-family: $sans
-
-.art-card:
-    margin-left: auto
-    margin-right: auto
-    margin-top: 2em
-    margin-bottom: 2em
-    width: 200px
-    height: 150px
-    border-radius: 1ex
-    box-shadow: 0px -1px 1px $light_background, 0px 1px 1px $dark_background, 1px 0px 1px $dark_background, -1px 0px 1px $dark_background
-    position: relative
-    display: table
-    background-color: $light_background
-
-    .row-hack:
-        display: table-row
-        width: 200px
-
-    .name, .authors:
-        display: table-cell
-        text-align: center
-        vertical-align: middle
-        font-family: $sans
-        font-size: 80%
-        overflow: hidden
-        div:
-            padding-left: 1ex
-            padding-right: 1ex
-            width: 200px
-            white-space: nowrap
-
-    .thumbnail:
-        display: table-cell
-        vertical-align: middle
-        text-align: center
-        height: 120px
-        background-color: $mid_background
-
-        &.missing .icon-4x:
-            color: $dark_foreground
-            text-shadow: 0px 0px 20px $dark_background, 0px 0px 3px $light_background
-
-.art-view:
-    text-align: center
-    margin-top: 2em
-    margin-bottom: 2em
-    color: $dark_foreground
-
-    img:
-        max-width: 100%
-
-    &.size-view a img:
-        cursor: -webkit-zoom-in
-        cursor: -moz-zoom-in
-        cursor: zoom-in
-
-    &.size-full a img:
-        cursor: -webkit-zoom-out
-        cursor: -moz-zoom-out
-        cursor: zoom-out
-
-.fullview-link:
-    text-align: center
-    color: $dark_foreground
-
-    a:
-        font-family: $sans
-        font-size: 80%
-        padding-right: 1em
-
-.art-list:
-    text-align: center
-
-    .art-card:
-        display: inline-table
-        margin-left: 1em
-        margin-right: 1em

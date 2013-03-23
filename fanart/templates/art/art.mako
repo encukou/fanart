@@ -40,3 +40,7 @@
 % else:
     ${art()}
 % endif
+
+% for author, description in artwork.author_descriptions.items():
+    ${self.helpers.comment(description, poster=author)}
+% endfor

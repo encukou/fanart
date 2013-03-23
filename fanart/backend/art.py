@@ -8,6 +8,7 @@ import itertools
 import collections
 
 from sqlalchemy.sql import and_, or_
+from sqlalchemy import orm
 
 from fanart.models import tables
 from fanart.helpers import make_identifier, WrapList
@@ -240,6 +241,14 @@ class Artworks(Collection):
                     artfilter = or_(
                         artfilter, tables.ArtworkAuthor.author == user._obj)
                 self._query = self._query.filter(artfilter)
+
+    def by_identifier(self, ident):
+        query = self._query.filter(self.item_table.identifier == ident)
+        try:
+            item = query.one()
+        except orm.exc.NoResultFound:
+            raise LookupError(ident)
+        return self.item_class(self.backend, item)
 
     def add(self, name=None):
         if not access_allowed(allow_logged_in, self):

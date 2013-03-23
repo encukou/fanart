@@ -61,6 +61,10 @@ def PieceSchema(request):
                     ('n', 'Ne (obrázek uvidí jen autoři a administrátoři)'),
                 ]),
             )
+        description = colander.SchemaNode(colander.String(), missing=None,
+                title='Popisek',
+                widget=deform.widget.TextAreaWidget(
+                    css_class='markdown-textarea'))
 
     return PieceSchema().bind(request=request)
 
@@ -132,6 +136,8 @@ class PieceManager(ViewBase):
                 if appstruct['image_name']:
                     artwork.name = appstruct['image_name']
                     artwork.set_identifier()
+                if appstruct['description']:
+                    artwork.own_description_source = appstruct['description']
             return httpexceptions.HTTPSeeOther(self.url)
         appdata = dict()
         appdata['image_name'] = artwork.name
@@ -141,6 +147,7 @@ class PieceManager(ViewBase):
             form['image_name'].error = colander.Invalid(
                 form['image_name'], errormsg)
         appdata['publish'] = 'n' if artwork.hidden else 'y'
+        appdata['description'] = artwork.own_description_source
         return self.render_response(
             'art/piece_manager.mako', request,
             form=form.render(appdata),
@@ -154,7 +161,7 @@ class ArtPage(ViewBase):
 
     def __init__(self, parent, item, name=None):
         if isinstance(item, str):
-            item = parent.backend.art[item]
+            item = parent.request.backend.art.by_identifier(item)
         self.friendly_name = item.name
         if not item.identifier:
             raise LookupError(item)

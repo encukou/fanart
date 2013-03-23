@@ -40,3 +40,22 @@
         </div>
     </div>
 </%def>
+
+<%def name="comment(post, poster=None)">
+    <% if poster is None: poster = post.poster %>
+    <div class="comment-block" id="comment-${post.id}">
+        <div class="comment-header">
+            ${h.format_date(post.posted_at)}
+            % if poster:
+                <div class="avatar"></div>
+                <div class="poster">${wrap(poster).link()}:</div>
+            % else:
+                <div class="poster">${"<Systém>"}:</div>
+            % endif
+        </div>
+        <div class="comment markdown">
+            ${h.markdown2html(post.source)}
+        </div>
+        <span class="fix"></span>
+    </div>
+</%def>
