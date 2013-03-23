@@ -5,6 +5,7 @@ import uuid
 import hashlib
 import os
 import itertools
+import collections
 
 from sqlalchemy.sql import and_, or_
 
@@ -15,6 +16,7 @@ from fanart.backend.access import (
     access_allowed, allow_any, allow_logged_in, AccessError, ADMIN)
 from fanart.backend.helpers import ColumnProperty, WrappedProperty
 from fanart.backend.users import User
+from fanart.backend.text import Post
 
 
 def allow_authors(user, instance):
@@ -91,6 +93,43 @@ class Artwork(Item):
     @property
     def current_version(self):
         return ArtworkVersion(self.backend, self._obj.current_version)
+
+    @property
+    def author_descriptions(self):
+        return collections.OrderedDict(
+            (User(self.backend, aa.author), Post(self.backend, aa.description))
+            for aa in self._obj.artwork_authors if aa.description)
+
+    @property
+    def _own_artwork_author(self):
+        user = self.backend.logged_in_user
+        artwork_authors = self._obj.artwork_authors
+        try:
+            [aa] = [aa for aa in artwork_authors if aa.author == user._obj]
+        except ValueError:
+            return None
+        else:
+            return aa
+
+    @property
+    def own_description_source(self):
+        artwork_author = self._own_artwork_author
+        if not artwork_author:
+            return None
+        post = artwork_author.description
+        if post:
+            return post.source
+        else:
+            return None
+
+    @own_description_source.setter
+    def own_description_source(self, new_source):
+        if not access_allowed(allow_authors, self):
+            raise AccessError('Not an author')
+        artwork_author = self._own_artwork_author
+        post = Post(self.backend, artwork_author.description)
+        new_post = post.replace(new_source)
+        artwork_author.description = new_post._obj
 
     def upload(self, input_file):
         """Upload a fileto be added to the artwork.

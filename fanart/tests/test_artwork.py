@@ -96,3 +96,37 @@ def test_flag_filter(backend):
     assert set(backend.art.filter_flags(complete=False)) == {default, hidden}
     assert set(backend.art.filter_flags(complete=True)) == {complete, both}
     assert set(backend.art.filter_flags(complete=True, hidden=True)) == {both}
+
+@pytest.mark.login
+def test_description(backend):
+    orig_user = backend.logged_in_user
+    art = backend.art.add('A Masterpiece')
+
+    assert art.own_description_source is None
+
+    art.own_description_source = 'Some text'
+    assert art.own_description_source == 'Some text'
+
+    assert list(art.author_descriptions.keys()) == [orig_user]
+    assert art.author_descriptions[orig_user].source == 'Some text'
+
+    user = backend.users.add('Matylda', 'super*secret', _crypt_strength=0)
+    backend.login(user)
+
+    assert art.own_description_source is None
+    with pytest.raises(backend_mod.AccessError):
+        art.own_description_source = 'My own text'
+
+    backend.login_admin()
+    art.authors.append(user)
+
+    assert list(art.authors) == [orig_user, user]
+    assert list(art.author_descriptions.keys()) == [orig_user]
+    assert art.author_descriptions[orig_user].source == 'Some text'
+
+    backend.login(user)
+    art.own_description_source = 'My own text'
+
+    assert list(art.author_descriptions.keys()) == [orig_user, user]
+    assert art.author_descriptions[orig_user].source == 'Some text'
+    assert art.author_descriptions[user].source == 'My own text'

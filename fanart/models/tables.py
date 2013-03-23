@@ -109,6 +109,7 @@ class ArtworkAuthor(Base):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     artwork_id = Column(Integer, ForeignKey('artworks.id'), nullable=False)
     author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    description_id = Column(Integer, ForeignKey('posts.id'), nullable=True)
     order = Column(Integer, nullable=True)
 
 class Post(Base):
@@ -170,6 +171,8 @@ ArtworkArtifact.artwork = association_proxy('artwork_version', 'artwork')
 ArtworkAuthor.author = relationship(User,
         primaryjoin=ArtworkAuthor.author_id == User.id,
         backref='artwork_authors')
+ArtworkAuthor.description = relationship(Post,
+        primaryjoin=ArtworkAuthor.description_id == Post.id)
 ArtworkAuthor.artwork = relationship(Artwork,
         primaryjoin=ArtworkAuthor.artwork_id == Artwork.id,
         backref=backref(
