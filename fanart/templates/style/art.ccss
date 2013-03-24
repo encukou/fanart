@@ -1,172 +1,193 @@
-
-.art-card:
-    margin-left: auto
-    margin-right: auto
-    margin-top: 2em
-    margin-bottom: 2em
-    width: 200px
-    height: 150px
-    border-radius: 1ex
-    box-shadow: 0px -1px 1px $light_background, 0px 1px 1px $dark_background, 1px 0px 1px $dark_background, -1px 0px 1px $dark_background
-    position: relative
-    display: table
-    background-color: $light_background
-
-    .row-hack:
-        display: table-row
-        width: 200px
-
-    .name, .authors:
-        display: table-cell
-        text-align: center
-        vertical-align: middle
-        font-family: $sans
-        font-size: 80%
-        overflow: hidden
-        div:
-            padding-left: 1ex
-            padding-right: 1ex
-            width: 200px
-            white-space: nowrap
-
-    .thumbnail:
-        display: table-cell
-        vertical-align: middle
-        text-align: center
-        height: 120px
-        background-color: $mid_background
-
-        &.missing .icon-4x:
-            color: $dark_foreground
-            text-shadow: 0px 0px 20px $dark_background, 0px 0px 3px $light_background
-
-.art-view:
-    text-align: center
-    margin-top: 2em
-    margin-bottom: 2em
-    color: $dark_foreground
-
-    img:
-        max-width: 100%
-
-    &.size-view a img:
-        cursor: -webkit-zoom-in
-        cursor: -moz-zoom-in
-        cursor: zoom-in
-
-    &.size-full a img:
-        cursor: -webkit-zoom-out
-        cursor: -moz-zoom-out
-        cursor: zoom-out
-
-.fullview-link:
-    text-align: center
-    color: $dark_foreground
-
-    a:
-        font-family: $sans
-        font-size: 80%
-        padding-right: 1em
-
-.art-list:
-    text-align: center
-
+body.fanart #content:
     .art-card:
-        display: inline-table
-        margin-left: 1em
-        margin-right: 1em
+        margin-left: auto
+        margin-right: auto
+        margin-top: 2em
+        margin-bottom: 2em
+        width: 200px
+        height: 150px
+        border-radius: 1ex
+        box-shadow: 0px -1px 1px $light_background, 0px 1px 1px $dark_background, 1px 0px 1px $dark_background, -1px 0px 1px $dark_background
+        position: relative
+        display: table
+        background-color: $light_background
 
-.comment-block:
-    position: relative
-    clear: both
+        .row-hack:
+            display: table-row
+            width: 200px
 
-    .comment-header:
-        background-color: $slightly_light_background
-        box-shadow: 0px 0px 2px $slightly_light_background
-        padding-right: 1ex
-        border-radius: 2px
-        border-top-right-radius: 0.5ex
-
-        time:
-            float: right
-            display: inline
-            position: relative
-
-        .avatar:
-            float: left
-            display: inline-block
-            position: relative
-            width: 100px
-            min-height: 2em
-            margin: 0.5ex 0.5em
+        .name, .authors:
+            display: table-cell
             text-align: center
+            vertical-align: middle
+            font-family: $sans
+            font-size: 80%
+            overflow: hidden
+            div:
+                padding-left: 1ex
+                padding-right: 1ex
+                width: 200px
+                white-space: nowrap
 
-    .poster, .comment:
-        margin-left: 100px
-        padding-left: 1em
+        .thumbnail:
+            display: table-cell
+            vertical-align: middle
+            text-align: center
+            height: 120px
+            background-color: $mid_background
 
-    .comment:
-        margin-top: 1ex
-        margin-bottom: 1ex
-        min-height: 2em
+            &.missing .icon-4x:
+                color: $dark_foreground
+                text-shadow: 0px 0px 20px $dark_background, 0px 0px 3px $light_background
 
-    .update-info:
-        font-size: 80%
-        font-family: $sans
-        color: transparent
-        transition-property: color
-        transition-duration: 0.1s
-        cursor: default
-        text-align: right
-        padding-right: 1ex
+    .art-view:
+        text-align: center
+        margin-top: 2em
+        margin-bottom: 2em
+        color: $dark_foreground
 
-        &:after:
-            content: `"\f040"`
-            display: inline-block;
-            speak: none;
-            font-family: 'FontAwesome'
-            color: $text_on_mid.mix(50%, $mid_background)
-            padding-left: 1ex
+        img:
+            max-width: 100%
+
+        &.size-view a img:
+            cursor: -webkit-zoom-in
+            cursor: -moz-zoom-in
+            cursor: zoom-in
+
+        &.size-full a img:
+            cursor: -webkit-zoom-out
+            cursor: -moz-zoom-out
+            cursor: zoom-out
+
+    .fullview-link:
+        text-align: center
+        color: $dark_foreground
 
         a:
-            color: transparent
-            transition-duration: 0.1s
+            font-family: $sans
+            font-size: 80%
+            padding-right: 1em
 
-    &:hover:
-        .update-info:
-            color: $dark_foreground
+    .art-list:
+        text-align: center
 
-            a:
-                color: $dark_secondary_color
+        .art-card:
+            display: inline-table
+            margin-left: 1em
+            margin-right: 1em
 
-            &:after:
-                color: $text_on_mid
-
-    .fix:
-        display: block
+    .comment-block:
+        position: relative
         clear: both
 
-dl.art-info:
-    position: relative
-    margin-top: 1em
-    font-size: 80%
+        .comment-header:
+            background-color: $slightly_light_background
+            box-shadow: 0px 0px 2px $slightly_light_background
+            padding-right: 1ex
+            border-radius: 2px
+            border-top-right-radius: 1ex
 
-    dt:
-        clear: left
-        float: left
-        width: 100px
-        text-align: right
-        margin-left: 0.5em
-        margin-right: 0.5em
-        margin-left: `0.5rem`
-        margin-right: `0.5rem`
+            time:
+                float: right
+                display: inline
+                position: relative
 
-    dd:
+            .avatar:
+                float: left
+                display: inline-block
+                position: relative
+                width: 100px
+                min-height: 2em
+                margin: 0.5ex 0.5em
+                text-align: center
+
+        .poster, .comment:
+            margin-left: 100px
+            padding-left: 1em
+
+        .comment:
+            margin-top: 1ex
+            margin-bottom: 1ex
+            min-height: 2em
+
+        .update-info:
+            font-size: 80%
+            font-family: $sans
+            color: transparent
+            transition-property: color
+            transition-duration: 0.1s
+            cursor: default
+            text-align: right
+            padding-right: 1ex
+
+            &:after:
+                content: `"\f040"`
+                display: inline-block
+                speak: none;
+                font-family: 'FontAwesome'
+                color: $text_on_mid.mix(50%, $mid_background)
+                padding-left: 1ex
+
+            a:
+                color: transparent
+                transition-duration: 0.1s
+
+        &:hover:
+            .update-info:
+                color: $dark_foreground
+
+                a:
+                    color: $dark_secondary_color
+
+                &:after:
+                    color: $text_on_mid
+
+        .fix:
+            display: block
+            clear: both
+
+    dl.art-info:
+        position: relative
+        margin-top: 1em
+        font-size: 80%
+
+        dt:
+            clear: left
+            float: left
+            width: 100px
+            text-align: right
+            margin-left: 0.5em
+            margin-right: 0.5em
+            margin-left: `0.5rem`
+            margin-right: `0.5rem`
+
+        dd:
+            margin-left: 100px
+            padding-left: 1em
+            padding-left: `1rem`
+
+            &:after:
+                content: `" "`
+                clear: both
+                display: block
+
+        &+fix:
+            clear: both
+            display: block
+
+    .link-line.art-link-line:
         margin-left: 100px
         padding-left: 1em
         padding-left: `1rem`
 
-        &:after:
-            content: `" "`
-            clear: both
-            display: block
+        /*
+        &:before:
+            content: `"\f0ad"`
+            display: block;
+            float: left
+            width: 1em
+            margin-left: -1.5em
+            speak: none
+            font-family: 'FontAwesome'
+            text-align: right
+        */

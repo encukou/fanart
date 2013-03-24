@@ -126,6 +126,7 @@ body.fanart:
         .link-line:
             margin-left: 0
             margin-right: 0
+
             li:
                 display: inline
                 & + li:

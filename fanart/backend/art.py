@@ -62,6 +62,7 @@ class Artwork(Item):
         return self._obj.identifier
 
     created_at = ColumnProperty('created_at')
+    added_at = ColumnProperty('added_at')
     name = ColumnProperty('name', allow_any, allow_authors,
                           check=lambda i, x: x)
     approved = ColumnProperty('approved')
@@ -258,9 +259,11 @@ class Artworks(Collection):
         if not access_allowed(allow_logged_in, self):
             raise AccessError('Cannot add art')
         db = self.backend._db
+        now = datetime.utcnow()
         item = self.item_table(
                 name=name or '',
-                created_at=datetime.utcnow(),
+                created_at=now,
+                added_at=now,
             )
         db.add(item)
         db.flush()

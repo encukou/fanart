@@ -72,6 +72,7 @@ class Artwork(Base):
     __tablename__ = 'artworks'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     created_at = Column(DateTime, index=True, nullable=False)
+    added_at = Column(DateTime, index=True, nullable=False)
     name = Column(Unicode, nullable=False)
     identifier = Column(Unicode, nullable=True, unique=True)
     approved = Column(Boolean, nullable=False, default=False)

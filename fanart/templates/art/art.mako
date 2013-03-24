@@ -46,12 +46,28 @@
 % endfor
 
 <dl class="art-info">
+    % if not all(a in artwork.author_descriptions for a in artwork.authors):
+    <dt>Vytvořil${h.a(request, *artwork.authors)}</dt>
+        <dd>${Markup(', ').join(wrap(a).link() for a in artwork.authors)}</dd>
+    % endif
     <dt>Vytvořeno</dt>
         <dd>${h.format_date(artwork.created_at)}</dd>
+    % if artwork.created_at != artwork.added_at:
+        <dt>Přidáno</dt>
+            <dd>${h.format_date(artwork.added_at)}</dd>
+    % endif
     <dt>Klíč. slova</dt>
         <dd>žádná</dd>
 </dl>
 <span class="fix"></span>
+
+% if request.user in artwork.authors:
+    <ul class="link-line art-link-line">
+        <li class="action-link">
+            <a href="${this.root['art']['manage'][artwork.id].url}">Upravit údaje o obrázku</a>
+        </li>
+    </ul>
+% endif
 
 <hr>
 
