@@ -1,16 +1,3 @@
-<%def name="a(m='', f='a', other='/a', user=None)" filter="trim">
-% if not user:
-    <% user = request.user %>
-% endif
-% if user.gender == 'male':
-    ${m}
-% elif user.gender == 'female':
-    ${f}
-% else:
-    ${other}
-% endif
-</%def>
-
 <%def name="art_card(artwork)">
     <div class="art-card">
         <div class="row-hack">
@@ -73,7 +60,7 @@
                 <div class="update-info">
                     ${post_type}
                     ${h.format_date(post.active_text.posted_at)}
-                    změnil${self.a(tposter)}
+                    změnil${a(tposter)}
                     ${wrap(tposter).link()}
                 </div>
             % endif

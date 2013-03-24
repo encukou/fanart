@@ -55,6 +55,23 @@ class FormSchema(colander.MappingSchema):
         widget=deform.widget.HiddenWidget(),
     )
 
+def a(request, *users, m='', f='a', other='/a', m_pl='i', f_pl='y'):
+    """Helper for forming Czech past participles, which depend on gender
+    """
+    if not users:
+        users = [request.user]
+    if len(users) == 1:
+        if users[0].gender == 'male':
+            return m
+        elif users[0].gender == 'female':
+            return f
+        else:
+            return other
+    else:
+        if all(u.gender != 'male' for u in users):
+            return f_pl
+        else:
+            return m_pl
 
 class FileUploadTempStore(object):
 

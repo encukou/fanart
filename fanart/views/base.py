@@ -79,6 +79,7 @@ class ViewBase(object):
         kwargs.setdefault('h', helpers)
         kwargs.setdefault('wrap', request.root.wrap)
         kwargs.setdefault('Markup', Markup)
+        kwargs.setdefault('a', lambda *a, **kw: helpers.a(request, *a, **kw))
         return Response(render(template, kwargs, request))
 
     def link(self, link_text=None, extra_classes=()):
