@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy.sql import functions
 from sqlalchemy import orm
 import bcrypt
@@ -32,10 +34,28 @@ class User(Item):
 
     gender = ColumnProperty('gender', allow_any, allow_self)
     email = ColumnProperty('email', allow_any, allow_self)
-    date_of_birth = ColumnProperty('date_of_birth', allow_any, allow_self)
+    date_of_birth = ColumnProperty('date_of_birth', allow_self, allow_self)
     show_email = ColumnProperty('show_email', allow_any, allow_self)
     show_age = ColumnProperty('show_age', allow_any, allow_self)
     show_birthday = ColumnProperty('show_birthday', allow_any, allow_self)
+
+    @property
+    def age(self):
+        if not access_allowed(allow_self, self) and not self.show_age:
+            return None
+        now = datetime.now()
+        dob = self._obj.date_of_birth
+        age = now.year - dob.year
+        if (now.month, now.day) >= (dob.month, dob.day):
+            age += 1
+        return age
+
+    @property
+    def birthday(self):
+        if not access_allowed(allow_self, self) and not self.show_birthday:
+            return None
+        dob = self._obj.date_of_birth
+        return dob.month, dob.day
 
     @property
     def bio_post(self):
@@ -71,7 +91,9 @@ class User(Item):
             new = set(new_value)
             for deleted_key in existing - new:
                 del self._obj.contacts[deleted_key]
-            self._obj.contacts.update(new_value)
+            self._obj.contacts.update(NormalizedKeyDict(
+                underlying_dict=new_value,
+                normalizer=make_identifier))
         else:
             raise AccessError('Cannot set contacts')
 

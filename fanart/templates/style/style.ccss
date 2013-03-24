@@ -25,21 +25,36 @@ serif = 'Gentium Book Basic', serif
 @import url(art.ccss)
 
 #content:
-    dl.contact_info:
+    dl.contact_info, dl.user-info:
+        position: relative
+        margin-top: 1em
+
+        *:
+            padding-bottom: 0.25ex
+
         dt:
-            font-weight: bold
-            break: both
+            clear: left
             float: left
-            display: block
-            margin-right: 1ex
+            width: 8em
+            text-align: right
+            margin-left: 0.5em
+            margin-right: 0.5em
+
             &:after:
                 content: `":"`
-        dd:
-            display: block
-            margin-bottom: 0.25ex
 
-        &+*:
-            break: both
+        dd:
+            margin-left: 8em
+            padding-left: 1em
+
+            &:after:
+                content: `" "`
+                clear: both
+                display: block
+
+        &+fix:
+            clear: both
+            display: block
 
 
     article + article:
@@ -99,3 +114,6 @@ serif = 'Gentium Book Basic', serif
         margin-top: 2ex
         font-size: 80%
         font-family: $sans
+
+body.fanart #content .link-line.user-link-line:
+    margin-left: 1em

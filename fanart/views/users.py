@@ -1,5 +1,4 @@
-# Encoding: UTF-8
-
+from datetime import date
 
 from pyramid import httpexceptions
 from pyramid import traversal
@@ -8,6 +7,7 @@ import deform
 
 from fanart.views.base import ViewBase, instanceclass
 from fanart.views import helpers
+from fanart.helpers import make_identifier
 from fanart import backend
 
 class StringListSchema(colander.SequenceSchema):
@@ -18,8 +18,39 @@ class MemoryTmpStore(dict):
         return None
 
 
+class CZDate(object):
+    day_names = 'Pondělí Úterý Středa Čtvrtek Pátek Sobota Neděle'.split()
+
+    def serialize(self, node, appstruct):
+        if appstruct is colander.null:
+            return colander.null
+        try:
+            strftime = appstruct.strftime
+            print('ISOWEEKDAY', appstruct.weekday(), '-'*90)
+            day_name = self.day_names[appstruct.weekday()]
+        except (AttributeError, KeyError):
+            raise colander.Invalid(node, '%r is not a date')
+        else:
+            return day_name + strftime(' %d. %m. %Y')
+
+    def deserialize(self, node, cstruct):
+        if cstruct is colander.null:
+           return colander.null
+        try:
+            day, month, year = cstruct.split('.')
+            weekday, sep, day = day.rpartition(' ')
+            return date(int(year), int(month), int(day))
+        except (AttributeError, TypeError, ValueError) as e:
+            print('ERROR', e, '-'*90)
+            raise colander.Invalid(
+                node,
+                "%r není správné datum (zadej např. '2. 1. 1999')" % cstruct)
+
+    def cstruct_children(self, *args):
+        return []
+
+
 def UserSchema(request):
-    temp_store = helpers.FileUploadTempStore(request)
     class UserSchema(helpers.FormSchema):
         gender = colander.SchemaNode(colander.String(), missing=None,
                 title='Pohlaví',
@@ -27,16 +58,6 @@ def UserSchema(request):
                 widget=deform.widget.RadioChoiceWidget(values=[
                     ('male', 'Kluk'),
                     ('female', 'Holka'),
-                ]))
-        # XXX: Handle these better
-        avatar_file = colander.SchemaNode(deform.FileData(), missing=None,
-                title='Avatar',
-                widget=deform.widget.FileUploadWidget(temp_store))
-        avatar_choice = colander.SchemaNode(colander.String(), default='file_avatar',
-                title='',
-                widget=deform.widget.RadioChoiceWidget(values=[
-                    ('file_avatar', 'Použít avatar'),
-                    ('no_avatar', 'Nezobrazovat avatar'),
                 ]))
         bio = colander.SchemaNode(colander.String(), missing=None,
                 title='Něco o tobě',
@@ -47,7 +68,7 @@ def UserSchema(request):
                 #validator = colander.Email,
                 title='E-mail')
         # XXX: Make a nice calendar widget for this
-        date_of_birth = colander.SchemaNode(colander.Date(), missing=None,
+        date_of_birth = colander.SchemaNode(CZDate(), missing=None,
                 title='Datum narození')
         field_visibility = colander.SchemaNode(deform.Set(allow_empty=True),
                 title='Zobrazovat:',
@@ -59,7 +80,7 @@ def UserSchema(request):
         web = colander.SchemaNode(colander.String(), missing=None,
                 title='Webová adresa')
         xmpp_nick = colander.SchemaNode(colander.String(), missing=None,
-                title='Adresa na Jabber/​Google Talk/​XMPP')
+                title='Adresa na ​XMPP/Jabber')
         irc_nick = colander.SchemaNode(colander.String(), missing=None,
                 title='Přezdívka na IRC')
         deviantart_nick = colander.SchemaNode(colander.String(), missing=None,
@@ -202,7 +223,7 @@ class Users(ViewBase):
                 try:
                     traversal.find_resource(self.root, url)
                     return httpexceptions.HTTPSeeOther(url)
-                except httpexceptions.HTTPException:
+                except (httpexceptions.HTTPException, LookupError):
                     return httpexceptions.HTTPSeeOther(self.root.url)
             else:
                 return httpexceptions.HTTPNotFound()
@@ -230,43 +251,34 @@ class Users(ViewBase):
                 return httpexceptions.HTTPNotFound()
 
     def get(self, id):
-        if isinstance(id, backend.users.User):
-            return UserByID(self, id.id).by_name
-        return UserByID(self, id)
+        return User(self, id)
 
-class UserByID(ViewBase):
-    def __init__(self, parent, id):
-        super(UserByID, self).__init__(parent, id)
-        try:
-            id = int(id)
-        except ValueError:
-            raise IndexError(id)
-        self.user = self.request.backend.users[id]
-        if self.user is None:
-            raise IndexError(id)
 
-    @property
-    def friendly_name(self):
-        return None
 
-    @property
-    def __name__(self):
-        return str(self.user.id)
-
-    @property
-    def by_name(self):
-        return UserByName(self)
-
-    def get(self, name=None):
-        return self.by_name
+class AvatarChanger(ViewBase):
+    friendly_name = 'Změna avataru'
 
     def render(self, request):
-        return httpexceptions.HTTPSeeOther(self.by_name.url)
+        if request.user.is_virtual:
+            raise httpexceptions.HTTPForbidden('Nejsi přihlášen/a.')
+        user = self.parent.parent.user
+        if request.user != user:
+            raise httpexceptions.HTTPForbidden('Nemůžeš měnit cizí účty.')
+        return self.render_response('users/change_avatar.mako', request,
+                user=user,
+            )
 
-class UserByName(ViewBase):
+
+class User(ViewBase):
     def __init__(self, parent, name=None):
-        self.user = parent.user
-        super(UserByName, self).__init__(parent, self.user.identifier)
+        if isinstance(name, backend.users.User):
+            self.user = name
+        elif isinstance(name, int):
+            self.user = parent.request.backend.users[name]
+        else:
+            ident = make_identifier(name)
+            self.user = parent.request.backend.users[ident]
+        super().__init__(parent, self.user.identifier)
 
     @property
     def friendly_name(self):
@@ -283,7 +295,7 @@ class UserByName(ViewBase):
 
     @instanceclass
     class child_edit(ViewBase):
-        friendly_name = 'Nastavení účtu'
+        friendly_name = 'Tvoje údaje'
 
         def render(self, request):
             if request.user.is_virtual:
@@ -299,6 +311,7 @@ class UserByName(ViewBase):
             if user.gender: appdata['gender'] = user.gender
             if user.bio: appdata['bio'] = user.bio
             if user.date_of_birth: appdata['date_of_birth'] = user.date_of_birth
+            appdata['email'] = user.email
             appdata['field_visibility'] = set()
             if user.show_email: appdata['field_visibility'].add('email')
             if user.show_age: appdata['field_visibility'].add('age')
@@ -314,7 +327,7 @@ class UserByName(ViewBase):
                 elif type_.lower() == 'deviantart':
                     appdata['deviantart_nick'] = contact
                 elif type_.lower() == 'e-mail':
-                    appdata['email'] = contact
+                    pass  # this is directly in user.email
                 else:
                     appdata['contacts'].append(type_ + ': ' + contact)
             appdata['contacts'].append('')
@@ -323,11 +336,12 @@ class UserByName(ViewBase):
                 try:
                     appdata = form.validate(controls)
                 except deform.ValidationFailure as e:
-                    print(e, type(e), e.error)
-                    pass
+                    return self.render_response('users/edit.mako', request,
+                            user=request.user,
+                            form=e.render(),
+                        )
                 else:
                     user = request.user
-                    print(appdata)
                     user.gender = appdata['gender']
                     user.bio = appdata['bio']
                     user.email = appdata['email']
@@ -335,7 +349,6 @@ class UserByName(ViewBase):
                     user.show_email = 'email' in appdata['field_visibility']
                     user.show_age = 'age' in appdata['field_visibility']
                     user.show_birthday = 'birthday' in appdata['field_visibility']
-                    print(user.show_email, user.show_age, user.show_birthday)
 
                     new_contacts = {}
                     user.email = appdata['email']
@@ -354,8 +367,7 @@ class UserByName(ViewBase):
                             type_, sep, value = contact.partition(':')
                             if type_.strip():
                                 if sep and value.strip():
-                                    if value.strip():
-                                        new_contacts[type_] = value
+                                    new_contacts[type_] = value.strip()
                                 else:
                                     new_contacts[type_] = '?'
 
@@ -365,3 +377,5 @@ class UserByName(ViewBase):
                     user=request.user,
                     form=form.render(appdata),
                 )
+
+        child_avatar = instanceclass(AvatarChanger)

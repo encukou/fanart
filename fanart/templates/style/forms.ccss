@@ -1,7 +1,7 @@
 form:
     input[type=submit], input[type=button], textarea, select, input[type=file],
     input[type=password], input[type=text], input[type=search], input[type=date], button:
-        background-color: $light_background
+        background-color: $slightly_light_background
         margin: 0
         margin-bottom: 1ex
         border-radius: 0.5ex
@@ -12,6 +12,10 @@ form:
 
     &::-webkit-input-placeholder, &:-moz-placeholder:
         color: $dark_background
+
+    input[type=file]:
+        border-width: 1px
+        border-color: transparent
 
     input[type=password], input[type=text], input[type=search], input[type=date], textarea:
         text-align: center
@@ -93,7 +97,24 @@ form:
         background: url(../static/icons/cross.png)
         width: 16px
         height: 16px
-        display: inline-block
+        //display: inline-block
+        display: none
+
+    a.deformSeqAdd:
+        display: none
+        font-family: $sans
+        font-size: 80%
+
+        &:before:
+            content: `"\f055"`
+            display: inline-block
+            speak: none;
+            font-family: 'FontAwesome'
+            color: $text_on_mid.mix(50%, $mid_background)
+            padding-left: 1ex
+
+body.have-js a.deformSeqAdd:
+    display: inline
 
 #content:
     form:
@@ -144,7 +165,8 @@ form:
                 clear: both
 
         .deformClosebutton:
-            display: inline-block
+            //display: inline-block
+            display: none
 
         &.simple:
             fieldset:
@@ -239,7 +261,8 @@ body.wide #content form:
                     width: auto
 
                     .deformClosebutton:
-                        display: inline-block
+                        //display: inline-block
+                        display: none
 
 #ui-datepicker-div:
     background-color: $slightly_light_background

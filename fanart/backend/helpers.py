@@ -17,7 +17,7 @@ class ColumnProperty(object):
     def __get__(self, instance, owner):
         if instance:
             if not access_allowed(self.get_access, instance):
-                raise AccessError('Cannot set %s' % self.column_name)
+                raise AccessError('Cannot get %s' % self.column_name)
             return getattr(instance._obj, self.column_name)
         else:
             return self

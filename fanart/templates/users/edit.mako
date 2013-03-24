@@ -5,3 +5,7 @@
 <p>Nezadávej informace, které by o tvém účtu neměli vědět úplně neznámí lidé.</p>
 
 ${form|n}
+
+<ul class="link-line user-link-line">
+    <li class="action-link">${this['avatar'].link('Změnit avatar')}</li>
+</ul>

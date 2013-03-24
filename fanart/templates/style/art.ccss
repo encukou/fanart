@@ -179,15 +179,3 @@ body.fanart #content:
         margin-left: 100px
         padding-left: 1em
         padding-left: `1rem`
-
-        /*
-        &:before:
-            content: `"\f0ad"`
-            display: block;
-            float: left
-            width: 1em
-            margin-left: -1.5em
-            speak: none
-            font-family: 'FontAwesome'
-            text-align: right
-        */
