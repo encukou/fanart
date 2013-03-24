@@ -6,6 +6,7 @@ import hashlib
 import os
 import itertools
 import collections
+import contextlib
 
 from sqlalchemy.sql import and_, or_
 from sqlalchemy import orm
@@ -22,6 +23,41 @@ from fanart.backend.text import Post
 
 def allow_authors(user, instance):
     return user in instance._obj.authors
+
+@contextlib.contextmanager
+def upload_artifact(backend, input_file):
+    """Upload a file to scratch space, return a tables.Artifact object
+
+    Acts as a context manager that removes the file when anything in the
+    managed body goes wrong. Usage:
+
+        with upload_artifact(backend, input_file) as artifact:
+            adD_to_database(artifact)
+    """
+    basename = '_' + str(uuid.uuid4()).replace('-', '')
+    fname = os.path.join(backend._scratch_dir, basename)
+    file_hash = hashlib.sha256()
+    try:
+        with open(fname, 'wb') as output_file:
+            input_file.seek(0)
+            while True:
+                data = input_file.read(2**16)
+                if not data:
+                    break
+                file_hash.update(data)
+                output_file.write(data)
+            output_file.flush()
+            os.fsync(output_file.fileno())
+        artifact = tables.Artifact(
+            storage_type='scratch',
+            storage_location=basename,
+            hash=file_hash.digest(),
+            )
+        backend._db.add(artifact)
+        yield artifact
+    except:
+        os.remove(fname)
+        raise
 
 
 class Artwork(Item):
@@ -140,27 +176,7 @@ class Artwork(Item):
         The file is scheduled for processing; at some point in the future,
         thumbnails will be generated and the new Version will be usable.
         """
-        basename = '_' + str(uuid.uuid4()).replace('-', '')
-        fname = os.path.join(self.backend._scratch_dir, basename)
-        file_hash = hashlib.sha256()
-        try:
-            with open(fname, 'wb') as output_file:
-                input_file.seek(0)
-                while True:
-                    data = input_file.read(2**16)
-                    if not data:
-                        break
-                    file_hash.update(data)
-                    output_file.write(data)
-                output_file.flush()
-                os.fsync(output_file.fileno())
-            artifact = tables.Artifact(
-                storage_type='scratch',
-                storage_location=basename,
-                hash=file_hash.digest(),
-                )
-            self.backend._db.add(artifact)
-
+        with upload_artifact(self.backend, input_file) as artifact:
             artwork_version = tables.ArtworkVersion(
                 artwork=self._obj,
                 uploaded_at=datetime.utcnow(),
@@ -179,9 +195,6 @@ class Artwork(Item):
             self.backend._db.flush()
 
             return ArtworkVersion(self.backend, artwork_version)
-        except:
-            os.remove(fname)
-            raise
 
     def set_identifier(self):
         """Auto-create a unique identifier for the art"""

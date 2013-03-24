@@ -264,6 +264,12 @@ class AvatarChanger(ViewBase):
         user = self.parent.parent.user
         if request.user != user:
             raise httpexceptions.HTTPForbidden('Nemůžeš měnit cizí účty.')
+        if 'submit' in request.POST:
+            if request.POST['submit'] == 'add-avatar':
+                input_file = request.POST['avatar-file'].file
+                if input_file:
+                    user.upload_avatar(input_file)
+                    return httpexceptions.HTTPSeeOther(self.url)
         return self.render_response('users/change_avatar.mako', request,
                 user=user,
             )

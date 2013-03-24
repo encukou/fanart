@@ -37,7 +37,6 @@ class ArtManager(ViewBase):
         def render(self, request):
             if request.user.is_virtual:
                 raise httpexceptions.HTTPForbidden("Nejsi přihlášen/a.")
-            print(request.fanart_settings)
             if 'submit' in request.POST:
                 image = request.POST['image']
                 input_file = image.file

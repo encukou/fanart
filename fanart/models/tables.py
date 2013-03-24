@@ -31,6 +31,15 @@ class User(Base):
     show_age = Column(Boolean, default=False)
     show_birthday = Column(Boolean, default=False)
 
+    avatar_request_id = Column(
+        Integer,
+        ForeignKey('artifacts.id', use_alter=True, name='fk_user_avatar_req'),
+        nullable=True)
+    avatar_id = Column(
+        Integer,
+        ForeignKey('artifacts.id', use_alter=True, name='fk_user_avatar'),
+        nullable=True)
+
     def __init__(self, *args, **kwargs):
         self.logged_in = kwargs.pop('logged_in', True)
         super(User, self).__init__(*args, **kwargs)
@@ -145,6 +154,10 @@ UserContact.user = relationship(
             '_contactdict',
             cascade="all, delete-orphan",
             collection_class=attribute_mapped_collection('type')))
+User.avatar_request = relationship(Artifact,
+        primaryjoin=User.avatar_request_id == Artifact.id)
+User.avatar = relationship(Artifact,
+        primaryjoin=User.avatar_id == Artifact.id)
 
 
 NewsItem.reporter = relationship(User,

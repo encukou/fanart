@@ -97,6 +97,25 @@ class User(Item):
         else:
             raise AccessError('Cannot set contacts')
 
+    @property
+    def avatar_request(self):
+        if not access_allowed(allow_self, self):
+            raise AccessError("Access denied")
+        if not self._obj.avatar_request:
+            return None
+        from fanart.backend.art import Artifact
+        return Artifact(self.backend, self._obj.avatar_request)
+
+    def upload_avatar(self, input_file):
+        if not access_allowed(allow_self, self):
+            raise AccessError("Cannot upload another person's avatar")
+        if self._obj.avatar_request:
+            raise ValueError('Cannot upload another avatar request')
+        from fanart.backend.art import upload_artifact
+        with upload_artifact(self.backend, input_file) as artifact:
+            self._obj.avatar_request = artifact
+            self.backend._db.flush()
+
 
 class Users(Collection):
     item_table = tables.User

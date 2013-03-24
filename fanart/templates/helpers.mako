@@ -1,20 +1,22 @@
-<%def name="art_card(artwork)">
+<%def name="artifact_card(artifact, top_text, bottom_text, link=None)">
     <div class="art-card">
         <div class="row-hack">
             <div class="name">
-                <div>${wrap(artwork).link()}</div>
+                <div>${top_text}</div>
             </div>
         </div>
-        <% thumb = artwork.current_version.artifacts.get('thumb') %>
-        % if thumb:
-            % if thumb.storage_type == 'scratch':
+        % if artifact:
+            % if artifact.storage_type == 'scratch':
                 <div class="row-hack">
                     <div class="thumbnail">
                         <% # XXX: this src generation is kinda dumb; make it pluggable
-                            src = request.root.url + '/scratch/' + thumb.storage_location
-                            link = wrap(artwork).link
+                            src = request.root.url + '/scratch/' + artifact.storage_location
                         %>
-                        ${link(Markup('<img src="{}">'.format(src)))}
+                        % if link:
+                            ${link(Markup('<img src="{}">'.format(src)))}
+                        % else:
+                            ${Markup('<img src="{}">'.format(src))}
+                        % endif
                     </div>
                 </div>
             % else:
@@ -35,10 +37,18 @@
         % endif
         <div class="row-hack">
             <div class="authors">
-                <div>© ${Markup(', ').join(wrap(a).link() for a in artwork.authors)}</div>
+                <div>${bottom_text}</div>
             </div>
         </div>
     </div>
+</%def>
+
+
+<%def name="art_card(artwork)">
+    ${artifact_card(artwork.current_version.artifacts.get('thumb'),
+        top_text=wrap(artwork).link(),
+        bottom_text='© ' + Markup(', ').join(wrap(a).link() for a in artwork.authors),
+        link=wrap(artwork).link)}
 </%def>
 
 <%def name="comment(post, poster=None, post_type='komentář')">

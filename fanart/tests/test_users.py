@@ -1,4 +1,5 @@
 import pytest
+import os
 
 from fanart import backend as backend_mod
 
@@ -135,3 +136,13 @@ def test_bio(backend):
     assert user.bio == "Some person"
     user.bio = ''
     assert user.bio == ''
+
+@pytest.mark.login
+def test_avatars(backend):
+    user = backend.logged_in_user
+    fname = os.path.join(os.path.dirname(__file__), 'data', '64x64.png')
+    with open(fname, 'rb') as file:
+        user.upload_avatar(file)
+
+        with pytest.raises(ValueError):
+            user.upload_avatar(file)
