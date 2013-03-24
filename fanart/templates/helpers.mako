@@ -53,9 +53,16 @@
         link=wrap(artwork).link)}
 </%def>
 
-<%def name="comment(post, poster=None, post_type='komentář')">
+<%def name="comment(post, poster=None, post_type='komentář', bare=False)">
     <% if poster is None: poster = post.poster %>
     <div class="comment-block" id="comment-${post.id}">
+        % if bare:
+            <div class="avatar">
+            % if poster.avatar:
+                ${artifact_image(poster.avatar)}
+            % endif
+            </div>
+        % else:
         <div class="comment-header">
             ${h.format_date(post.posted_at)}
             % if poster:
@@ -69,16 +76,19 @@
                 <div class="poster">${"<Systém>"}:</div>
             % endif
         </div>
+        % endif
         <div class="comment markdown">
             ${h.markdown2html(post.source)}
             % if abs(post.posted_at - post.active_text.posted_at).total_seconds() > 3 * 60:
                 <% tposter = post.active_text.poster %>
-                <div class="update-info">
-                    ${post_type}
-                    ${h.format_date(post.active_text.posted_at)}
-                    změnil${a(tposter)}
-                    ${wrap(tposter).link()}
-                </div>
+                % if not bare:
+                    <div class="update-info">
+                        ${post_type}
+                        ${h.format_date(post.active_text.posted_at)}
+                        změnil${a(tposter)}
+                        ${wrap(tposter).link()}
+                    </div>
+                % endif
             % endif
         </div>
         <span class="fix"></span>

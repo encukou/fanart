@@ -117,3 +117,25 @@ serif = 'Gentium Book Basic', serif
 
 body.fanart #content .link-line.user-link-line:
     margin-left: 1em
+
+.avatar-box:
+    margin-left: auto
+    margin-right: auto
+    margin-top: 2em
+    margin-bottom: 2em
+    width: 100px
+    height: 100px
+    border-radius: 1ex
+    box-shadow: 0px -1px 1px $dark_background, 0px 1px 1px $light_background, 1px 0px 1px $light_background, -1px 0px 1px $light_background
+    position: relative
+    display: table
+    background-color: $slightly_light_background
+
+    div:
+        display: table-row
+        width: 100px
+
+        div:
+            display: table-cell
+            vertical-align: middle
+            text-align: center

@@ -3,10 +3,17 @@
 <%inherit file="../base.mako" />
 
 % if user.bio:
-    <div class="markdown">
-        ${h.markdown2html(user.bio)}
+    ${self.helpers.comment(user.bio_post, poster=user, post_type='info', bare=True)}
+% elif user.avatar:
+    <div class="avatar-box">
+        <div>
+            <div>
+                ${self.helpers.artifact_image(user.avatar)}
+            </div>
+        </div>
     </div>
 % endif
+
 <dl class="user-info">
 % if user.birthday:
     <dt>Narozeniny</dt>

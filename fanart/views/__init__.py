@@ -85,7 +85,7 @@ class Site(ViewBase):
                    'templates/style/style.ccss')
             css_context = dict(
                 url=URLExpression('fanart:static', request.static_url),
-                avatar_size=clevercss.expressions.Number(AVATAR_SIZE),
+                avatar_size=clevercss.expressions.Value(AVATAR_SIZE, 'px'),
             )
             css = clevercss.convert(open(filename).read(), minified=False,
                 fname=filename, context=css_context)
