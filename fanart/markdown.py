@@ -42,14 +42,15 @@ engine = markdown.Markdown(safe_mode='escape', extensions=[
 # Now, since `*hug*` or `*sigh*` just look **bad** in italics and without the
 # asterisks, have **italics**, ****bold**** and ******bold italics******.
 # Underscores will work as asterisks did.
+# Also, have these only start and end at word boundaries
 engine.inlinePatterns["strong_em"] = DoubleTagPattern(
-        r'(\*{6}|_{3})(.+?)\2', 'strong,em')
+        r'\b(\*{6}|_{3})(.+?)\2\b', 'strong,em')
 engine.inlinePatterns["strong"] = SimpleTagPattern(
-        r'(\*{4}|_{2})(.+?)\2', 'strong')
+        r'\b(\*{4}|_{2})(.+?)\2\b', 'strong')
 engine.inlinePatterns["emphasis"] = SimpleTagPattern(
-        r'(\*{2})([^\*{2}]+)\2', 'em')
+        r'\b(\*{2})([^\*{2}]+)\2\b', 'em')
 engine.inlinePatterns["emphasis2"] = SimpleTagPattern(
-        r'(_)(.+?)\2', 'em')
+        r'\b(_)(.+?)\2\b', 'em')
 
 # Allow the <b>, <u> and <i> tags – legacy syntax users are used to
 html_index = engine.inlinePatterns.index('link')
