@@ -51,9 +51,8 @@ class User(Item):
         if not access_allowed(allow_self, self):
             raise AccessError('Not allowed')
         new_post = self.bio_post.edit(new_bio)
-        if new_post is not None:
-            new_post = new_post._obj
-        self._obj.bio_post = new_post
+        if not new_post.is_virtual:
+            self._obj.bio_post = new_post._obj
 
     @property
     def contacts(self):

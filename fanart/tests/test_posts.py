@@ -26,7 +26,16 @@ def test_post_edit(backend):
     backend.login(user)
 
     post = backend.posts.add('Some corect text')
+
+    assert post.active_text.posted_at == post.posted_at
+    assert post.active_text.source == post.source
+    assert post.active_text.poster == user
+
     post2 = post.edit('Some corrected text')
+
+    assert post.active_text.posted_at > post.posted_at
+    assert post.active_text.source == post.source
+    assert post.active_text.poster == user
 
     assert post == post2
     assert post.source == 'Some corrected text'

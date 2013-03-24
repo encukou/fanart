@@ -110,6 +110,38 @@
         margin-bottom: 1ex
         min-height: 2em
 
+    .update-info:
+        font-size: 80%
+        font-family: $sans
+        color: transparent
+        transition-property: color
+        transition-duration: 0.1s
+        cursor: default
+        text-align: right
+        padding-right: 1ex
+
+        &:after:
+            content: `"\f040"`
+            display: inline-block;
+            speak: none;
+            font-family: 'FontAwesome'
+            color: $text_on_mid.mix(50%, $mid_background)
+            padding-left: 1ex
+
+        a:
+            color: transparent
+            transition-duration: 0.1s
+
+    &:hover:
+        .update-info:
+            color: $dark_foreground
+
+            a:
+                color: $dark_secondary_color
+
+            &:after:
+                color: $text_on_mid
+
     .fix:
         display: block
         clear: both

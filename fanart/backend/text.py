@@ -32,6 +32,10 @@ class Post(Item):
     active_text = WrappedProperty('active_text', PostText)
 
     @property
+    def is_virtual(self):
+        return self._obj is EMPTY_POST
+
+    @property
     def source(self):
         if self.active_text:
             return self.active_text.source
@@ -50,7 +54,7 @@ class Post(Item):
         """
         if new_source == self.source:
             return self
-        if self._obj is EMPTY_POST:
+        if self.is_virtual:
             return self.backend.posts.add(new_source)
         else:
             poster = self.backend.logged_in_user
@@ -72,7 +76,7 @@ class Post(Item):
             return self
 
     def __repr__(self):
-        if self._obj is EMPTY_POST:
+        if self.is_virtual:
             return '<Post (empty)>'
         else:
             return '<Post {}>'.format(self.id)

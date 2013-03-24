@@ -42,7 +42,7 @@
 % endif
 
 % for author, description in artwork.author_descriptions.items():
-    ${self.helpers.comment(description, poster=author)}
+    ${self.helpers.comment(description, poster=author, post_type='popisek')}
 % endfor
 
 <dl class="art-info">

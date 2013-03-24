@@ -1,3 +1,16 @@
+<%def name="a(m='', f='a', other='/a', user=None)" filter="trim">
+% if not user:
+    <% user = request.user %>
+% endif
+% if user.gender == 'male':
+    ${m}
+% elif user.gender == 'female':
+    ${f}
+% else:
+    ${other}
+% endif
+</%def>
+
 <%def name="art_card(artwork)">
     <div class="art-card">
         <div class="row-hack">
@@ -41,7 +54,7 @@
     </div>
 </%def>
 
-<%def name="comment(post, poster=None)">
+<%def name="comment(post, poster=None, post_type='komentář')">
     <% if poster is None: poster = post.poster %>
     <div class="comment-block" id="comment-${post.id}">
         <div class="comment-header">
@@ -55,6 +68,15 @@
         </div>
         <div class="comment markdown">
             ${h.markdown2html(post.source)}
+            % if abs(post.posted_at - post.active_text.posted_at).total_seconds() > 3 * 60:
+                <% tposter = post.active_text.poster %>
+                <div class="update-info">
+                    ${post_type}
+                    ${h.format_date(post.active_text.posted_at)}
+                    změnil${self.a(tposter)}
+                    ${wrap(tposter).link()}
+                </div>
+            % endif
         </div>
         <span class="fix"></span>
     </div>

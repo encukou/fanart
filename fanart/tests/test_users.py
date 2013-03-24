@@ -124,3 +124,14 @@ def test_contacts_private(backend):
         user.contacts = {}
     user.contacts['myspace'] = 'ellie1234'
     assert 'myspace' not in user.contacts
+
+def test_bio(backend):
+    user = backend.users.add('Carol', 'super*secret', _crypt_strength=0)
+    assert user.bio == ''
+    backend.login(user)
+    user.bio = ''
+    assert user.bio == ''
+    user.bio = "Some person"
+    assert user.bio == "Some person"
+    user.bio = ''
+    assert user.bio == ''
