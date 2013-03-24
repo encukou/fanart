@@ -51,8 +51,8 @@ def _deferred_csrf_default(node, kw):
 class FormSchema(colander.MappingSchema):
     csrft = colander.SchemaNode(
         colander.String(),
-        default = _deferred_csrf_default,
-        widget = deform.widget.HiddenWidget(),
+        default=_deferred_csrf_default,
+        widget=deform.widget.HiddenWidget(),
     )
 
 

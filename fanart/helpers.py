@@ -135,7 +135,7 @@ class WrapList(collections.abc.MutableSequence):
     def __init__(self, underlying_list, wrap, unwrap):
         self.list = underlying_list
         self.wrap = wrap
-        self.unwrap=unwrap
+        self.unwrap = unwrap
 
     def insert(self, index, item):
         self.list.insert(index, self.wrap(item))

@@ -28,8 +28,8 @@ def check_csrf(request):
         logging.debug("CSRF in POST matches session token")
         return True
     else:
-        logging.warn("Form POST without CSRF! %s from %s"
-                % (request.url, request.remote_addr))
+        logging.warn("Form POST without CSRF! %s from %s",
+                request.url, request.remote_addr)
         return False
 
 def check_request_for_csrf(event):
