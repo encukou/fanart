@@ -190,4 +190,4 @@ class Shoutbox(Collection):
     def from_newest(self):
         new_query = self._query.order_by(None)
         new_query = new_query.order_by(self.item_table.published.desc())
-        return type(self)(self.backend, new_query)
+        return self._clone(new_query)

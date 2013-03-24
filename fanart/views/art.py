@@ -171,6 +171,11 @@ class ArtPage(ViewBase):
         self.artwork = item
 
     def render(self, request):
+        if request.POST.get('submit') == 'add-comment':
+            source = request.POST.get('art-comment')
+            if source:
+                self.artwork.comments.add(source)
+            return httpexceptions.HTTPSeeOther(self.url)
         return self.render_response(
             'art/art.mako', request,
             artwork=self.artwork,

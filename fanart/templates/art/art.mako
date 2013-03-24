@@ -52,3 +52,24 @@
         <dd>žádná</dd>
 </dl>
 <span class="fix"></span>
+
+<hr>
+
+<div class="art-comments">
+
+% if not request.user.is_virtual:
+    <form action="${this.url}" method="POST" class="simple" enctype="multipart/form-data" accept-charset="utf-8">
+    <fieldset>
+    <textarea name="art-comment" class="markdown-textarea">${request.POST.get('art-comment', '')}</textarea>
+    <input type="hidden" name="csrft" value="${request.csrf_token}"></button>
+    </fieldset>
+    <fieldset>
+    <button type="submit" name="submit" value="add-comment">Přidat komentář</button>
+    </fieldset>
+    </form>
+% endif
+
+% for comment in artwork.comments.from_newest:
+    ${self.helpers.comment(comment)}
+% endfor
+</div>

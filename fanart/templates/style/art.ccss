@@ -81,8 +81,8 @@
     clear: both
 
     .comment-header:
-        background-color: $light_background
-        box-shadow: 0px 0px 2px $light_background
+        background-color: $slightly_light_background
+        box-shadow: 0px 0px 2px $slightly_light_background
         padding-right: 1ex
         border-radius: 2px
         border-top-right-radius: 0.5ex

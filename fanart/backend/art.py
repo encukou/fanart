@@ -348,3 +348,9 @@ class Comments(Collection):
         self.backend._db.add(item)
         self.backend._db.flush()
         return Comment(self.backend, post._obj)
+
+    @property
+    def from_newest(self):
+        new_query = self._query.order_by(None)
+        new_query = new_query.order_by(self.item_table.posted_at.desc())
+        return self._clone(new_query)

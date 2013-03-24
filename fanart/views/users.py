@@ -224,7 +224,7 @@ class Users(ViewBase):
                 try:
                     traversal.find_resource(self.root, url)
                     return httpexceptions.HTTPSeeOther(url)
-                except httpexceptions.HTTPException:
+                except (httpexceptions.HTTPException, LookupError):
                     return httpexceptions.HTTPSeeOther(self.root.url)
             else:
                 return httpexceptions.HTTPNotFound()
