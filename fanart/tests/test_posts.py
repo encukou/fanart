@@ -43,3 +43,6 @@ def test_post_edit(backend):
     post.edit('Some correct text')
 
     assert post.source == 'Some correct text'
+
+    post.edit('')
+    assert post.source == ''

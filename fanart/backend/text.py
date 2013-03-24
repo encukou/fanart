@@ -64,7 +64,7 @@ class Post(Item):
             else:
                 poster_obj = poster._obj
             item = tables.PostText(
-                    source=new_source,
+                    source=new_source or '',
                     poster=poster_obj,
                     posted_at=_time or datetime.utcnow(),
                     post=self._obj,
