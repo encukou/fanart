@@ -1,4 +1,22 @@
-<%def name="artifact_card(artifact, top_text, bottom_text, link=None)">
+<%! from markupsafe import Markup %>
+
+<%def name="artifact_image(artifact, link=None)">
+    % if artifact.is_bad:
+        <div class="icon-warning-sign icon-4x"></div>
+        <div class="extra-text">${artifact.error_message}</div>
+    % elif artifact.storage_type == 'scratch':
+        <% # XXX: this src generation is kinda dumb; make it pluggable
+            src = request.root.url + '/scratch/' + artifact.storage_location
+        %>
+        % if link:
+            ${link(Markup('<img src="{}">'.format(src)))}
+        % else:
+            ${Markup('<img src="{}">'.format(src))}
+        % endif
+    % endif
+</%def>
+
+<%def name="artifact_card(artifact, top_text, bottom_text=Markup('&nbsp;'), link=None)">
     <div class="art-card">
         <div class="row-hack">
             <div class="name">
@@ -6,27 +24,11 @@
             </div>
         </div>
         % if artifact:
-            % if artifact.storage_type == 'scratch':
-                <div class="row-hack">
-                    <div class="thumbnail">
-                        <% # XXX: this src generation is kinda dumb; make it pluggable
-                            src = request.root.url + '/scratch/' + artifact.storage_location
-                        %>
-                        % if link:
-                            ${link(Markup('<img src="{}">'.format(src)))}
-                        % else:
-                            ${Markup('<img src="{}">'.format(src))}
-                        % endif
-                    </div>
-                </div>
-            % else:
             <div class="row-hack">
                 <div class="thumbnail">
-                    <div class="icon-question-sign icon-4x"></div>
-                    <div class="extra-text">Neznámý obrázek?!</div>
+                    ${artifact_image(artifact, link)}
                 </div>
             </div>
-            % endif
         % else:
             <div class="row-hack">
                 <div class="thumbnail">
@@ -57,7 +59,11 @@
         <div class="comment-header">
             ${h.format_date(post.posted_at)}
             % if poster:
-                <div class="avatar"></div>
+                <div class="avatar">
+                % if poster.avatar:
+                    ${artifact_image(poster.avatar)}
+                % endif
+                </div>
                 <div class="poster">${wrap(poster).link()}:</div>
             % else:
                 <div class="poster">${"<Systém>"}:</div>

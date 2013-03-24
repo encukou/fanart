@@ -1,9 +1,8 @@
-
+"""
 from pyramid.response import Response
 from sqlalchemy.orm.exc import NoResultFound
 import yaml
 import os
-import subprocess
 import tempfile
 import contextlib
 import hashlib
@@ -48,50 +47,6 @@ def select_task(request):
                 break
         else:
             yield lambda: remove_scratch_artifact(request, artwork_artifact)
-
-
-def get_scratch_path(request, artwork_artifact):
-    artifact = artwork_artifact.artifact
-    assert artifact.storage_type == 'scratch'
-    path = request.fanart_settings['fanart.scratch_dir']
-    return os.path.join(path, artifact.storage_location)
-
-
-def run_process(command_line):
-    process = subprocess.Popen(
-        command_line, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    return process.communicate()
-
-
-def identify_artifact(request, artwork_artifact):
-    # XXX: JPEGs
-    # XXX: Animated GIFs
-    artifact = artwork_artifact.artifact
-    path = get_scratch_path(request, artwork_artifact)
-    command_line = [
-        IDENTIFY_BINARY,
-        '-format', '%m;%w;%h;',
-        path,
-        ]
-    stdout, stderr = run_process(command_line)
-    assert not stderr, stderr
-    stdout = stdout.decode('utf-8')
-    filetype, width, height, extra = stdout.split(';', 3)
-    artifact.filetype = filetype = filetype.strip()
-    artifact.width = width = int(width.strip())
-    artifact.height = height = int(height.strip())
-    extra = extra.strip()
-    request.db.commit()
-    return dict(
-        action='identify_artifact',
-        name=artwork_artifact.artwork.name,
-        command_line=command_line,
-        stdout=stdout,
-        filetype=filetype,
-        width=width,
-        height=height,
-        extra=extra,
-        )
 
 
 def link_artifact(request, artifact_version, new_type):
@@ -238,3 +193,4 @@ def remove_scratch_artifact(request, artwork_artifact):
 def run_task(request):
     for task in select_task(request):
         return task()
+"""

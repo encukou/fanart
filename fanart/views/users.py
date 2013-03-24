@@ -31,7 +31,7 @@ class CZDate(object):
         except (AttributeError, KeyError):
             raise colander.Invalid(node, '%r is not a date')
         else:
-            return day_name + strftime(' %d. %m. %Y')
+            return day_name + strftime(' %d. %m. %Y').replace(' 0', ' ')
 
     def deserialize(self, node, cstruct):
         if cstruct is colander.null:
@@ -270,6 +270,10 @@ class AvatarChanger(ViewBase):
                 if input_file:
                     user.upload_avatar(input_file)
                     return httpexceptions.HTTPSeeOther(self.url)
+            if request.POST['submit'] == 'remove-request':
+                del user.avatar_request
+            if request.POST['submit'] == 'remove-avatar':
+                del user.avatar
         return self.render_response('users/change_avatar.mako', request,
                 user=user,
             )

@@ -333,6 +333,15 @@ class Artifact(Item):
     width = ColumnProperty('width')
     height = ColumnProperty('height')
     filetype = ColumnProperty('filetype')
+    error_message = ColumnProperty('error_message')
+
+    @property
+    def is_bad(self):
+        return bool(self.error_message)
+
+    def _schedule_removal(self):
+        self.backend.schedule_task(
+            'remove_artifact', {'artifact_id': self.id})
 
 
 class Comment(Post):

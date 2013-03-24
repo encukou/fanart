@@ -1,0 +1,1 @@
+AVATAR_SIZE = 64

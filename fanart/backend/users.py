@@ -45,17 +45,23 @@ class User(Item):
             return None
         now = datetime.now()
         dob = self._obj.date_of_birth
-        age = now.year - dob.year
-        if (now.month, now.day) >= (dob.month, dob.day):
-            age += 1
-        return age
+        if dob:
+            age = now.year - dob.year
+            if (now.month, now.day) >= (dob.month, dob.day):
+                age += 1
+            return age
+        else:
+            return None
 
     @property
     def birthday(self):
         if not access_allowed(allow_self, self) and not self.show_birthday:
             return None
         dob = self._obj.date_of_birth
-        return dob.month, dob.day
+        if dob:
+            return dob.month, dob.day
+        else:
+            return None
 
     @property
     def bio_post(self):
@@ -101,20 +107,50 @@ class User(Item):
     def avatar_request(self):
         if not access_allowed(allow_self, self):
             raise AccessError("Access denied")
-        if not self._obj.avatar_request:
+        if self._obj.avatar_request:
+            from fanart.backend.art import Artifact
+            return Artifact(self.backend, self._obj.avatar_request)
+        else:
             return None
-        from fanart.backend.art import Artifact
-        return Artifact(self.backend, self._obj.avatar_request)
+
+    @avatar_request.deleter
+    def avatar_request(self):
+        if not access_allowed(allow_self, self):
+            raise AccessError("Access denied")
+        if self._obj.avatar_request:
+            self.avatar_request._schedule_removal()
+        self._obj.avatar_request = None
+
+    @property
+    def avatar(self):
+        if self._obj.avatar:
+            from fanart.backend.art import Artifact
+            return Artifact(self.backend, self._obj.avatar)
+        else:
+            return None
+
+    @avatar.deleter
+    def avatar(self):
+        if not access_allowed(allow_self, self):
+            raise AccessError("Access denied")
+        if self._obj.avatar_request:
+            self.avatar_request._schedule_removal()
+        self._obj.avatar_request = None
+        if self._obj.avatar:
+            self.avatar._schedule_removal()
+        self._obj.avatar = None
 
     def upload_avatar(self, input_file):
         if not access_allowed(allow_self, self):
             raise AccessError("Cannot upload another person's avatar")
         if self._obj.avatar_request:
             raise ValueError('Cannot upload another avatar request')
-        from fanart.backend.art import upload_artifact
+        from fanart.backend.art import Artifact, upload_artifact
         with upload_artifact(self.backend, input_file) as artifact:
             self._obj.avatar_request = artifact
             self.backend._db.flush()
+            self.backend.schedule_task('apply_avatar', {'user_id': self.id})
+            return Artifact(self.backend, artifact)
 
 
 class Users(Collection):

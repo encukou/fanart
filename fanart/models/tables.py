@@ -106,6 +106,7 @@ class Artifact(Base):
     width = Column(Integer, nullable=True)
     height = Column(Integer, nullable=True)
     filetype = Column(Unicode, nullable=True)
+    error_message = Column(Unicode, nullable=True)
 
 class ArtworkArtifact(Base):
     __tablename__ = 'artwork_artifacts'
@@ -144,6 +145,13 @@ class ArtworkComment(Base):
     __tablename__ = 'artwork_comments'
     artwork_id = Column(Integer, ForeignKey('artworks.id'), nullable=False, primary_key=True)
     post_id = Column(Integer, ForeignKey('posts.id'), nullable=True, primary_key=True)
+
+class Task(Base):
+    __tablename__ = 'tasks'
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    name = Column(Unicode, nullable=False)
+    params = Column(Unicode, nullable=False)
+    priority = Column(Integer, nullable=False)
 
 User.bio_post = relationship(Post, post_update=True,
         primaryjoin=User.bio_post_id == Post.id)

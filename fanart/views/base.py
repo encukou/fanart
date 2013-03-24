@@ -6,6 +6,7 @@ from pyramid.decorator import reify
 from markupsafe import Markup
 
 from fanart.views import helpers
+from fanart import AVATAR_SIZE
 
 class instanceclass(object):
     def __init__(self, cls):

@@ -3,10 +3,12 @@ from pyramid import httpexceptions
 import clevercss
 import pkg_resources
 
+import yaml
+
 from fanart.views.base import ViewBase, instanceclass
 from fanart.views import users, news, api, shoutbox, art
-from fanart.tasks import run_tasks
 from fanart import backend
+from fanart import AVATAR_SIZE
 
 def view_root(context, request):
     print(request.application_url, request.path_info, context.url)
@@ -51,6 +53,14 @@ class URLExpression(clevercss.expressions.Expr):
         'static': static,
     }
 
+class RunTask(ViewBase):
+    def render(self, request):
+        result = request.backend.run_task()
+        yaml_result = yaml.safe_dump(result)
+        response = Response(yaml_result)
+        response.content_type = 'text/plain'
+        return response
+
 class Site(ViewBase):
     __name__ = __parent__ = None
     friendly_name = 'Fanart'
@@ -75,6 +85,7 @@ class Site(ViewBase):
                    'templates/style/style.ccss')
             css_context = dict(
                 url=URLExpression('fanart:static', request.static_url),
+                avatar_size=clevercss.expressions.Number(AVATAR_SIZE),
             )
             css = clevercss.convert(open(filename).read(), minified=False,
                 fname=filename, context=css_context)
@@ -96,8 +107,8 @@ class Site(ViewBase):
     child_shoutbox = instanceclass(shoutbox.Shoutbox)
     child_art = instanceclass(art.Art)
 
-    # XXX: We should have a Celery runner here or something
-    child_task = instanceclass(run_tasks.RunTask)
+    # XXX: We should have a real runner here
+    child_task = instanceclass(RunTask)
 
     def wrap(self, item):
         if isinstance(item, backend.users.User):

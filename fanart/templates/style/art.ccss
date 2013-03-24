@@ -96,13 +96,13 @@ body.fanart #content:
                 float: left
                 display: inline-block
                 position: relative
-                width: 100px
+                width: $avatar_size px
                 min-height: 2em
                 margin: 0.5ex 0.5em
                 text-align: center
 
         .poster, .comment:
-            margin-left: 100px
+            margin-left: $avatar_size px
             padding-left: 1em
 
         .comment:
@@ -154,7 +154,7 @@ body.fanart #content:
         dt:
             clear: left
             float: left
-            width: 100px
+            width: $avatar_size px
             text-align: right
             margin-left: 0.5em
             margin-right: 0.5em
@@ -162,7 +162,7 @@ body.fanart #content:
             margin-right: `0.5rem`
 
         dd:
-            margin-left: 100px
+            margin-left: $avatar_size px
             padding-left: 1em
             padding-left: `1rem`
 
@@ -176,6 +176,6 @@ body.fanart #content:
             display: block
 
     .link-line.art-link-line:
-        margin-left: 100px
+        margin-left: $avatar_size px
         padding-left: 1em
         padding-left: `1rem`

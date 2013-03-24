@@ -141,8 +141,90 @@ def test_bio(backend):
 def test_avatars(backend):
     user = backend.logged_in_user
     fname = os.path.join(os.path.dirname(__file__), 'data', '64x64.png')
+
+    assert user.avatar_request is None
+    assert user.avatar is None
+
     with open(fname, 'rb') as file:
-        user.upload_avatar(file)
+        artifact = user.upload_avatar(file)
 
         with pytest.raises(ValueError):
             user.upload_avatar(file)
+
+    assert user.avatar_request == artifact
+    assert artifact.filetype is None
+
+    backend.run_task()
+
+    assert user.avatar_request is None
+    assert artifact.filetype == 'Image'
+    assert artifact.width == artifact.height == 64
+
+    assert user.avatar
+    assert user.avatar.filetype == 'Image'
+    assert user.avatar.width == user.avatar.height == 64
+
+    del user.avatar
+    assert user.avatar_request is None
+    assert user.avatar is None
+
+@pytest.mark.login
+def test_cancel_avatar_request(backend):
+    user = backend.logged_in_user
+    fname = os.path.join(os.path.dirname(__file__), 'data', '64x64.png')
+
+    assert user.avatar_request is None
+    assert user.avatar is None
+
+    with open(fname, 'rb') as file:
+        artifact = user.upload_avatar(file)
+
+    assert user.avatar_request == artifact
+
+    del user.avatar_request
+
+    backend.run_task()
+
+    assert user.avatar_request is None
+    assert user.avatar is None
+
+@pytest.mark.login
+def test_remove_avatar_and_request(backend):
+    user = backend.logged_in_user
+    fname = os.path.join(os.path.dirname(__file__), 'data', '64x64.png')
+
+    assert user.avatar_request is None
+    assert user.avatar is None
+
+    with open(fname, 'rb') as file:
+        artifact = user.upload_avatar(file)
+
+    assert user.avatar_request == artifact
+
+    backend.run_task()
+
+    with open(fname, 'rb') as file:
+        artifact = user.upload_avatar(file)
+
+    assert user.avatar_request
+    assert user.avatar
+
+    del user.avatar
+
+    assert user.avatar_request is None
+    assert user.avatar is None
+
+
+@pytest.mark.login
+def test_bad_avatar_request(backend):
+    user = backend.logged_in_user
+    fname = __file__
+
+    with open(fname, 'rb') as file:
+        artifact = user.upload_avatar(file)
+
+    backend.run_task()
+
+    assert user.avatar is None
+    assert user.avatar_request == artifact
+    assert user.avatar_request.is_bad

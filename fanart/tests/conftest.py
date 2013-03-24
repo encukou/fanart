@@ -11,12 +11,12 @@ from fanart import wsgi_app
 
 TEST_PORT = 8008
 
-@pytest.fixture(scope='module')
+@pytest.fixture
 def sqla_engine():
     print('Creating engine')
     return sqlalchemy.create_engine('sqlite://', echo=True)
 
-@pytest.fixture(scope='module')
+@pytest.fixture
 def db_session(sqla_engine):
     sqla_engine.echo = False
     print('Creating all tables...')
