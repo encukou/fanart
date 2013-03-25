@@ -1,9 +1,11 @@
 <%! from markupsafe import Markup %>
 
-<%def name="artifact_image(artifact, link=None)">
+<%def name="artifact_image(artifact, link=None, ignore_errors=False)">
     % if artifact.is_bad:
-        <div class="icon-warning-sign icon-4x"></div>
-        <div class="extra-text">${artifact.error_message}</div>
+        % if not ignore_errors:
+            <div class="icon-warning-sign icon-4x"></div>
+            <div class="extra-text">${artifact.error_message}</div>
+        % endif
     % elif artifact.storage_type == 'scratch':
         <% # XXX: this src generation is kinda dumb; make it pluggable
             src = request.root.url + '/scratch/' + artifact.storage_location
@@ -13,6 +15,9 @@
         % else:
             ${Markup('<img src="{}">'.format(src))}
         % endif
+    % elif not ignore_errors:
+        <div class="icon-question-sign icon-4x"></div>
+        <div class="extra-text">Neznámý formát obrázku</div>
     % endif
 </%def>
 
@@ -59,7 +64,7 @@
         % if bare:
             <div class="avatar">
             % if poster.avatar:
-                ${artifact_image(poster.avatar)}
+                ${artifact_image(poster.avatar, link=wrap(poster).link, ignore_errors=True)}
             % endif
             </div>
         % else:
@@ -68,7 +73,7 @@
             % if poster:
                 <div class="avatar">
                 % if poster.avatar:
-                    ${artifact_image(poster.avatar)}
+                    ${artifact_image(poster.avatar, link=wrap(poster).link, ignore_errors=True)}
                 % endif
                 </div>
                 <div class="poster">${wrap(poster).link()}:</div>

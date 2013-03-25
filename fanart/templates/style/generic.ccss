@@ -81,3 +81,6 @@ body.no-details details:
 
 summary:
     display: block
+
+time:
+    cursor: default

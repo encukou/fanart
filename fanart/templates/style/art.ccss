@@ -106,8 +106,8 @@ body.fanart #content:
             padding-left: 1em
 
         .comment:
-            margin-top: 1ex
-            margin-bottom: 1ex
+            margin-top: 0
+            margin-bottom: 1em
             min-height: 2em
 
         .update-info:
