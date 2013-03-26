@@ -57,6 +57,15 @@ def autocommit(handler, registry):
         return response
     return tween
 
+
+def add_default_headers(handler, registry):
+    def tween(request):
+        response = handler(request)
+        response.headers.setdefault('X-Frame-Options', 'DENY')
+        return response
+    return tween
+
+
 def main(global_config, **settings):
     """ This function returns a WSGI application.
     """
@@ -91,6 +100,7 @@ def main(global_config, **settings):
         )
     deform.Form.set_default_renderer(deform_renderer)
     config.add_tween('fanart.wsgi_app.autocommit', under=EXCVIEW)
+    config.add_tween('fanart.wsgi_app.add_default_headers', under=EXCVIEW)
     config.add_subscriber(check_request_for_csrf, NewRequest)
     config.add_subscriber(set_locale, NewRequest)
     config.add_translation_dirs('colander:locale/', 'deform:locale/')
