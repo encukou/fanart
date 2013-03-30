@@ -214,7 +214,8 @@ def test_processing(backend):
 @pytest.mark.parametrize(('filename', 'same', 'sizes', 'types'), (
     ['64x64.png', [True, True, True], [(64, 64), (64, 64), (64, 64)], 'PNG,PNG,PNG'],
     ['200x200.png', [False, True, False], [(100, 100), (200, 200), (200, 200)], 'PNG,PNG,PNG'],
-    ['500x500.png', [False, False, False], [(100, 100), (400, 400), (500, 500)], 'PNG,PNG,PNG'],
+    ['500x500.png', [False, True, False], [(100, 100), (500, 500), (500, 500)], 'PNG,PNG,PNG'],
+    ['100x1000.png', [False, False, False], [(10, 100), (60, 600), (100, 1000)], 'PNG,PNG,PNG'],
     ['anim.gif', [True, False, False], [(38, 38), (38, 38), (38, 38)], 'PNG,PNG,Animated GIF'],
     ['gimplasma.jpg', [True, True, True], [(64, 64), (64, 64), (64, 64)], 'JPEG,JPEG,JPEG'],
 ))
