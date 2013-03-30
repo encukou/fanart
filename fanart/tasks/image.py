@@ -71,9 +71,10 @@ def resize_image(backend, artifact, filetype, max_width=None, max_height=None,
         print('Artifact {} has error - cannot resize'.format(artifact.id))
         return
     path = os.path.join(backend._scratch_dir, artifact.storage_location)
-    command_line = [CONVERT_BINARY, path]
+    command_line = [CONVERT_BINARY]
     if comment:
         command_line += ['-comment', comment]
+    command_line += [path]
     if (max_width and artifact.width > max_width) or (
             max_height and artifact.height > max_height):
         command_line += ['-resize', '{}x{}'.format(max_width, max_height)]
