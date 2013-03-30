@@ -194,6 +194,9 @@ class Artwork(Item):
             self.backend._db.add(artifact_link)
             self.backend._db.flush()
 
+            self.backend.schedule_task('process_art',
+                                       {'version_id': artwork_version.id})
+
             return ArtworkVersion(self.backend, artwork_version)
 
     def set_identifier(self):
@@ -233,6 +236,8 @@ class Artwork(Item):
                 if not query.count():
                     self._obj.identifier = identifier
                     break
+            self.backend.schedule_task('try_publish_art',
+                                       {'artwork_id': self.id})
 
     @property
     def comments(self):
@@ -334,6 +339,10 @@ class Artifact(Item):
     height = ColumnProperty('height')
     filetype = ColumnProperty('filetype')
     error_message = ColumnProperty('error_message')
+
+    @property
+    def size(self):
+        return self.width, self.height
 
     @property
     def is_bad(self):

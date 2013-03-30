@@ -46,13 +46,13 @@ class Backend(object):
         from fanart.backend.text import Posts
         return Posts(self)
 
-    def schedule_task(self, name, params):
+    def schedule_task(self, name, params, priority=None):
         from fanart.backend.tasks import schedule_task
-        return schedule_task(self, name, params)
+        return schedule_task(self, name, params, priority)
 
     def run_task(self, n=1):
         from fanart.backend.tasks import run_task
-        return run_task(self)
+        return run_task(self, n=n)
 
     def commit(self):
         self._db.commit()

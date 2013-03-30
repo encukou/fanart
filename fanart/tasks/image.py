@@ -24,6 +24,9 @@ def identify_artifact(backend, artifact):
     if artifact.storage_type != 'scratch':
         print('Artifact {} not in scratch'.format(artifact.id))
         return False
+    if artifact.filetype:
+        print('Artifact {} already identified'.format(artifact.id))
+        return
     path = os.path.join(backend._scratch_dir, artifact.storage_location)
     command_line = [
         IDENTIFY_BINARY,
@@ -47,6 +50,8 @@ def identify_artifact(backend, artifact):
         return False
     elif filetype == 'JPEG':
         filetype = 'JPEG'
+    elif filetype == 'PNG':
+        filetype = 'PNG'
     else:
         filetype = 'Image'
     artifact.filetype = filetype = filetype.strip()
@@ -55,8 +60,9 @@ def identify_artifact(backend, artifact):
     return True
 
 
-def resize_image(backend, artifact, filetype, max_width, max_height, 
+def resize_image(backend, artifact, filetype, max_width=None, max_height=None,
                  comment=None):
+    identify_artifact(backend, artifact)
     if artifact.storage_type != 'scratch':
         print('Artifact {} storage type is {} - cannot resize'.format(
             artifact.id, artifact.storage_type))
@@ -68,7 +74,8 @@ def resize_image(backend, artifact, filetype, max_width, max_height,
     command_line = [CONVERT_BINARY, path]
     if comment:
         command_line += ['-comment', comment]
-    if artifact.width > max_width or artifact.height > max_height:
+    if (max_width and artifact.width > max_width) or (
+            max_height and artifact.height > max_height):
         command_line += ['-resize', '{}x{}'.format(max_width, max_height)]
     if filetype != 'gif':
         command_line += ['-background', 'transparent', '-flatten']
@@ -109,3 +116,39 @@ def resize_image(backend, artifact, filetype, max_width, max_height,
         backend._db.flush()
         identify_artifact(backend, new_artifact)
         return new_artifact
+
+
+def process_image(backend, artwork_version, scratch_artifact, size,
+                 artifact_type, base=None, keep_animations=False):
+    identify_artifact(backend, scratch_artifact)
+    artwork_id = artwork_version.artwork_id
+    comment = 'vystaveno na poke.fanart.cz/art/{}'.format(artwork_id)
+    animated = False
+    if scratch_artifact.filetype == 'JPEG':
+        filetype = 'jpeg'
+    elif scratch_artifact.filetype == 'Animated GIF':
+        if keep_animations:
+            filetype = 'gif'
+            animated = True
+        else:
+            filetype = 'png'
+    elif scratch_artifact.filetype in ('Image', 'PNG', ):
+        filetype = 'png'
+    else:
+        raise ValueError('Unknown filetype %s' % scratch_artifact.filetype)
+    if base and not animated:
+        base_artifact, (width, height) = base
+        if (scratch_artifact.width <= width and
+                scratch_artifact.height <= height):
+            print('Reusing base')
+            artwork_version.artifacts[artifact_type] = base_artifact
+            backend._db.flush()
+            return
+    if not size:
+        size = ()
+    else:
+        width, height = size
+    new_artifact = resize_image(
+        backend, scratch_artifact, filetype, *size, comment=comment)
+    artwork_version.artifacts[artifact_type] = new_artifact
+    backend._db.flush()

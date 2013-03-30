@@ -5,6 +5,7 @@ import binascii
 import pytest
 
 from fanart import backend as backend_mod
+from fanart.models import tables
 
 def test_zero_artwork(backend):
     assert len(backend.art) == 0
@@ -157,3 +158,81 @@ def test_comments(backend):
 
     assert list(art.comments) == [comment1, comment2, comment3]
     assert comment2.source == 'Middle comment'
+
+
+def assert_run_task(backend, *expected):
+    [got] = backend.run_task()
+    got = got[:len(expected)]
+    assert got == expected
+
+
+@pytest.mark.login
+def test_processing(backend):
+    art = backend.art.add('Yet Another Masterpiece')
+
+    fname = os.path.join(os.path.dirname(__file__), 'data', '64x64.png')
+    with open(fname, 'rb') as file:
+        art_version = art.upload(file)
+
+    scratch_artifact = art_version.artifacts['scratch']
+    scratch_path = os.path.join(backend._scratch_dir,
+                                scratch_artifact.storage_location)
+
+    assert set(art_version.artifacts.keys()) == {'scratch'}
+
+    assert_run_task(backend, 'process_art')
+    assert set(art_version.artifacts.keys()) == {'scratch', 'thumb'}
+
+    assert_run_task(backend, 'process_art')
+    assert set(art_version.artifacts.keys()) == {'scratch', 'thumb', 'view'}
+    assert art.complete == False
+
+    assert_run_task(backend, 'process_art')
+    assert set(art_version.artifacts.keys()) == {'thumb', 'view', 'full'}
+    assert art.complete == True
+    assert art.approved == False
+
+    assert_run_task(backend, 'try_publish_art')
+    assert set(art_version.artifacts.keys()) == {'thumb', 'view', 'full'}
+    assert os.path.exists(scratch_path)
+    assert art.approved == True  # XXX: more strict publish rules
+
+    assert_run_task(backend, 'remove_artifact')
+    assert set(art_version.artifacts.keys()) == {'thumb', 'view', 'full'}
+    assert not os.path.exists(scratch_path)
+    assert not backend._db.query(tables.Artifact).get([scratch_artifact.id])
+
+    artifacts = art_version.artifacts.values()
+    are_same = [a == list(artifacts)[0] for a in artifacts]
+    assert all(are_same)
+
+
+@pytest.mark.parametrize(('filename', 'same', 'sizes', 'types'), (
+    ['64x64.png', [True, True, True], [(64, 64), (64, 64), (64, 64)], 'PNG,PNG,PNG'],
+    ['200x200.png', [False, True, False], [(100, 100), (200, 200), (200, 200)], 'PNG,PNG,PNG'],
+    ['500x500.png', [False, False, False], [(100, 100), (400, 400), (500, 500)], 'PNG,PNG,PNG'],
+    ['anim.gif', [True, False, False], [(38, 38), (38, 38), (38, 38)], 'PNG,PNG,Animated GIF'],
+    ['gimplasma.jpg', [True, True, True], [(64, 64), (64, 64), (64, 64)], 'JPEG,JPEG,JPEG'],
+))
+@pytest.mark.login
+def test_format_processing(backend, filename, same, sizes, types):
+    art = backend.art.add('Yet Another Masterpiece')
+
+    fname = os.path.join(os.path.dirname(__file__), 'data', filename)
+    with open(fname, 'rb') as file:
+        art_version = art.upload(file)
+
+    backend.run_task(n=None)
+
+    thumb = art_version.artifacts['thumb']
+    view = art_version.artifacts['view']
+    full = art_version.artifacts['full']
+
+    same_got = [thumb == view, view == full, full == thumb]
+    assert same == same_got
+
+    sizes_got = [thumb.size, view.size, full.size]
+    assert sizes_got == sizes
+
+    types_got = [thumb.filetype, view.filetype, full.filetype]
+    assert types_got == types.split(',')

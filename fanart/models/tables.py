@@ -163,9 +163,11 @@ UserContact.user = relationship(
             cascade="all, delete-orphan",
             collection_class=attribute_mapped_collection('type')))
 User.avatar_request = relationship(Artifact,
-        primaryjoin=User.avatar_request_id == Artifact.id)
+        primaryjoin=User.avatar_request_id == Artifact.id,
+        backref='avatar_requestors')
 User.avatar = relationship(Artifact,
-        primaryjoin=User.avatar_id == Artifact.id)
+        primaryjoin=User.avatar_id == Artifact.id,
+        backref='avatar_users')
 
 
 NewsItem.reporter = relationship(User,
@@ -193,7 +195,8 @@ ArtworkVersion.uploader = relationship(User,
 ArtworkVersion.artwork = relationship(Artwork,
         primaryjoin=ArtworkVersion.artwork_id == Artwork.id,
         backref='artwork_versions')
-ArtworkVersion.artifacts = association_proxy('artwork_artifacts', 'artifact')
+ArtworkVersion.artifacts = association_proxy('artwork_artifacts', 'artifact',
+        creator=lambda k, v: ArtworkArtifact(type=k, artifact=v))
 
 ArtworkArtifact.artwork_version = relationship(ArtworkVersion,
         primaryjoin=ArtworkArtifact.artwork_version_id == ArtworkVersion.id,

@@ -157,11 +157,11 @@ def test_avatars(backend):
     backend.run_task()
 
     assert user.avatar_request is None
-    assert artifact.filetype == 'Image'
+    assert artifact.filetype == 'PNG'
     assert artifact.width == artifact.height == 64
 
     assert user.avatar
-    assert user.avatar.filetype == 'Image'
+    assert user.avatar.filetype == 'PNG'
     assert user.avatar.width == user.avatar.height == 64
 
     del user.avatar

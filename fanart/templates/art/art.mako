@@ -19,7 +19,12 @@
     </div>
 </%def>
 
-% if artwork.current_version.artifacts.get('view') != artwork.current_version.artifacts.get('full'):
+<%
+    view_artifact = artwork.current_version.artifacts.get('view')
+    full_artifact = artwork.current_version.artifacts.get('full')
+%>
+
+% if view_artifact and full_artifact and view_artifact != full_artifact:
     % if this.artifact_type == 'view':
         <%
             link = this['fullview'].link
