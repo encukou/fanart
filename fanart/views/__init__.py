@@ -64,6 +64,7 @@ class RunTask(ViewBase):
 class Site(ViewBase):
     __name__ = __parent__ = None
     friendly_name = 'Fanart'
+    page_title = None
 
     def __init__(self, request):
         # Does not call super

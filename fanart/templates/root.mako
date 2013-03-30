@@ -1,14 +1,12 @@
 <%inherit file="base.mako" />
 <%def name="title()"></%def>
 <%def name="title_in_head()">${self.title()}</%def>
-<%def name="title_in_page()">Česká PokéGalerie</%def>
+<%def name="title_in_page()"></%def>
 
 % if request.user.is_virtual:
     <div>Vítej v České PokéGalerii!</div>
     <div>Tady můžeš všem ukázat své výtvarné umění, čerpat inspiraci, pochválit co
     se ti líbí, nebo se jen podívat na obrázky.</div>
-% else:
-    <div>Vítej zpět!</div>
 % endif
 
 <h1>Novinky</h1>

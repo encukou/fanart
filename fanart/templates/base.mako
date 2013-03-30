@@ -1,6 +1,6 @@
 <%def name="title()">${getattr(this, 'page_title', this.friendly_name)}</%def>
 <%def name="title_in_head()">${self.title() + ' - '}</%def>
-<%def name="title_in_page()">${self.title()}</%def>
+<%def name="title_in_page()"><h1>${self.title()}</h1></%def>
 <%namespace name="helpers" file="helpers.mako" inheritable="True"/>
 
 <!DOCTYPE html>
@@ -40,7 +40,7 @@
                 % endif
             % endfor
         </nav>
-        <h1>${self.title_in_page()}</h1>
+        ${self.title_in_page()}
         ${next.body()}
     </section>
     <hr>
