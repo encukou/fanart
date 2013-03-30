@@ -3,23 +3,36 @@
 from pyramid import httpexceptions
 import colander
 import deform
+import collections
 
 from fanart.views.base import ViewBase, instanceclass
 from fanart.views import helpers as view_helpers
 
+
+def split_by_flag(coll, flag):
+    return [coll.filter_flags(**{flag: f}) for f in (True, False)]
+
+ManagerSection = collections.namedtuple('ManagerSection', 'title art')
 
 class ArtManager(ViewBase):
     friendly_name = 'Správa'
     page_title = 'Správa obrázků'
 
     def render(self, request):
-        art_to_manage = list(request.backend.art.filter_author(request.user))
-        if not art_to_manage:
-            return httpexceptions.HTTPSeeOther(self['upload'].url)
-        elif len(art_to_manage) == 1:
-            return httpexceptions.HTTPSeeOther(self[art_to_manage[0]].url)
+        art_to_manage = request.backend.art.filter_author(request.user)
+        hidden, other = split_by_flag(art_to_manage, 'hidden')
+        approved, other = split_by_flag(other, 'approved')
+        other = list(other)
+        have_identifier = [a for a in other if a.identifier]
+        no_identifier = [a for a in other if not a.identifier]
         return self.render_response(
-            'art/manage.mako', request, artworks=art_to_manage)
+            'art/manage.mako', request,
+            sections = [
+                ManagerSection('Nepřidané obrázky', no_identifier),
+                ManagerSection('Nepřijaté obrázky', have_identifier),
+                ManagerSection('Skryté obrázky', hidden),
+                ManagerSection('Obrázky v Galerii', approved),
+            ])
 
     def get(self, item):
         return PieceManager(self, item)
@@ -48,10 +61,13 @@ class ArtManager(ViewBase):
             return self.render_form()
 
 
-def PieceSchema(request):
+def PieceSchema(request, lenient=False):
     class PieceSchema(view_helpers.FormSchema):
         image_name = colander.SchemaNode(colander.String(),
                 title='Jméno')
+        if lenient:
+            image_name.missing = ''
+
         publish = colander.SchemaNode(colander.String(), missing=None,
                 title='Zveřejnit',
                 validator=colander.OneOf(('y', 'n')),
@@ -125,12 +141,18 @@ class PieceManager(ViewBase):
                 ))
         if 'submit' in request.POST:
             controls = list(request.POST.items())
+            appstruct = None
             try:
                 appstruct = form.validate(controls)
             except deform.ValidationFailure as e:
                 print(e, type(e), e.error)
-                pass
-            else:
+                try:
+                    lenient_schema = PieceSchema(request, lenient=True)
+                    lenient_form = deform.Form(lenient_schema)
+                    appstruct = lenient_form.validate(controls)
+                except deform.ValidationFailure as e:
+                    pass
+            if appstruct:
                 artwork.hidden = appstruct['publish'] == 'n'
                 if appstruct['image_name']:
                     artwork.name = appstruct['image_name']
@@ -164,10 +186,11 @@ class ArtPage(ViewBase):
         elif isinstance(item, int):
             item = parent.request.backend.art[item]
         self.friendly_name = item.name
-        if not item.identifier:
-            raise LookupError(item)
         if not name:
-            name = str(item.identifier)
+            if item.identifier:
+                name = str(item.identifier)
+            else:
+                name = str(item.id)
         super().__init__(parent, name)
         self.artwork = item
 

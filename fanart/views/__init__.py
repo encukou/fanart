@@ -111,10 +111,13 @@ class Site(ViewBase):
     # XXX: We should have a real runner here
     child_task = instanceclass(RunTask)
 
-    def wrap(self, item):
+    def wrap(self, item, manage=False):
         if isinstance(item, backend.users.User):
             return self['users'][item]
         elif isinstance(item, backend.art.Artwork):
-            return self['art'][item]
+            if manage:
+                return self['art', 'manage'][item]
+            else:
+                return self['art'][item]
         else:
             raise ValueError(item)

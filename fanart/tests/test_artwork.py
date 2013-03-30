@@ -170,6 +170,10 @@ def assert_run_task(backend, *expected):
 def test_processing(backend):
     art = backend.art.add('Yet Another Masterpiece')
 
+    art.set_identifier()
+    assert_run_task(backend, 'try_publish_art')
+    assert art.approved == False
+
     fname = os.path.join(os.path.dirname(__file__), 'data', '64x64.png')
     with open(fname, 'rb') as file:
         art_version = art.upload(file)

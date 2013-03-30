@@ -47,9 +47,7 @@
     <footer>
         <section id="usernav">
             <%include file="widgets/user_login.mako" />
-            <details open>
-                <summary>K přidání</summary>
-            </details>
+            <%include file="widgets/art_management.mako" />
             <%include file="widgets/shoutbox.mako" />
             <details>
                 <summary>Odmítnuté</summary>

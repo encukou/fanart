@@ -108,6 +108,9 @@ class Collection(object):
                 else:
                     return self.item_class(self.backend, item)
 
+    def __bool__(self):
+        return bool(len(self))
+
 
 class Item(object):
     def __init__(self, backend, _obj):

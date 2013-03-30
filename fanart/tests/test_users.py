@@ -6,12 +6,17 @@ from fanart import backend as backend_mod
 def test_zero_users(backend):
     assert len(backend.users) == 0
     assert list(backend.users) == []
+    assert not backend.users
 
 def test_add_user(backend):
     user = backend.users.add('John', 'super*secret', _crypt_strength=0)
     assert user.name == 'John'
     assert user.identifier == 'john'
     assert user.id == int(user.id)
+
+    assert backend.users
+    assert len(backend.users) == 1
+    assert list(backend.users) == [user]
 
 def test_add_user_2(backend):
     user = backend.users.add('John', 'super*secret', _crypt_strength=0)

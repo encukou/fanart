@@ -316,8 +316,11 @@ class ArtworkVersion(Item):
 
     @property
     def artifacts(self):
-        artifacts = self._obj.artifacts.items()
-        return {k: Artifact(self.backend, v) for k, v in artifacts}
+        if self._obj:
+            artifacts = self._obj.artifacts.items()
+            return {k: Artifact(self.backend, v) for k, v in artifacts}
+        else:
+            return {}
 
 
 class ArtworkVersions(Collection):

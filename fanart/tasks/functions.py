@@ -71,7 +71,7 @@ def process_art(backend, version_id):
 @register(priority=-10)
 def try_publish_art(backend, artwork_id):
     art = backend.art[artwork_id]._obj
-    if art.name and art.complete:
+    if art.identifier and art.complete:
         art.approved = True
 
 

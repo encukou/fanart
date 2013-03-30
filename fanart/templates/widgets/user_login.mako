@@ -24,8 +24,5 @@
         <div class="links">
             <a href="${request.root['me', 'edit'].url}">Tvůj účet</a>
         </div>
-        <div class="links">
-            <a href="${request.root['art', 'manage', 'upload'].url}">Přidat obrázek</a>
-        </div>
     % endif
 </details>

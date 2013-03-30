@@ -152,6 +152,10 @@ class User(Item):
             self.backend.schedule_task('apply_avatar', {'user_id': self.id})
             return Artifact(self.backend, artifact)
 
+    @property
+    def art(self):
+        return self.backend.art.filter_author(self)
+
 
 class Users(Collection):
     item_table = tables.User
