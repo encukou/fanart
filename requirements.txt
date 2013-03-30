@@ -30,5 +30,7 @@ venusian==1.0a7
 waitress==0.8.2
 zope.deprecation==4.0.2
 zope.interface==4.0.5
+docopt==0.6.1
+ipython==0.13.1
 
 ###

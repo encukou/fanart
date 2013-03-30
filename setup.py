@@ -47,10 +47,12 @@ setup_args = dict(name='fanart',
     install_requires = requires,
     tests_require = requires,
     test_suite="fanart",
-    entry_points = """\
-        [paste.app_factory]
-        main = fanart.wsgi_app:main
-        """,
+    entry_points = {
+        'paste.app_factory':
+            ['main = fanart.wsgi_app:main'],
+        'console_scripts':
+            ['fanart = fanart.cli:entry_point'],
+        }
 )
 
 if __name__ == '__main__':
