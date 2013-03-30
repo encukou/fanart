@@ -161,6 +161,8 @@ class ArtPage(ViewBase):
     def __init__(self, parent, item, name=None):
         if isinstance(item, str):
             item = parent.request.backend.art.by_identifier(item)
+        elif isinstance(item, int):
+            item = parent.request.backend.art[item]
         self.friendly_name = item.name
         if not item.identifier:
             raise LookupError(item)
@@ -207,8 +209,9 @@ class Art(ViewBase):
 
     def get(self, item):
         try:
-            return ArtPage(self, item)
-        except LookupError:
-            return self['manage'][item]
+            item = int(item)
+        except (TypeError, ValueError):
+            pass
+        return ArtPage(self, item)
 
     child_manage = instanceclass(ArtManager)
