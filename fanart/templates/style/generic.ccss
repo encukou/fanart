@@ -16,6 +16,11 @@ hr:
 ul, ol:
     margin-left: 1.5em
 
+h1, h2, h3, h4:
+    word-wrap: break-word
+    overflow: hidden
+    text-overflow: ellipsis
+
 h1:
     font-size: 110%
     margin: 0

@@ -90,15 +90,34 @@ body.fanart:
             margin-bottom: 1ex
             font-family: $sans
             font-size: 80%
-            color: $mid_background;
+            color: $mid_background
             box-shadow: 0px 1px 5px $dark_background
 
             &+h1:
                 margin-top: 0
                 border-top-right-radius: 2px
 
-            a:
-                color: $light_background
+            ul:
+                margin: 0
+                display: inline
+
+                li:
+                    display: inline
+
+                    a:
+                        color: $light_background
+                        display: inline-block
+                        overflow: hidden
+
+                    &+li a:
+                        max-width: 10em
+                        white-space: pre
+                        text-overflow: ellipsis
+
+                        &:before:
+                            content: `"» "`
+                            display: inline-block
+                            color: $mid_background
 
         h1:
             border-radius: 0
@@ -264,17 +283,39 @@ body.fanart.narrow:
             min-height: 16px
             padding: 0.5ex
 
-            &>a+a:before:
-                content: url(../static/favicon.ico)
+            li:before:
+                content: url(../static/favicon.png)
                 padding-left: 1em
                 float: right
 
-            &>a+a+a:before:
+            & li+li:before:
                 content: none
 
     #usernav, #sitenav, #links:
         padding-bottom: 0.25ex
         margin-bottom: 0
+
+
+body.fanart.full-view:
+    overflow: auto
+    &.wide:
+        footer #usernav:
+            right: -10em
+            display: none
+
+        footer #sitenav:
+            left: -10em
+            display: none
+
+        #content:
+            margin-left: auto
+            margin-right: auto
+
+    #content .art-view:
+        margin: 0 -1ex 2em
+
+        img:
+            max-width: none
 
 body.no-css-anim *:
     transition-property: none !important

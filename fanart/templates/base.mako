@@ -8,7 +8,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
   <title>${self.title_in_head()}Česká PokéGalerie ~ Pokémon</title>
-  <link rel="shortcut icon" href="${request.static_url('fanart:static/favicon.ico')}" />
+  <link rel="shortcut icon" href="${request.static_url('fanart:static/favicon.png')}" />
   <link rel="stylesheet" href="${this.root['css'].url}" type="text/css" media="screen" charset="utf-8" />
   <link rel="stylesheet" href="${request.static_url('fanart:static/css/font-awesome.min.css')}" type="text/css" media="screen" charset="utf-8" />
   <link href='http://fonts.googleapis.com/css?family=Ubuntu:400,700,400italic,700italic|Gentium+Book+Basic:400,400italic,700,700italic&amp;subset=latin-ext,latin' rel='stylesheet' type='text/css'/>
@@ -31,14 +31,13 @@
     </header>
     <section id="content">
         <nav class="hierarchy">
-            % for x in reversed(list(this.lineage)):
-                % if x.friendly_name:
-                    % if not loop.first:
-                        »
+            <ul>
+                % for x in reversed(list(this.lineage)):
+                    % if x.friendly_name:
+                        <li><a href="${x.url}">${x.friendly_name}</a></li>
                     % endif
-                    <a href="${x.url}">${x.friendly_name}</a>
-                % endif
-            % endfor
+                % endfor
+            </ul>
         </nav>
         ${self.title_in_page()}
         ${next.body()}

@@ -23,6 +23,7 @@ body.fanart #content:
             font-family: $sans
             font-size: 80%
             overflow: hidden
+            text-overflow: ellipsis
             div:
                 padding-left: 1ex
                 padding-right: 1ex
@@ -118,6 +119,7 @@ body.fanart #content:
             margin-top: 0
             margin-bottom: 1em
             min-height: 2em
+            word-wrap: break-word
 
         .update-info:
             font-size: 80%
