@@ -64,7 +64,7 @@ class UserContact(Base):
 class NewsItem(Base):
     __tablename__ = 'news_items'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    published = Column(DateTime, index=True, nullable=False)
+    published_at = Column(DateTime, index=True, nullable=False)
     heading = Column(Unicode, nullable=False)
     reporter_id = Column(Integer, ForeignKey('users.id'), nullable=True)
     post_id = Column(Integer, ForeignKey('posts.id'), nullable=True)
@@ -72,7 +72,7 @@ class NewsItem(Base):
 class ChatMessage(Base):
     __tablename__ = 'chat_messages'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    published = Column(DateTime, index=True, nullable=False)
+    published_at = Column(DateTime, index=True, nullable=False)
     source = Column(Unicode, nullable=False)
     sender_id = Column(Integer, ForeignKey('users.id'), nullable=True)
     recipient_id = Column(Integer, ForeignKey('users.id'), nullable=True)

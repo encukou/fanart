@@ -12,7 +12,10 @@
 <h1>Novinky</h1>
 % for news_item in news:
     <details>
-        <summary class="h2 date-header">${h.format_date(news_item.published)} <span class="head-text">${news_item.heading}</span></summary>
+        <summary class="h2 date-header">
+            ${h.format_date(news_item.published_at)}
+            <span class="head-text">${news_item.heading}</span>
+        </summary>
         <div class="markdown">
         ${h.markdown2html(news_item.source)}
         </div>

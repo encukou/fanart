@@ -5,7 +5,10 @@
 % endif
 % for news_item in news:
     <article>
-        <h2 class="date-header">${h.format_date(news_item.published)} <span class="head-text">${news_item.heading}</span></h2>
+        <h2 class="date-header">
+            ${h.format_date(news_item.published_at)}
+            <span class="head-text">${news_item.heading}</span>
+        </h2>
         <div class="markdown">
         ${h.markdown2html(news_item.source)}
         </div>

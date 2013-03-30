@@ -111,7 +111,7 @@ class Posts(Collection):
 
 class NewsItem(Item):
     heading = ColumnProperty('heading')
-    published = ColumnProperty('published')
+    published_at = ColumnProperty('published_at')
     reporter = WrappedProperty('reporter', User)
     post = WrappedProperty('post', Post)
 
@@ -126,7 +126,7 @@ class NewsItem(Item):
 class News(Collection):
     item_table = tables.NewsItem
     item_class = NewsItem
-    order_clauses = [tables.NewsItem.published]
+    order_clauses = [tables.NewsItem.published_at]
 
     def add(self, heading, source):
         if not access_allowed(allow_logged_in, self):
@@ -142,7 +142,7 @@ class News(Collection):
                 heading=heading,
                 post=post._obj,
                 reporter=reporter_obj,
-                published=datetime.utcnow(),
+                published_at=datetime.utcnow(),
             )
         db.add(item)
         db.flush()
@@ -151,12 +151,12 @@ class News(Collection):
     @property
     def from_newest(self):
         new_query = self._query.order_by(None)
-        new_query = new_query.order_by(self.item_table.published.desc())
+        new_query = new_query.order_by(self.item_table.published_at.desc())
         return type(self)(self.backend, new_query)
 
 
 class ChatMessage(Item):
-    published = ColumnProperty('published')
+    published_at = ColumnProperty('published_at')
     source = ColumnProperty('source')
     sender = WrappedProperty('sender', User)
     recipient = WrappedProperty('recipient', User)
@@ -165,7 +165,7 @@ class ChatMessage(Item):
 class Shoutbox(Collection):
     item_table = tables.ChatMessage
     item_class = ChatMessage
-    order_clauses = [tables.ChatMessage.published]
+    order_clauses = [tables.ChatMessage.published_at]
 
     def add(self, source, *, recipient=None):
         if not access_allowed(allow_logged_in, self):
@@ -180,7 +180,7 @@ class Shoutbox(Collection):
                 source=source,
                 sender=sender_obj,
                 recipient=recipient._obj if recipient else None,
-                published=datetime.utcnow(),
+                published_at=datetime.utcnow(),
             )
         db.add(item)
         db.flush()
@@ -189,5 +189,10 @@ class Shoutbox(Collection):
     @property
     def from_newest(self):
         new_query = self._query.order_by(None)
-        new_query = new_query.order_by(self.item_table.published.desc())
+        new_query = new_query.order_by(self.item_table.published_at.desc())
+        return self._clone(new_query)
+
+    def filter_since(self, date):
+        new_query = self._query
+        new_query = new_query.filter(self.item_table.published_at >= date)
         return self._clone(new_query)

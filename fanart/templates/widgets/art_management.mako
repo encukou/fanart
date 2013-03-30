@@ -24,7 +24,7 @@ art_index = None
             </div>
         </a>
     % endfor
-    % if art_index is not None:
+    % if art_index is not None or request.user.art:
         <div class="links">
             <a href="${request.root['art', 'manage'].url}">Tvé obrázky</a>
         </div>

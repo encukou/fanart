@@ -25,7 +25,7 @@ def test_add_news(backend, as_admin):
     story = backend.news.add('Breaking news!', 'Stuff happened')
     assert story.heading == 'Breaking news!'
     assert story.source == 'Stuff happened'
-    assert start <= story.published <= datetime.utcnow()
+    assert start <= story.published_at <= datetime.utcnow()
 
     assert backend.news[story.id] == story
 

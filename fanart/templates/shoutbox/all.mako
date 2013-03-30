@@ -16,7 +16,10 @@
 
 % for item in items:
     <article>
-        <h2 class="date-header">${h.format_date(item.published)} <span class="head-text">${item.sender.name}</span></h2>
+        <h2 class="date-header">
+            ${h.format_date(item.published_at)}
+            <span class="head-text">${item.sender.name}</span>
+        </h2>
         <div class="markdown">
         ${h.markdown2html(item.source)}
         </div>

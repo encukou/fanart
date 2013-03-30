@@ -24,7 +24,7 @@ def test_add_shoutbox(backend, as_admin):
     story = backend.shoutbox.add('Bla bla', recipient=user)
     assert story.source == 'Bla bla'
     assert story.recipient == user
-    assert start <= story.published <= datetime.utcnow()
+    assert start <= story.published_at <= datetime.utcnow()
 
     assert backend.shoutbox[story.id] == story
 
@@ -36,3 +36,15 @@ def test_add_shoutbox(backend, as_admin):
     assert list(backend.shoutbox[0:]) == [story]
     assert list(backend.shoutbox[:1]) == [story]
     assert list(backend.shoutbox[1:]) == []
+
+@pytest.mark.login
+def test_filter_since(backend):
+    post1 = backend.shoutbox.add('A')
+    post2 = backend.shoutbox.add('B')
+    post3 = backend.shoutbox.add('C')
+
+    assert post1.published_at < post2.published_at < post3.published_at
+
+    assert list(backend.shoutbox.filter_since(post1.published_at)) == [post1, post2, post3]
+    assert list(backend.shoutbox.filter_since(post2.published_at)) == [post2, post3]
+    assert list(backend.shoutbox.filter_since(post3.published_at)) == [post3]

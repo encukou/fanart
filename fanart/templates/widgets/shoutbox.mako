@@ -14,7 +14,7 @@
     % for item in request.backend.shoutbox.from_newest[:10]:
         <section class="item">
         <h3 class="date-header">
-            ${h.format_date(item.published, format='compact')}
+            ${h.format_date(item.published_at, format='compact')}
             <span class="head-text">${wrap(item.sender).link()}</span>
         </h3>
         <div class="message markdown">${h.markdown2html(item.source)}</div>
