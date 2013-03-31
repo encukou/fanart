@@ -10,7 +10,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy import Column, ForeignKey
-from sqlalchemy import Integer, Unicode, DateTime, Boolean, BINARY
+from sqlalchemy import Integer, Unicode, DateTime, Boolean, Float, BINARY
 
 
 Base = declarative_base()
@@ -33,6 +33,7 @@ class User(Base):
     show_age = Column(Boolean, default=False)
     show_birthday = Column(Boolean, default=False)
     joined_at = Column(DateTime, nullable=False)
+    score = Column(Float, default=0)
 
     avatar_request_id = Column(
         Integer,

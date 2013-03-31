@@ -48,11 +48,10 @@
             <%include file="widgets/user_login.mako" />
             <%include file="widgets/art_management.mako" />
             <%include file="widgets/shoutbox.mako" />
-            <details>
-                <summary>Odmítnuté</summary>
-            </details>
         </section>
         <section id="sitenav">
+            <%include file="widgets/userlist.mako" />
+            <!--
             <details open>
                 <summary>Hledání</summary>
                 <form>
@@ -65,10 +64,22 @@
             <details>
                 <summary>Počitadlo</summary>
             </details>
+            -->
         </section>
         <section id="links">
             <section>
                 <h2>Odkazy</h2>
+                <ul class="link-line">
+                    <li class="action-link">
+                        <a href="http://www.pikachu.cz">pikachu.cz</a>
+                    </li>
+                    <li class="action-link">
+                        <a href="http://www.pjz.cz">pjz.cz</a>
+                    </li>
+                    <li class="action-link">
+                        <a href="http://isshu.cz">isshu.cz</a>
+                    </li>
+                </lu>
             </section>
         </section>
         <div id="helper">

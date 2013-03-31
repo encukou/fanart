@@ -119,6 +119,25 @@ serif = 'Gentium Book Basic', serif
         font-size: 80%
         font-family: $sans
 
+#sitenav #userlist:
+    text-align: center
+
+    summary:
+        margin-bottom: 1em
+
+    .user:
+        margin-top: 1em
+
+        .username:
+            font-size: 80%
+            font-family: $sans
+
+    .etc:
+        font-size: 80%
+        font-family: $sans
+        margin-top: 1em
+        padding-top: 0.5ex
+
 body.fanart #content .link-line.user-link-line:
     margin-left: 1em
 

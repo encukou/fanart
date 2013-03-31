@@ -38,6 +38,7 @@ class User(Item):
     show_email = ColumnProperty('show_email', allow_any, allow_self)
     show_age = ColumnProperty('show_age', allow_any, allow_self)
     show_birthday = ColumnProperty('show_birthday', allow_any, allow_self)
+    score = ColumnProperty('score', allow_any)
 
     @property
     def age(self):
@@ -204,3 +205,9 @@ class Users(Collection):
             return True
         else:
             return False
+
+    @property
+    def from_best(self):
+        new_query = self._query.order_by(None)
+        new_query = new_query.order_by(self.item_table.score.desc())
+        return self._clone(new_query)
