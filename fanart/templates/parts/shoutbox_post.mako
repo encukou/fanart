@@ -8,7 +8,11 @@
     <section class="item" data-time="${message.published_at}" data-id="${message.id}">
     <h3 class="date-header">
         ${h.format_date(message.published_at, format='compact')}
-        <span class="head-text">${wrap(message.sender).link()}</span>
+        % if message.sender:
+            <span class="head-text">${wrap(message.sender).link()}</span>
+        % else:
+            <span class="head-text">Systémová zpráva</span>
+        % endif
     </h3>
     <div class="message markdown">${h.markdown2html(message.source)}</div>
     </section>

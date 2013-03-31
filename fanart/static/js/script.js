@@ -252,6 +252,7 @@ $(function() {
                 } else {
                     previous.before(item);
                 }
+                item.addClass('ajax-loaded');
                 item.slideDown("slow");
             };
             if (max_length) {
