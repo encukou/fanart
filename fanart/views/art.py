@@ -225,10 +225,10 @@ class Art(ViewBase):
     friendly_name = 'Obrázky'
 
     def render(self, request):
-        all_art = request.backend.art
+        all_art = request.backend.art.from_newest
         artworks = list(all_art.filter_flags(approved=True, hidden=False))
         return self.render_response(
-            'art/index.mako', request, artworks=artworks)
+            'art/index.mako', request, artworks=list(artworks[:30]))
 
     def get(self, item):
         try:

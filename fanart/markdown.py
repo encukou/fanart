@@ -80,4 +80,7 @@ class MarkdownResultString(str):
 
 # And the actual function to call it all
 def convert(source):
-    return MarkdownResultString(engine.convert(source))
+    if source:
+        return MarkdownResultString(engine.convert(source))
+    else:
+        return ''

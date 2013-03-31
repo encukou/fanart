@@ -114,7 +114,7 @@ class Artwork(Item):
                 operator.attrgetter('_obj'),
                 functools.partial(User, self.backend))
         else:
-            authors = tuple(authors)
+            authors = tuple(User(self.backend, a) for a in authors)
         return authors
 
     @authors.setter
@@ -305,6 +305,12 @@ class Artworks(Collection):
             else:
                 raise ValueError(flag)
         return type(self)(self.backend, query)
+
+    @property
+    def from_newest(self):
+        new_query = self._query.order_by(None)
+        new_query = new_query.order_by(self.item_table.added_at.desc())
+        return self._clone(new_query)
 
 
 class ArtworkVersion(Item):
