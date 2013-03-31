@@ -30,7 +30,12 @@ class User(Item):
 
     def check_password(self, password):
         hashed = self._obj.password
-        return bcrypt.hashpw(password, hashed) == hashed
+        if hashed.startswith('?H?'):
+            from fanart_migration import check_password
+            return check_password(password, hashed[3:])
+        else:
+            return bcrypt.hashpw(password, hashed) == hashed
+
 
     gender = ColumnProperty('gender', allow_any, allow_self)
     email = ColumnProperty('email', allow_any, allow_self)
