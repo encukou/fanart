@@ -23,6 +23,8 @@
                 src = request.root.url + '/scratch/' + artifact.storage_location
             %>
             <img src="${src}">
+        % elif artifact.storage_type == 'external':
+            <img src="${artifact.storage_location}">
         % elif not ignore_errors:
             <div class="icon-question-sign icon icon-4x"></div>
             % if error_text:

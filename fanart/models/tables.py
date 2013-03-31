@@ -1,4 +1,6 @@
 
+from datetime import datetime
+
 from sqlalchemy.orm import (scoped_session, reconstructor, sessionmaker,
         relationship, backref)
 from sqlalchemy.ext.declarative import declarative_base
@@ -30,6 +32,7 @@ class User(Base):
     show_email = Column(Boolean, default=False)
     show_age = Column(Boolean, default=False)
     show_birthday = Column(Boolean, default=False)
+    joined_at = Column(DateTime, nullable=False)
 
     avatar_request_id = Column(
         Integer,
@@ -246,6 +249,7 @@ ArtworkComment.post = relationship(Post,
 
 def populate(session):
     session.add(User(id=3, name='Test', normalized_name='test',
+        joined_at=datetime.utcnow(),
         # password is: 'pass'
         password='$2a$04$B6eLb5G5cQjpmtqtkh.JfOWjMKbAHIsKmh1ULOR7AK7/6xcpqvCxy'))
     session.flush()

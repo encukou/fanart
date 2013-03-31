@@ -123,8 +123,12 @@ def get_backend(arguments):
     return backend
 
 
+def parse_argv(argv):
+    return docopt(__doc__, argv)
+
+
 def main(argv):
-    arguments = docopt(__doc__)
+    arguments = parse_argv(argv)
     if arguments['--debug']:
         print(yaml.safe_dump({'Options': dict(arguments)}), file=sys.stderr)
     backend = get_backend(arguments)

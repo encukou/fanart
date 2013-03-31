@@ -95,7 +95,7 @@ class Collection(object):
             return self._clone(new_query)
         else:
             try:
-                item.__index__()
+                item = item.__index__()
             except (AttributeError, ValueError, TypeError):
                 raise LookupError(item)
             else:
