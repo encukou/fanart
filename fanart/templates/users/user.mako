@@ -54,3 +54,12 @@
     % endfor
     </dl>
 % endif
+
+% if artworks:
+    <h1>Obrázky</h1>
+    <div class="art-list">
+    % for art in artworks:
+        ${self.helpers.art_card(art)}
+    % endfor
+    </div>
+% endif

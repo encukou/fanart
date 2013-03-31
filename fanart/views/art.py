@@ -20,6 +20,7 @@ class ArtManager(ViewBase):
 
     def render(self, request):
         art_to_manage = request.backend.art.filter_author(request.user)
+        art_to_manage.optimize_for_display()
         hidden, other = split_by_flag(art_to_manage, 'hidden')
         approved, other = split_by_flag(other, 'approved')
         other = list(other)
@@ -28,10 +29,10 @@ class ArtManager(ViewBase):
         return self.render_response(
             'art/manage.mako', request,
             sections = [
-                ManagerSection('Nepřidané obrázky', no_identifier),
-                ManagerSection('Nepřijaté obrázky', have_identifier),
-                ManagerSection('Skryté obrázky', hidden),
-                ManagerSection('Obrázky v Galerii', approved),
+                ManagerSection('Tvé nepřidané obrázky', no_identifier),
+                ManagerSection('Tvé nepřijaté obrázky', have_identifier),
+                ManagerSection('Tvé skryté obrázky', hidden),
+                ManagerSection('Tvé obrázky v Galerii', approved),
             ])
 
     def get(self, item):
@@ -226,6 +227,7 @@ class Art(ViewBase):
 
     def render(self, request):
         all_art = request.backend.art.from_newest
+        all_art.art_query.optimize_for_display()
         artworks = list(all_art.filter_flags(approved=True, hidden=False))
         return self.render_response(
             'art/index.mako', request, artworks=list(artworks[:30]))

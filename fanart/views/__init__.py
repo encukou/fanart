@@ -73,8 +73,10 @@ class Site(ViewBase):
     def render(self, request):
         # XXX: Better number of stories
         news_items = request.backend.news.from_newest[:3]
-        art_items = request.backend.art.from_newest.filter_flags(
-            hidden=False, approved=True)[:12]
+        art_query = request.backend.art.from_newest
+        art_query = art_query.filter_flags(hidden=False, approved=True)
+        art_query.optimize_for_display()
+        art_items = art_query[:12]
         return self.render_response(
             'root.mako', request, news=news_items, artworks=art_items)
 

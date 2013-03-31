@@ -2,6 +2,7 @@
 <%namespace name="helpers" file="/helpers.mako"/>
 
 <% users = request.backend.users.from_best %>
+<% users.joinedload('avatar') %>
 
 <details open id="userlist">
     <summary>Autoři</summary>

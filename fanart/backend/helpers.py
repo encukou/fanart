@@ -1,4 +1,5 @@
 from sqlalchemy import orm
+from sqlalchemy.orm import joinedload
 from pyramid.path import DottedNameResolver
 from pyramid.decorator import reify
 
@@ -110,6 +111,9 @@ class Collection(object):
 
     def __bool__(self):
         return bool(len(self))
+
+    def joinedload(self, *args):
+        self._query = self._query.options(joinedload(*args))
 
 
 class Item(object):

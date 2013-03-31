@@ -68,7 +68,7 @@ class CodeBlockProcessor(BlockProcessor):
     def run(self, parent, blocks):
         block = blocks.pop(0)
         print(block)
-        sig = markdown.etree.SubElement(parent, 'div')
+        sig = markdown.util.etree.SubElement(parent, 'div')
         sig.set('class', 'signature')
         sig.text = '—' + block.lstrip('~')
 

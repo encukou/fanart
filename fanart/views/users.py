@@ -299,8 +299,11 @@ class User(ViewBase):
         return str(self.user.identifier)
 
     def render(self, request):
+        artworks = self.user.art.from_newest
+        artworks.optimize_for_display()
         return self.render_response('users/user.mako', request,
                 user=self.user,
+                artworks=list(artworks[:15])
             )
 
     @instanceclass

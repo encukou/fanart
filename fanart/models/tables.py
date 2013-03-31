@@ -33,7 +33,7 @@ class User(Base):
     show_age = Column(Boolean, default=False)
     show_birthday = Column(Boolean, default=False)
     joined_at = Column(DateTime, nullable=False)
-    score = Column(Float, default=0)
+    score = Column(Float, index=True, default=0)
 
     avatar_request_id = Column(
         Integer,
@@ -95,10 +95,10 @@ class Artwork(Base):
 class ArtworkVersion(Base):
     __tablename__ = 'artwork_versions'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    artwork_id = Column(Integer, ForeignKey('artworks.id'), nullable=False)
+    artwork_id = Column(Integer, ForeignKey('artworks.id'), index=True, nullable=False)
     uploaded_at = Column(DateTime, index=True, nullable=False)
     uploader_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    current = Column(Boolean, nullable=False, default=False)
+    current = Column(Boolean, nullable=False, index=True, default=False)
     complete = Column(Boolean, nullable=False, default=False)
 
 class Artifact(Base):
@@ -121,8 +121,8 @@ class ArtworkArtifact(Base):
 class ArtworkAuthor(Base):
     __tablename__ = 'artwork_authors'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    artwork_id = Column(Integer, ForeignKey('artworks.id'), nullable=False)
-    author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    artwork_id = Column(Integer, ForeignKey('artworks.id'), index=True, nullable=False)
+    author_id = Column(Integer, ForeignKey('users.id'), index=True, nullable=False)
     description_id = Column(Integer, ForeignKey('posts.id'), nullable=True)
     order = Column(Integer, nullable=True)
 
@@ -139,7 +139,7 @@ class Post(Base):
 class PostText(Base):
     __tablename__ = 'post_texts'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    post_id = Column(Integer, ForeignKey('posts.id'), nullable=False)
+    post_id = Column(Integer, ForeignKey('posts.id'), index=True, nullable=False)
     posted_at = Column(DateTime, index=True, nullable=False)
     poster_id = Column(Integer, ForeignKey('users.id'), nullable=True)
     source = Column(Unicode, nullable=False)
@@ -154,7 +154,7 @@ class Task(Base):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(Unicode, nullable=False)
     params = Column(Unicode, nullable=False)
-    priority = Column(Integer, nullable=False)
+    priority = Column(Integer, nullable=False, index=True)
 
 User.bio_post = relationship(Post, post_update=True,
         primaryjoin=User.bio_post_id == Post.id)

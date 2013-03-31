@@ -312,6 +312,13 @@ class Artworks(Collection):
         new_query = new_query.order_by(self.item_table.added_at.desc())
         return self._clone(new_query)
 
+    def optimize_for_display(self):
+        self.joinedload('current_version')
+        self.joinedload('current_version', 'artwork_artifacts')
+        self.joinedload('current_version', 'artwork_artifacts', 'artifact')
+        self.joinedload('artwork_authors')
+        self.joinedload('artwork_authors', 'author')
+
 
 class ArtworkVersion(Item):
     artwork = WrappedProperty('artwork', Artwork)

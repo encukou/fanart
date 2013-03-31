@@ -10,7 +10,7 @@ class News(ViewBase):
 
     def render(self, request):
         # XXX: Better number of stories
-        news_items = request.backend.news.from_newest[:7]
+        news_items = request.backend.news.from_newest[:60]
         return self.render_response('news/all.mako', request, news=news_items)
 
     @instanceclass
