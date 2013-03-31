@@ -17,7 +17,7 @@
   <script src="${request.static_url('fanart:static/js/jquery.timeago.js')}" type="text/javascript"></script>
   <script src="${request.static_url('fanart:static/js/script.js')}" type="text/javascript"></script>
   <script src="${request.static_url('deform:static/scripts/deform.js')}" type="text/javascript"></script>
-  <script src="https://browserid.org/include.js" type="text/javascript"></script>
+  <!--<script src="https://browserid.org/include.js" type="text/javascript"></script>-->
   <!--[if lte IE 7]>
   <link rel="stylesheet" href="${request.static_url('fanart:static/css/font-awesome-ie7.min.css')}" type="text/css" media="screen" charset="utf-8" />
   <![endif]-->
