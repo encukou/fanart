@@ -10,6 +10,9 @@ class Update(ViewBase):
     @instanceclass
     class child_shoutbox(ViewBase):
         def render(self, request):
+            # XXX: Move to a worker thread/process, when available
+            request.backend.run_task()
+
             try:
                 date = request.GET['since']
             except KeyError:
