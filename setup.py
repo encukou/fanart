@@ -21,6 +21,7 @@ requires = [
     'markdown',
     'pytz',
     'pyyaml',
+    'iso8601',
     ]
 
 if sys.version_info[:3] < (3, 3):

@@ -1,6 +1,6 @@
 -e .
 
-git+git://github.com/clevercss/clevercss.git@2131d490d7cf007598cd5b86b098d6efb9ae5d8e#egg=CleverCSS-dev
+-e git+git@github.com:clevercss/clevercss.git@586917573be462d1938eda0426de1cfcff65cd22#egg=CleverCSS-dev
 Beaker==1.6.4
 Chameleon==2.11
 Mako==0.7.3
@@ -15,7 +15,6 @@ WebOb==1.2.3
 colander==1.0a2
 cssutils==0.9.10b1
 deform==0.9.7
-distribute==0.6.35
 peppercorn==0.4
 py3k-bcrypt==0.3
 pyramid==1.4
@@ -32,5 +31,6 @@ zope.deprecation==4.0.2
 zope.interface==4.0.5
 docopt==0.6.1
 ipython==0.13.1
+-e git+git@github.com:encukou/pyiso8601.git@cec4509d14cef9801db81ec982fb0035f6bd79bd#egg=iso8601-dev
 
 ###

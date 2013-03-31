@@ -1,4 +1,4 @@
-<%namespace name="helpers" file="../helpers.mako"/>
+<%namespace name="helpers" file="/helpers.mako"/>
 
 <%
 if request.user.is_virtual:

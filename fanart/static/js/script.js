@@ -1,3 +1,5 @@
+"use strict";
+
 $(function() {
     $('body').removeClass('no-js').addClass('have-js');
     deform.load();
@@ -129,13 +131,13 @@ $(function() {
         var months = days / 30.5;
         var years = days / 365;
 
+        function pad2(n) {
+            var z = '0';
+            var n = n + '';
+            var width = 2;
+            return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+        }
         if (element && element.attr('data-dateformat') == 'compact') {
-            function pad2(n) {
-                var z = '0';
-                var n = n + '';
-                var width = 2;
-                return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
-            }
             if (days < 2) {
                 var today = new Date();
                 if (orig_date.getDate() == today.getDate()) {
@@ -226,4 +228,64 @@ $(function() {
 
     };
     jQuery("time").timeago();
+});
+
+/* AJAX Update */
+$(function() {
+    function load(container, data) {
+        data.each(function() {
+            var item = $(this);
+            var id = item.attr('data-id');
+            var max_length = container.attr('data-max-length');
+            if (!container.find('*[data-id=' + id + ']').length) {
+                var time = item.attr('data-time')
+                var previous = null;
+                container.find('*[data-time]').each(function() {
+                    if ($(this).attr('data-time') < time) {
+                        previous = $(this);
+                        return false;
+                    }
+                });
+                item.hide();
+                if (previous === null) {
+                    container.prepend(item);
+                } else {
+                    previous.before(item);
+                }
+                item.slideDown("slow");
+            };
+            if (max_length) {
+                container.find('*[data-time]').slice(max_length).slideUp(
+                    "slow",
+                    function() { $(this).remove(); });
+            }
+        });
+    };
+    function do_update() {
+        var container = $('*[data-update-stream]').first();
+        var url = $.fanart.api_base + '/' + container.attr('data-update-stream');
+        var since = container.find('*[data-time]').first().attr('data-time');
+        $.ajax({
+            url: url,
+            data: {since: since},
+            dataType: 'html',
+            ifModified: true,
+            success: function (data, status, jqXHR) {
+                load(container, $(data));
+                set_timer(15000);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                set_timer(60000);
+            }
+        });
+    };
+    var timer_id = null;
+    function set_timer(n) {
+        if (timer_id !== null) {
+            clearTimeout(timer_id);
+            timer_id = null;
+        }
+        timer_id = setTimeout(do_update, n);
+    }
+    set_timer(15);
 });

@@ -45,6 +45,13 @@ def test_filter_since(backend):
 
     assert post1.published_at < post2.published_at < post3.published_at
 
-    assert list(backend.shoutbox.filter_since(post1.published_at)) == [post1, post2, post3]
-    assert list(backend.shoutbox.filter_since(post2.published_at)) == [post2, post3]
-    assert list(backend.shoutbox.filter_since(post3.published_at)) == [post3]
+    filter_since = backend.shoutbox.filter_since
+    assert list(filter_since(post1.published_at)) == [post1, post2, post3]
+    assert list(filter_since(post2.published_at)) == [post2, post3]
+    assert list(filter_since(post3.published_at)) == [post3]
+
+    # Manufacture duplicate published date (internal detail)
+    post2._obj.published_at = post3.published_at
+
+    assert list(filter_since(post2.published_at)) == [post2, post3]
+    assert list(filter_since(post3.published_at)) == [post2, post3]

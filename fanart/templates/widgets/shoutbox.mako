@@ -1,4 +1,5 @@
 <% user = this.request.user %>
+<%namespace name="shoutbox_post" file="/parts/shoutbox_post.mako"/>
 
 <details open id="shoutbox">
     <summary>Shoutbox</summary>
@@ -11,15 +12,9 @@
         </fieldset>
         </form>
     % endif
-    % for item in request.backend.shoutbox.from_newest[:10]:
-        <section class="item">
-        <h3 class="date-header">
-            ${h.format_date(item.published_at, format='compact')}
-            <span class="head-text">${wrap(item.sender).link()}</span>
-        </h3>
-        <div class="message markdown">${h.markdown2html(item.source)}</div>
-        </section>
-    % endfor
+    <div data-update-stream="update/shoutbox" data-max-length="50">
+        ${shoutbox_post.body(*request.backend.shoutbox.from_newest[:10])}
+    </div>
     <footer>
         <a href="${this.root['shoutbox'].url}">Historie Shoutboxu</a>
     </footer>

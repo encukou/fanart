@@ -22,7 +22,7 @@ class Shoutbox(ViewBase):
             if 'submit' in request.POST:
                 source = request.POST['content']
                 if source:
-                    request.shoutbox.add(source)
+                    request.backend.shoutbox.add(source)
                 try:
                     url = request.GET['redirect']
                 except KeyError:
