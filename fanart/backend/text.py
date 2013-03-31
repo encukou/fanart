@@ -10,7 +10,6 @@ from fanart.backend.users import User
 EMPTY_POST = tables.Post(
     posted_at=None,
     poster=None,
-    source='',
     id=object(),
 )
 
@@ -98,7 +97,6 @@ class Posts(Collection):
             poster_obj = poster._obj
         time = datetime.utcnow()
         item = self.item_table(
-                source=source,
                 poster=poster_obj,
                 posted_at=time,
             )

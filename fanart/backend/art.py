@@ -155,8 +155,8 @@ class Artwork(Item):
         if not artwork_author:
             return None
         post = artwork_author.description
-        if post:
-            return post.source
+        if post and post.active_text:
+            return post.active_text.source
         else:
             return None
 

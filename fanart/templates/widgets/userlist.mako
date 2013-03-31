@@ -15,5 +15,5 @@
         </a>
     </div>
     % endfor
-    <div class="etc">a další...</div>
+    <div class="etc">a další</div>
 </details>

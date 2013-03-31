@@ -193,7 +193,7 @@ class Users(Collection):
                 name=name,
                 normalized_name=make_identifier(name),
                 password=bcrypt.hashpw(password, salt),
-                jointd_at=datetime.utcnow(),
+                joined_at=datetime.utcnow(),
             )
         db.add(user)
         db.flush()

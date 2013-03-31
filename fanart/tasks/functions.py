@@ -58,6 +58,7 @@ def process_art(backend, version_id):
         image.process_image(backend, artwork_version, scratch_artifact,
                             None, 'full', base=(view, VIEW_SIZE),
                             keep_animations=True)
+        artwork_version.complete = True
         artwork_version.artwork.complete = True
         db.delete(artwork_version.artwork_artifacts['scratch'])
         backend.schedule_task('remove_artifact',

@@ -131,7 +131,6 @@ class Post(Base):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     posted_at = Column(DateTime, index=True, nullable=False)
     poster_id = Column(Integer, ForeignKey('users.id'), nullable=True)
-    source = Column(Unicode, nullable=False)
     active_text_id = Column(
         Integer,
         ForeignKey('post_texts.id', use_alter=True, name='fk_post_active_text'),

@@ -124,7 +124,7 @@ def get_backend(arguments):
 
 
 def parse_argv(argv):
-    return docopt(__doc__, argv)
+    return docopt(__doc__, argv=argv)
 
 
 def main(argv):
@@ -141,7 +141,7 @@ def main(argv):
 
 
 def entry_point():
-    sys.exit(main(sys.argv[:1]))
+    sys.exit(main(sys.argv[1:]))
 
 if __name__ == '__main__':
     entry_point()
