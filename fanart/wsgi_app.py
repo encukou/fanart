@@ -50,10 +50,12 @@ def autocommit(handler, registry):
         try:
             response = handler(request)
         except:
-            request.backend.rollback()
+            if request.have_backend:
+                request.backend.rollback()
             raise
         else:
-            request.backend.commit()
+            if request.have_backend:
+                request.backend.commit()
         return response
     return tween
 
@@ -77,11 +79,13 @@ def main(global_config, **settings):
 
     class FARequest(Request):
         fanart_settings = settings
+        have_backend = False
 
         @reify
         def backend(self):
             backend = make_backend()
             users.get_user(self, backend)
+            self.have_backend = True
             return backend
 
         @property
