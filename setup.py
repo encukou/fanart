@@ -22,6 +22,7 @@ requires = [
     'pytz',
     'pyyaml',
     'iso8601',
+    'dogpile.cache',
     ]
 
 if sys.version_info[:3] < (3, 3):

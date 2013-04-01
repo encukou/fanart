@@ -83,19 +83,22 @@ class Site(ViewBase):
     @instanceclass
     class child_css(ViewBase):
         def render(self, request):
-            # XXX: Cache me
-            filename = pkg_resources.resource_filename('fanart',
-                   'templates/style/style.ccss')
-            css_context = dict(
-                url=URLExpression('fanart:static', request.static_url),
-                avatar_size=clevercss.expressions.Value(AVATAR_SIZE, 'px'),
-            )
-            css = clevercss.convert(open(filename).read(), minified=False,
-                fname=filename, context=css_context)
+            css= request.cache_region.get_or_create('css', self.get_css)
             response = Response(css)
             response.content_type = 'text/css'
             response.cache_expires(3600 * 24)
             return response
+
+        def get_css(self):
+            print('called')
+            filename = pkg_resources.resource_filename('fanart',
+                'templates/style/style.ccss')
+            css_context = dict(
+                url=URLExpression('fanart:static', self.request.static_url),
+                avatar_size=clevercss.expressions.Value(AVATAR_SIZE, 'px'),
+            )
+            return clevercss.convert(open(filename).read(), minified=False,
+                fname=filename, context=css_context)
 
     def child_me(self, name):
         user = self.request.backend.logged_in_user

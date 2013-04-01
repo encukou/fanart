@@ -15,6 +15,7 @@ from pyramid.i18n import get_localizer
 from pyramid.threadlocal import get_current_request
 from pkg_resources import resource_filename
 import deform
+from dogpile import cache
 
 from fanart.models.tables import initialize_sql
 from fanart.views import Site
@@ -73,6 +74,8 @@ def main(global_config, **settings):
     """
     engine = engine_from_config(settings, 'sqlalchemy.')
     sqla_session = initialize_sql(engine)
+    dogpile_region = cache.make_region()
+    dogpile_region.configure_from_config(settings, 'cache.')
 
     def make_backend():
         return Backend(sqla_session, settings['fanart.scratch_dir'])
@@ -80,6 +83,7 @@ def main(global_config, **settings):
     class FARequest(Request):
         fanart_settings = settings
         have_backend = False
+        cache_region = dogpile_region
 
         @reify
         def backend(self):
