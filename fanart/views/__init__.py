@@ -94,7 +94,7 @@ class Site(ViewBase):
                 fname=filename, context=css_context)
             response = Response(css)
             response.content_type = 'text/css'
-            #response.cache_expires(3600 * 24)
+            response.cache_expires(3600 * 24)
             return response
 
     def child_me(self, name):

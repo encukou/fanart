@@ -113,6 +113,7 @@ def resize_image(backend, artifact, filetype, max_width=None, max_height=None,
             storage_location=filename,
             hash=digest,
             )
+        os.chmod(path, 0o644)
         backend._db.add(new_artifact)
         backend._db.flush()
         identify_artifact(backend, new_artifact)

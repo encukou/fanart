@@ -10,7 +10,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy import Column, ForeignKey
-from sqlalchemy import Integer, Unicode, DateTime, Boolean, Float, BINARY
+from sqlalchemy import Integer, Unicode, DateTime, Boolean, Float
 
 
 Base = declarative_base()
@@ -106,7 +106,7 @@ class Artifact(Base):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     storage_type = Column(Unicode, nullable=True)
     storage_location = Column(Unicode, nullable=False)
-    hash = Column(BINARY(16), nullable=True)
+    hash = Column(Unicode, nullable=True)
     width = Column(Integer, nullable=True)
     height = Column(Integer, nullable=True)
     filetype = Column(Unicode, nullable=True)

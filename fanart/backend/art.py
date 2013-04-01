@@ -216,8 +216,6 @@ class Artwork(Item):
                     try:
                         int(art_identifier)
                     except ValueError:
-                        pass
-                    else:
                         yield art_identifier
                 # If that's taken, prepend the author's name(s)
                 bases = [

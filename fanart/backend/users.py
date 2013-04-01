@@ -53,8 +53,8 @@ class User(Item):
         dob = self._obj.date_of_birth
         if dob:
             age = now.year - dob.year
-            if (now.month, now.day) >= (dob.month, dob.day):
-                age += 1
+            if (now.month, now.day) < (dob.month, dob.day):
+                age -= 1
             return age
         else:
             return None

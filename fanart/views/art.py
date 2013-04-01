@@ -216,7 +216,7 @@ class FullView(ArtPage):
 
     def __init__(self, parent, name=None):
         super().__init__(parent, parent.artwork, name='fullview')
-        self.friendly_name = 'Celokuk'
+        self.friendly_name += ' (Celokuk)'
 
     def child_fullview(self, item):
         raise httpexceptions.HTTPNotFound("Dál už to nejde")
@@ -227,7 +227,7 @@ class Art(ViewBase):
 
     def render(self, request):
         all_art = request.backend.art.from_newest
-        all_art.art_query.optimize_for_display()
+        all_art.optimize_for_display()
         artworks = list(all_art.filter_flags(approved=True, hidden=False))
         return self.render_response(
             'art/index.mako', request, artworks=list(artworks[:30]))

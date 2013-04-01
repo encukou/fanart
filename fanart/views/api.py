@@ -24,8 +24,10 @@ class Update(ViewBase):
             date = date.astimezone(pytz.utc).replace(tzinfo=None)
             messages = request.backend.shoutbox.filter_since(date)[:20]
             messages = list(messages)
-            return self.render_response('parts/shoutbox_post.mako', request,
+            response = self.render_response('parts/shoutbox_post.mako', request,
                 g_shoutbox_messages=messages)
+            response.cache_expires(10)
+            return response
 
 
 class Api(ViewBase):
