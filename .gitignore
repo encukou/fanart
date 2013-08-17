@@ -1,4 +1,5 @@
 /fanart.egg-info/
 fanart.db
+fanart.db-journal
 *.pyc
 /data/
