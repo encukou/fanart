@@ -1,38 +1,39 @@
 -e .
 
--e git://github.com/clevercss/clevercss.git@586917573be462d1938eda0426de1cfcff65cd22#egg=CleverCSS-dev
+-e git+git@github.com:clevercss/clevercss.git@a3b9a095b13af4e9c76c2584bf9fd70fbaa5e3e2#egg=CleverCSS
 Beaker==1.6.4
 Chameleon==2.11
-Mako==0.7.3
-Markdown==2.3
-MarkupSafe==0.15
+Mako==0.8.1
+Markdown==2.3.1
+MarkupSafe==0.18
 PasteDeploy==1.5.0
 PyYAML==3.10
 Pygments==1.6
-SQLAlchemy==0.8.0
-Unidecode==0.04.12
+SQLAlchemy==0.8.2
+Unidecode==0.04.13
 WebOb==1.2.3
 colander==1.0a2
 cssutils==0.9.10b1
 deform==0.9.7
+distribute==0.7.3
 peppercorn==0.4
 py3k-bcrypt==0.3
-pyramid==1.4
-pyramid-beaker==0.7
-pyramid-debugtoolbar==1.0.4
+pyramid==1.4.3
+pyramid-beaker==0.8
+pyramid-debugtoolbar==1.0.6
 pyramid-tm==0.7
 pytz==2013b
 repoze.lru==0.6
 transaction==1.4.1
 translationstring==1.1
 venusian==1.0a7
-waitress==0.8.2
+waitress==0.8.6
 zope.deprecation==4.0.2
 zope.interface==4.0.5
 docopt==0.6.1
 ipython==0.13.1
--e git://github.com/encukou/pyiso8601.git@cec4509d14cef9801db81ec982fb0035f6bd79bd#egg=iso8601-dev
-dogpile.cache==0.4.2
+-e git+git@github.com:encukou/pyiso8601.git@cec4509d14cef9801db81ec982fb0035f6bd79bd#egg=iso8601
+dogpile.cache==0.5.0
 dogpile.core==0.4.1
 python3-memcached==1.44
 
