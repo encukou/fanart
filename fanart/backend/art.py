@@ -143,6 +143,11 @@ class Artwork(Item):
     def own_keywords(self):
         return OwnArtworkKeywords(self, self.backend.logged_in_user)
 
+    @own_keywords.setter
+    def own_keywords(self, new_keywords):
+        assert not isinstance(new_keywords, str)
+        self.own_keywords.replace(new_keywords)
+
     @property
     def _own_artwork_author(self):
         user = self.backend.logged_in_user

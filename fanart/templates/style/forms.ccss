@@ -93,6 +93,9 @@ form:
     li:
         margin-bottom: 1ex
 
+        .deformSet &:
+            margin-bottom: 0
+
     .deformClosebutton:
         background: url(../static/icons/cross.png)
         width: 16px
@@ -235,7 +238,7 @@ body.wide #content form:
                 input[type=password], input[type=text], input[type=search], button[type=submit]:
                     min-width: 10rem
 
-                textarea, ul, .markdown.preview:
+                textarea, ul, .markdown.preview, .long-text:
                     width: 61%
                     max-width: 30em
 

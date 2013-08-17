@@ -62,7 +62,7 @@ class ArtManager(ViewBase):
             return self.render_form()
 
 
-def PieceSchema(request, lenient=False):
+def PieceSchema(request, lenient=False, existing_keywords=()):
     class PieceSchema(view_helpers.FormSchema):
         image_name = colander.SchemaNode(colander.String(),
                 title='Jméno')
@@ -82,7 +82,28 @@ def PieceSchema(request, lenient=False):
                 widget=deform.widget.TextAreaWidget(
                     css_class='markdown-textarea'))
 
-    return PieceSchema().bind(request=request)
+    schema = PieceSchema()
+    schema.add(colander.SchemaNode(colander.String(),
+        title='Klíčová slova',
+        name='new_keywords',
+        default='',
+        missing='',
+        description='Nová klíčová slova. Jednotlivé pojmy odděl čárkou',
+        widget=deform.widget.TextInputWidget(
+            css_class='long-text')))
+    existing = colander.SchemaNode(colander.Set(), unknown='preserve',
+        title='',
+        name='kept_keywords')
+    schema.add(existing)
+
+    def regenerate_existing_keywords(existing_keywords):
+        existing.widget = deform.widget.CheckboxChoiceWidget(
+            item_css_class='squeezed',
+            values=[(t, t) for t in existing_keywords])
+    schema.regenerate_existing_keywords = regenerate_existing_keywords
+    regenerate_existing_keywords(existing_keywords)
+
+    return schema.bind(request=request)
 
 
 class PieceManager(ViewBase):
@@ -106,7 +127,7 @@ class PieceManager(ViewBase):
         artwork = self.artwork
         if request.user not in artwork.authors:
             raise httpexceptions.HTTPForbidden("Sem můžou jen autoři obrázku.")
-        schema = PieceSchema(request)
+        schema = PieceSchema(request, existing_keywords=artwork.own_keywords)
 
         messages = []
         if not artwork.identifier:
@@ -160,7 +181,10 @@ class PieceManager(ViewBase):
                     artwork.set_identifier()
                 if appstruct['description']:
                     artwork.own_description_source = appstruct['description']
-            return httpexceptions.HTTPSeeOther(self.url)
+                new_keywords = list(appstruct['kept_keywords']) + [
+                    t.strip() for t in appstruct['new_keywords'].split(',')]
+                artwork.own_keywords = filter(None, new_keywords)
+                return httpexceptions.HTTPSeeOther(self.url)
         appdata = dict()
         appdata['image_name'] = artwork.name
         if not artwork.name:
@@ -170,6 +194,7 @@ class PieceManager(ViewBase):
                 form['image_name'], errormsg)
         appdata['publish'] = 'n' if artwork.hidden else 'y'
         appdata['description'] = artwork.own_description_source
+        appdata['kept_keywords'] = list(artwork.own_keywords)
         return self.render_response(
             'art/piece_manager.mako', request,
             form=form.render(appdata),
