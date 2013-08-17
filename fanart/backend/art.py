@@ -19,6 +19,7 @@ from fanart.backend.access import (
 from fanart.backend.helpers import ColumnProperty, WrappedProperty
 from fanart.backend.users import User
 from fanart.backend.text import Post
+from fanart.backend.tags import OwnArtworkKeywords
 
 
 def allow_authors(user, instance):
@@ -137,6 +138,10 @@ class Artwork(Item):
         return collections.OrderedDict(
             (User(self.backend, aa.author), Post(self.backend, aa.description))
             for aa in self._obj.artwork_authors if aa.description)
+
+    @property
+    def own_keywords(self):
+        return OwnArtworkKeywords(self, self.backend.logged_in_user)
 
     @property
     def _own_artwork_author(self):
@@ -342,7 +347,8 @@ class ArtworkVersions(Collection):
     def __init__(self, backend, _query=None, artwork=None):
         super().__init__(backend, _query=_query)
         if artwork:
-            self._query.filter(tables.ArtworkVersion.artwork == artwork._obj)
+            self._query = self._query.filter(
+                tables.ArtworkVersion.artwork == artwork._obj)
 
 
 class Artifact(Item):

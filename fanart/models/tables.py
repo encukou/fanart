@@ -9,6 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.orm.collections import attribute_mapped_collection
+from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy import Integer, Unicode, DateTime, Boolean, Float
 
@@ -156,6 +157,16 @@ class Task(Base):
     params = Column(Unicode, nullable=False)
     priority = Column(Integer, nullable=False, index=True)
 
+class ArtworkUserKeyword(Base):
+    __tablename__ = 'artwork_user_keywords'
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    artwork_id = Column(Integer, ForeignKey('artworks.id'), nullable=False, index=True)
+    identifier = Column(Unicode, nullable=False, index=True)
+    text = Column(Unicode, nullable=False)
+
+    _unique = UniqueConstraint(artwork_id, user_id, text)
+
 User.bio_post = relationship(Post, post_update=True,
         primaryjoin=User.bio_post_id == Post.id)
 User.contacts = association_proxy('_contactdict', 'value', creator=UserContact)
@@ -245,6 +256,13 @@ ArtworkComment.post = relationship(Post,
         backref=backref(
             'artwork_comments',
             order_by=Post.posted_at))
+
+ArtworkUserKeyword.user = relationship(User,
+        primaryjoin=ArtworkUserKeyword.user_id == User.id,
+        backref='artwork_user_keywords')
+ArtworkUserKeyword.artwork = relationship(Artwork,
+        primaryjoin=ArtworkUserKeyword.artwork_id == Artwork.id,
+        backref='artwork_user_keywords')
 
 
 def populate(session):

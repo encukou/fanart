@@ -19,6 +19,7 @@ import fanart.backend.users
 import fanart.backend.art
 import fanart.backend.helpers
 import fanart.backend.text
+import fanart.backend.tags
 
 Backend
 AccessError
