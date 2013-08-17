@@ -13,7 +13,7 @@
     full_artifact = artwork.current_version.artifacts.get('full')
 %>
 
-% if view_artifact and full_artifact and view_artifact != full_artifact:
+% if view_artifact:
     % if this.artifact_type == 'view':
         <%
             link = this['fullview'].link
