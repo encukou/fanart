@@ -16,6 +16,10 @@ class Backend(object):
         """Log in as the given user. No auth is done."""
         self._user = user._obj
 
+    def logout(self):
+        """Log out."""
+        self._user = make_virtual_user('Host')
+
     @property
     def logged_in_user(self):
         from fanart.backend.users import User
