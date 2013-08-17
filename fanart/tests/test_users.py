@@ -43,12 +43,12 @@ def test_duplicate_user_name(backend):
     user = backend.users.add('Doppelgänger', 'super*secret', _crypt_strength=0)
 
     assert backend.users.name_taken('Doppelgänger')
-    assert backend.users.name_taken('doppelganger')
+    assert backend.users.name_taken('doppelgaenger')
 
     with pytest.raises(ValueError):
         backend.users.add('doppelgänger', 'super*secret', _crypt_strength=0)
     with pytest.raises(ValueError):
-        backend.users.add('Doppelganger', 'super*secret', _crypt_strength=0)
+        backend.users.add('Doppelgaenger', 'super*secret', _crypt_strength=0)
 
     other = backend.users.add('Doppelgänger 2', 'super*secret', _crypt_strength=0)
     assert user != other

@@ -14,6 +14,7 @@ from fanart import helpers
     ('☆にほんごのたんご☆', 'nihongonotango'),
     ('Unit no.5', 'unit-no-5'),
     ('45', 'n45'),
+    ('Herr Müller', 'herr-mueller'),
 ])
 def test_make_identifier(input, expected):
     assert helpers.make_identifier(input) == expected
