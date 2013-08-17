@@ -7,7 +7,7 @@ def test_homepage_h1(browser, webapp_url):
     browser.get(webapp_url)
     h1 = browser.find_element_by_css_selector('h1')
     assert h1.text
-    assert h1.text.startswith('Česká PokéGalerie')
+    assert h1.text.startswith('Novinky')
 
 def test_create_user(browser, webapp_url, webapp_backend, Keys):
     browser.get(webapp_url)

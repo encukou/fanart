@@ -9,7 +9,7 @@ from fanart.backend import Backend
 from fanart.models import tables
 from fanart import wsgi_app
 
-TEST_PORT = 8008
+TEST_PORT_MIN = 8008
 
 @pytest.fixture
 def sqla_engine():
@@ -44,6 +44,7 @@ def webapp_config(tmpdir):
         'available_languages': 'cs',
         'mako.directories': 'fanart:templates/',
         'sqlalchemy.url': 'sqlite:///{}/fanart.db'.format(tmpdir),
+        'cache.backend': 'dogpile.cache.memory',
         }
 
 @pytest.fixture()
@@ -52,10 +53,18 @@ def webapp(webapp_config):
 
 @pytest.fixture()
 def webapp_url(request, webapp):
-    server = make_server('', TEST_PORT, webapp)
+    for port in range(TEST_PORT_MIN, TEST_PORT_MIN + 10):
+        try:
+            server = make_server('', port, webapp)
+        except OSError as exception:
+            last_exception = exception
+        else:
+            break
+    else:
+        raise last_exception
     threading.Thread(target=server.serve_forever).start()
     request.addfinalizer(server.shutdown)
-    return 'http://localhost:{}'.format(TEST_PORT)
+    return 'http://localhost:{}'.format(port)
 
 @pytest.fixture()
 def webapp_backend(webapp):

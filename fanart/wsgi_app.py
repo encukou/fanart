@@ -98,7 +98,10 @@ def main(global_config, **settings):
 
         @reify
         def csrf_token(self):
-            return self.session.get_csrf_token().decode('ascii')
+            token = self.session.get_csrf_token()
+            if hasattr(token, 'decode'):
+                token = token.decode('ascii')
+            return token
 
     session_factory = pyramid_beaker.session_factory_from_settings(settings)
     config = Configurator(settings=settings,
